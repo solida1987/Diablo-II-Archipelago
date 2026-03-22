@@ -1,39 +1,9 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.egg-info/
-dist/
-build/
-*.spec
-
-# User data
-profiles/
-d2_save_backup/
-config.json
-skill_state.json
+*.obj
 *.log
-
-# Game files (not part of the launcher)
-*.mpq
-*.exe
-*.dll
-!launcher/x64/StormLib.dll
-*.LNG
-BnetLog.txt
-game_watch_log.txt
-debug_log.txt
-Screenshots/
-
-# D2 runtime mod files
-data/global/
-
-# Development
+*.exp
+*.lib
+*.pdb
+*.ilk
 Reference/
-tools/
-.claude/
-
-# OS
-Thumbs.db
-Desktop.ini
-.DS_Store
+Screenshots/
+_backup_original/
