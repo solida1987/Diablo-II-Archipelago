@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago beta-1.1.0 - Build Release Package
+title Diablo II Archipelago beta-1.1.1 - Build Release Package
 echo ============================================
 echo   Building Release Package (D2MOO + AP)
 echo ============================================
@@ -68,7 +68,11 @@ for %%f in (D2Archipelago.dll D2Common.dll D2Game.dll Fog.dll D2Debugger.dll) do
 echo Copying framework to files\framework\...
 copy /Y "%SRC%D2.Detours.dll" "%REL%\files\framework\" >nul
 copy /Y "%SRC%D2.DetoursLauncher.exe" "%REL%\files\framework\" >nul
-copy /Y "%SRC%Archipelago\src\D2ArchLauncher.exe" "%REL%\files\framework\Play Archipelago.exe" >nul
+if exist "%SRC%Play Archipelago.exe" (
+    copy /Y "%SRC%Play Archipelago.exe" "%REL%\files\framework\Play Archipelago.exe" >nul
+) else (
+    copy /Y "%SRC%Archipelago\src\D2ArchLauncher.exe" "%REL%\files\framework\Play Archipelago.exe" >nul
+)
 copy /Y "%SRC%ddraw.dll" "%REL%\files\framework\" >nul
 copy /Y "%SRC%ddraw.ini" "%REL%\files\framework\" >nul
 :: AP Bridge executable (PyInstaller-built)
@@ -120,8 +124,18 @@ if exist "%SRC%MpqFixer\SFMPQ.dll" copy /Y "%SRC%MpqFixer\SFMPQ.dll" "%REL%\file
 :: ============================================
 :: Play Archipelago.exe to root (backup)
 :: ============================================
+:: ============================================
+:: LICENSE
+:: ============================================
+echo Copying LICENSE...
+if exist "%SRC%LICENSE" copy /Y "%SRC%LICENSE" "%REL%\" >nul
+
 echo Copying Play Archipelago.exe to root...
-copy /Y "%SRC%Archipelago\src\D2ArchLauncher.exe" "%REL%\Play Archipelago.exe" >nul
+if exist "%SRC%Play Archipelago.exe" (
+    copy /Y "%SRC%Play Archipelago.exe" "%REL%\Play Archipelago.exe" >nul
+) else (
+    copy /Y "%SRC%Archipelago\src\D2ArchLauncher.exe" "%REL%\Play Archipelago.exe" >nul
+)
 
 :: ============================================
 :: Verify
@@ -154,6 +168,8 @@ echo   Checking files\Archipelago\...
 if not exist "%REL%\files\Archipelago\diablo2_archipelago.apworld" (echo     WARNING: .apworld missing - AP world not included)
 echo   Checking files\data\...
 if not exist "%REL%\files\data\global\excel\Skills.txt" (echo     MISSING: files\data\global\excel\Skills.txt & set OK=0)
+if not exist "%REL%\files\data\global\excel\ItemTypes.txt" (echo     MISSING: files\data\global\excel\ItemTypes.txt & set OK=0)
+if not exist "%REL%\files\data\global\excel\inventory.txt" (echo     MISSING: files\data\global\excel\inventory.txt & set OK=0)
 if not exist "%REL%\files\data\global\ui\SPELLS\AmSkillicon.DC6" (echo     MISSING: files\data\global\ui\SPELLS\AmSkillicon.DC6 & set OK=0)
 if not exist "%REL%\files\data\global\ui\panel\invchar6.dc6" (echo     MISSING: files\data\global\ui\panel\invchar6.dc6 & set OK=0)
 if not exist "%REL%\files\data\global\ui\panel\tradestash.dc6" (echo     MISSING: files\data\global\ui\panel\tradestash.dc6 & set OK=0)

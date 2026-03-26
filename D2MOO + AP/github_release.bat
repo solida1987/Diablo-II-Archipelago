@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago - GitHub Release beta-1.1.0
+title Diablo II Archipelago - GitHub Release beta-1.1.1
 echo ============================================
 echo   Diablo II Archipelago - GitHub Release
 echo ============================================
@@ -7,7 +7,7 @@ echo.
 
 set ROOT=%~dp0
 set REL=%ROOT%Release\Diablo II Archipelago
-set VERSION=beta-1.1.0
+set VERSION=beta-1.1.1
 set ZIPNAME=Diablo-II-Archipelago-%VERSION%.zip
 
 cd /d "%ROOT%"
@@ -41,7 +41,7 @@ echo.
 echo ## Features
 echo.
 echo - **210 Skills** from all 7 classes ^(Amazon, Sorceress, Necromancer, Paladin, Barbarian, Druid, Assassin^) randomized into a quest reward pool
-echo - **231 Quests** across 5 Acts: Story, Super Unique Hunting, Zone Clears, Exploration, Waypoints, Level Milestones
+echo - **227 Quests** across 5 Acts: Story, Super Unique Hunting, Zone Clears, Exploration, Waypoints, Level Milestones
 echo - **Expanded Inventory**: 10x8 inventory, 10x10 stash, 10x8 cube
 echo - **Skill Editor** ^(F1^): Assign unlocked skills to your build with 3 tabs and 10 slots per tab
 echo - **Quest Log** ^(F2^): Track progress with Main/Side quest tabs, scrollbar, and per-difficulty tracking
@@ -191,6 +191,7 @@ git add patch/*.dll
 git add build_release.bat
 git add github_release.bat
 git add ddraw.ini
+git add LICENSE
 git add .gitignore 2>nul
 echo   Done.
 echo.
@@ -237,6 +238,14 @@ echo [9/9] Creating GitHub release...
 gh release delete %VERSION% -y >nul 2>&1
 gh release create %VERSION% "%ROOT%%ZIPNAME%" --title "%VERSION% - Diablo II Archipelago" --notes "## Diablo II Archipelago %VERSION%
 
+### Critical Fixes
+- **AP checks now sent to server**: Fixed bridge character mismatch bug where checks were detected locally but never sent to AP server (tracker showed 0 checks)
+- **Bridge reconnect on character switch**: Bridge now properly disconnects and reconnects when switching characters instead of polling the wrong checks file
+- **Difficulty offset in checks**: WriteChecksFile now includes difficulty offsets (Normal+0, Nightmare+1000, Hell+2000) matching AP location IDs
+- **Skill icon mapping fixed**: 63 Druid, Assassin, and Paladin skill icons were showing wrong icons due to non-sequential vanilla IconCel values
+- **AP world generation fixes**: Fixed 3 bugs causing generation failures in ~68%% of seeds (Sisters to the Slaughter KeyError, duplicate Sewers location, FillError overflow)
+- **Gold rewards not applying**: Gold stat missing from new character save files caused gold to stay pending forever — now inserts STAT_GOLD if absent
+
 ### Bugfixes
 - **Quest flag detection**: Story quests now correctly detected via server-side quest state polling
 - **Skill name mapping**: All 210 skill IDs now correctly mapped between AP world and game
@@ -245,12 +254,19 @@ gh release create %VERSION% "%ROOT%%ZIPNAME%" --title "%VERSION% - Diablo II Arc
 - **AP location IDs**: Bridge now sends correct AP location IDs (42000 + quest_id)
 - **The Smith**: Moved from Act 3 to Act 1 where it actually spawns
 - **3 waypoint names**: Rocky Waste/Dry Hills/Far Oasis corrected
+- **DLL build**: Added advapi32.lib for registry functions
+- **Removed Sewers quests**: 4 Sewers kill zone quests removed due to D2MOO pathfinding issues
 
 ### New Features
 - **Expanded Inventory**: 10x8 character inventory (was 10x4)
 - **Expanded Stash**: 10x10 stash (was 6x8)
 - **Expanded Cube**: 10x8 cube (was 3x4)
 - **Increased Gold Cap**: 10,000,000 gold limit for both inventory and stash
+- **Custom Panel Graphics**: New DC6 panel files for expanded inventory, stash, and cube
+- **Classless Equipment**: All classes can now equip all weapon and armor types (claws, orbs, pelts, etc.)
+- **Assassin skill weapon restrictions removed**: Charge-up and finishing moves now work with any melee weapon, not just claws
+- **All melee weapons 1-handed**: Staves, polearms, spears, 2h axes, and hammers can now be held in one hand
+- **Universal dual-wield**: D2Common and D2Game patched to allow all classes to dual-wield (Left Hand Swing added to all classes)
 
 ### Installation
 1. Download and extract the ZIP below
