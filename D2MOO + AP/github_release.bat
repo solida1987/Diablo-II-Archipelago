@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago - GitHub Release beta-1.0.0
+title Diablo II Archipelago - GitHub Release beta-1.1.0
 echo ============================================
 echo   Diablo II Archipelago - GitHub Release
 echo ============================================
@@ -7,7 +7,7 @@ echo.
 
 set ROOT=%~dp0
 set REL=%ROOT%Release\Diablo II Archipelago
-set VERSION=beta-1.0.0
+set VERSION=beta-1.1.0
 set ZIPNAME=Diablo-II-Archipelago-%VERSION%.zip
 
 cd /d "%ROOT%"
@@ -42,6 +42,7 @@ echo ## Features
 echo.
 echo - **210 Skills** from all 7 classes ^(Amazon, Sorceress, Necromancer, Paladin, Barbarian, Druid, Assassin^) randomized into a quest reward pool
 echo - **231 Quests** across 5 Acts: Story, Super Unique Hunting, Zone Clears, Exploration, Waypoints, Level Milestones
+echo - **Expanded Inventory**: 10x8 inventory, 10x10 stash, 10x8 cube
 echo - **Skill Editor** ^(F1^): Assign unlocked skills to your build with 3 tabs and 10 slots per tab
 echo - **Quest Log** ^(F2^): Track progress with Main/Side quest tabs, scrollbar, and per-difficulty tracking
 echo - **Quest Tracker HUD** ^(F3^): Shows current objectives and goal progress
@@ -176,6 +177,8 @@ echo.
 
 :: ============================================
 :: Step 5: Stage only the correct files
+:: NO source code, NO .claude/, NO memory/, NO AI files, NO .dat state files
+:: NO apworld/ python source, NO research/, NO src/ C code
 :: ============================================
 echo [5/9] Staging files...
 git add README.md
@@ -183,6 +186,7 @@ git add Archipelago/d2arch.ini
 git add Archipelago/skill_icon_map.dat
 git add data/global/excel/*.txt
 git add data/global/ui/SPELLS/*.DC6
+git add data/global/ui/panel/*.dc6
 git add patch/*.dll
 git add build_release.bat
 git add github_release.bat
@@ -195,7 +199,7 @@ echo.
 :: Step 6: Commit
 :: ============================================
 echo [6/9] Committing...
-git commit -m "Release %VERSION% - Full AP integration, configurable settings, 231 quests"
+git commit -m "Release %VERSION% - Quest flag detection, skill mapping, expanded inventory, bugfixes"
 if errorlevel 1 (
     echo   ERROR: Commit failed!
     pause
@@ -233,45 +237,26 @@ echo [9/9] Creating GitHub release...
 gh release delete %VERSION% -y >nul 2>&1
 gh release create %VERSION% "%ROOT%%ZIPNAME%" --title "%VERSION% - Diablo II Archipelago" --notes "## Diablo II Archipelago %VERSION%
 
-First public beta with full Archipelago multiworld support.
+### Bugfixes
+- **Quest flag detection**: Story quests now correctly detected via server-side quest state polling
+- **Skill name mapping**: All 210 skill IDs now correctly mapped between AP world and game
+- **Corpsefire check**: Fixed hcIdx (was 41, now 40)
+- **8 Act 5 SuperUnique hcIdx**: All were off by +2, now corrected
+- **AP location IDs**: Bridge now sends correct AP location IDs (42000 + quest_id)
+- **The Smith**: Moved from Act 3 to Act 1 where it actually spawns
+- **3 waypoint names**: Rocky Waste/Dry Hills/Far Oasis corrected
 
-### Highlights
-- 231 quests across all 5 Acts (Story, Hunting, Zone Clears, Exploration, Waypoints, Level Milestones)
-- 210 skills from all 7 classes randomized into quest rewards
-- Full Archipelago integration: connect to AP servers, send/receive items, DeathLink
-- Configurable launcher with game settings (standalone) and AP connection
-- Quest Log with player name display for multiworld checks
-- Tier-gated skill system (T1: Lv1, T2: Lv20, T3: Lv40)
-- Trap system spawning Super Unique monsters
-- Reset Points for skill reassignment
+### New Features
+- **Expanded Inventory**: 10x8 character inventory (was 10x4)
+- **Expanded Stash**: 10x10 stash (was 6x8)
+- **Expanded Cube**: 10x8 cube (was 3x4)
+- **Increased Gold Cap**: 10,000,000 gold limit for both inventory and stash
 
 ### Installation
 1. Download and extract the ZIP below
 2. Run **D2ArchSetup.exe**
 3. Browse to your Diablo II installation folder and click Install
 4. Launch with **Play Archipelago.exe**
-
-### Singleplayer
-- Select Singleplayer in the launcher
-- Configure quest types, skill pool, and filler distribution
-- Click Play and create a character
-
-### Archipelago Multiworld
-- Install the .apworld (in files/Archipelago/) to your AP installation
-- Generate a multiworld with your YAML
-- Select Archipelago in the launcher, enter server details, click Play
-- Console window shows real-time AP events
-
-### AP World Options
-See the [README](https://github.com/solida1987/Diablo-II-Archipelago/blob/main/README.md) for all configurable YAML options.
-
-### Controls
-| Key | Action |
-|-----|--------|
-| F1 | Skill Editor |
-| F2 | Quest Log |
-| F3 | Quest Tracker |
-| ESC | Close panels |
 
 ### Requirements
 - Diablo II + Lord of Destruction (original installation required)

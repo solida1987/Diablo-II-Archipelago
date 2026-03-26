@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago beta-1.0.0 - Build Release Package
+title Diablo II Archipelago beta-1.1.0 - Build Release Package
 echo ============================================
 echo   Building Release Package (D2MOO + AP)
 echo ============================================
@@ -16,8 +16,6 @@ if exist "%SRC%Release" (
 
 :: ============================================
 :: Create folder structure
-:: Root: ONLY D2ArchSetup.exe
-:: Everything else goes into files\
 :: ============================================
 echo Creating folder structure...
 mkdir "%REL%"
@@ -30,8 +28,9 @@ mkdir "%REL%\files\data\global"
 mkdir "%REL%\files\data\global\excel"
 mkdir "%REL%\files\data\global\ui"
 mkdir "%REL%\files\data\global\ui\SPELLS"
+mkdir "%REL%\files\data\global\ui\panel"
 mkdir "%REL%\files\Archipelago"
-:: NOTE: src/ and research/ are NOT included in release — internal development only
+:: NOTE: src/, research/, apworld/ source, .claude/, memory/ are NOT included — internal development only
 
 :: ============================================
 :: ROOT: Only the installer EXE
@@ -41,9 +40,6 @@ if exist "%SRC%Archipelago\src\D2ArchSetup.exe" (
     copy /Y "%SRC%Archipelago\src\D2ArchSetup.exe" "%REL%\" >nul
 ) else (
     echo   ERROR: D2ArchSetup.exe not found! Build it first.
-    echo   cd Archipelago\src
-    echo   rc /nologo installer.rc
-    echo   cl /nologo /MT /O2 /W3 installer.c installer.res /Fe:D2ArchSetup.exe /link user32.lib gdi32.lib shell32.lib ole32.lib uuid.lib comctl32.lib advapi32.lib
     pause
     exit /b 1
 )
@@ -72,7 +68,6 @@ for %%f in (D2Archipelago.dll D2Common.dll D2Game.dll Fog.dll D2Debugger.dll) do
 echo Copying framework to files\framework\...
 copy /Y "%SRC%D2.Detours.dll" "%REL%\files\framework\" >nul
 copy /Y "%SRC%D2.DetoursLauncher.exe" "%REL%\files\framework\" >nul
-:: Launcher ships as "Play Archipelago.exe" only — no duplicate D2ArchLauncher.exe
 copy /Y "%SRC%Archipelago\src\D2ArchLauncher.exe" "%REL%\files\framework\Play Archipelago.exe" >nul
 copy /Y "%SRC%ddraw.dll" "%REL%\files\framework\" >nul
 copy /Y "%SRC%ddraw.ini" "%REL%\files\framework\" >nul
@@ -88,36 +83,42 @@ if exist "%SRC%Archipelago\src\dist\ap_bridge.exe" (
 )
 
 :: ============================================
-:: files\data: TXT files + skill icons
+:: files\data: TXT files + skill icons + panel graphics (inventory/stash/cube)
 :: ============================================
 echo Copying game data to files\data\...
-xcopy "%SRC%data\global\excel\*" "%REL%\files\data\global\excel\" /Y /Q >nul 2>nul
+xcopy "%SRC%data\global\excel\*.txt" "%REL%\files\data\global\excel\" /Y /Q >nul 2>nul
+:: Do NOT copy .bin files — game regenerates them from .txt with -direct -txt
 xcopy "%SRC%data\global\ui\SPELLS\*" "%REL%\files\data\global\ui\SPELLS\" /Y /Q >nul 2>nul
+:: Panel graphics: expanded inventory, stash, and cube panels
+xcopy "%SRC%data\global\ui\panel\*" "%REL%\files\data\global\ui\panel\" /Y /Q >nul 2>nul
 
 :: ============================================
-:: files\Archipelago: config, icon map, source, research
+:: files\Archipelago: config, icon map, apworld
 :: ============================================
 echo Copying Archipelago data to files\Archipelago\...
 copy /Y "%SRC%Archipelago\d2arch.ini" "%REL%\files\Archipelago\" >nul
 copy /Y "%SRC%Archipelago\skill_icon_map.dat" "%REL%\files\Archipelago\" >nul
 :: .apworld for Archipelago server
-if exist "%SRC%diablo2_archipelago.apworld" (
+if exist "%SRC%apworld\diablo2_archipelago.apworld" (
+    copy /Y "%SRC%apworld\diablo2_archipelago.apworld" "%REL%\files\Archipelago\" >nul
+    echo   .apworld: included (from apworld/)
+) else if exist "%SRC%diablo2_archipelago.apworld" (
     copy /Y "%SRC%diablo2_archipelago.apworld" "%REL%\files\Archipelago\" >nul
-    echo   .apworld: included
+    echo   .apworld: included (from root)
+) else (
+    echo   WARNING: .apworld not found!
 )
-:: Source code and research docs are NOT shipped — internal development only
+:: NOTE: Source code (src/), research docs, apworld/ python source, .claude/ memory are NEVER shipped
 
 :: ============================================
 :: MpqFixer (fixes 1.14b MPQs for 1.10f)
 :: ============================================
 echo Copying MpqFixer...
 mkdir "%REL%\files\MpqFixer" 2>nul
-:: Only SFMPQ.dll needed — no WinMPQ, no MSCOMCTL, no admin rights
 if exist "%SRC%MpqFixer\SFMPQ.dll" copy /Y "%SRC%MpqFixer\SFMPQ.dll" "%REL%\files\MpqFixer\" >nul
 
 :: ============================================
-:: ALSO copy Play Archipelago.exe directly to root
-:: (backup in case installer CopyFiles misses it)
+:: Play Archipelago.exe to root (backup)
 :: ============================================
 echo Copying Play Archipelago.exe to root...
 copy /Y "%SRC%Archipelago\src\D2ArchLauncher.exe" "%REL%\Play Archipelago.exe" >nul
@@ -154,6 +155,9 @@ if not exist "%REL%\files\Archipelago\diablo2_archipelago.apworld" (echo     WAR
 echo   Checking files\data\...
 if not exist "%REL%\files\data\global\excel\Skills.txt" (echo     MISSING: files\data\global\excel\Skills.txt & set OK=0)
 if not exist "%REL%\files\data\global\ui\SPELLS\AmSkillicon.DC6" (echo     MISSING: files\data\global\ui\SPELLS\AmSkillicon.DC6 & set OK=0)
+if not exist "%REL%\files\data\global\ui\panel\invchar6.dc6" (echo     MISSING: files\data\global\ui\panel\invchar6.dc6 & set OK=0)
+if not exist "%REL%\files\data\global\ui\panel\tradestash.dc6" (echo     MISSING: files\data\global\ui\panel\tradestash.dc6 & set OK=0)
+if not exist "%REL%\files\data\global\ui\panel\supertransmogrifier.dc6" (echo     MISSING: files\data\global\ui\panel\supertransmogrifier.dc6 & set OK=0)
 echo   Checking files\Archipelago\...
 if not exist "%REL%\files\Archipelago\d2arch.ini" (echo     MISSING: files\Archipelago\d2arch.ini & set OK=0)
 if not exist "%REL%\files\Archipelago\skill_icon_map.dat" (echo     MISSING: files\Archipelago\skill_icon_map.dat & set OK=0)
