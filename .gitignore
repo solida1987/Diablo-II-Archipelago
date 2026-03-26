@@ -1,9 +1,41 @@
-*.obj
-*.log
-*.exp
-*.lib
-*.pdb
-*.ilk
+# AI / Claude files - NEVER upload
+.claude/
+memory/
+**/.claude/
+**/memory/
+**/*MEMORY*
+
+# Source code folders - keep private
+D2MOO + AP/
+apworld/
+Archipelago/src/
+D2Common/
+D2CommonDefinitions/
+D2Game/
+Fog/
+D2Detours/
 Reference/
-Screenshots/
-_backup_original/
+
+# Build artifacts
+Release/
+*.zip
+*.exe
+
+# State / runtime files
+*.dat
+!Archipelago/d2arch.ini
+!Archipelago/skill_icon_map.dat
+
+# Backup
+backup*/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Misc
+*.log
+*.tmp
+Thumbs.db
+desktop.ini
