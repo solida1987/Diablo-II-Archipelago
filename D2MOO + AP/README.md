@@ -10,6 +10,7 @@ Randomizes skill unlocks across a quest system spanning all 5 Acts. Complete que
 
 - **210 Skills** from all 7 classes (Amazon, Sorceress, Necromancer, Paladin, Barbarian, Druid, Assassin) randomized into a quest reward pool
 - **231 Quests** across 5 Acts: Story, Super Unique Hunting, Zone Clears, Exploration, Waypoints, Level Milestones
+- **Expanded Inventory**: 10x8 inventory, 10x10 stash, 10x8 cube
 - **Skill Editor** (F1): Assign unlocked skills to your build with 3 tabs and 10 slots per tab
 - **Quest Log** (F2): Track progress with Main/Side quest tabs, scrollbar, and per-difficulty tracking
 - **Quest Tracker HUD** (F3): Shows current objectives and goal progress
