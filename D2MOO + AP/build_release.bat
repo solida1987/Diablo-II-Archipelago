@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago v0.3.0 - Build Release Package
+title Diablo II Archipelago beta-1.0.0 - Build Release Package
 echo ============================================
 echo   Building Release Package (D2MOO + AP)
 echo ============================================
@@ -76,6 +76,16 @@ copy /Y "%SRC%D2.DetoursLauncher.exe" "%REL%\files\framework\" >nul
 copy /Y "%SRC%Archipelago\src\D2ArchLauncher.exe" "%REL%\files\framework\Play Archipelago.exe" >nul
 copy /Y "%SRC%ddraw.dll" "%REL%\files\framework\" >nul
 copy /Y "%SRC%ddraw.ini" "%REL%\files\framework\" >nul
+:: AP Bridge executable (PyInstaller-built)
+if exist "%SRC%Archipelago\src\dist\ap_bridge.exe" (
+    copy /Y "%SRC%Archipelago\src\dist\ap_bridge.exe" "%REL%\files\framework\" >nul
+    echo   AP Bridge: included
+) else if exist "%SRC%ap_bridge.exe" (
+    copy /Y "%SRC%ap_bridge.exe" "%REL%\files\framework\" >nul
+    echo   AP Bridge: included (from root)
+) else (
+    echo   WARNING: ap_bridge.exe not found! AP connectivity disabled.
+)
 
 :: ============================================
 :: files\data: TXT files + skill icons
@@ -90,6 +100,11 @@ xcopy "%SRC%data\global\ui\SPELLS\*" "%REL%\files\data\global\ui\SPELLS\" /Y /Q 
 echo Copying Archipelago data to files\Archipelago\...
 copy /Y "%SRC%Archipelago\d2arch.ini" "%REL%\files\Archipelago\" >nul
 copy /Y "%SRC%Archipelago\skill_icon_map.dat" "%REL%\files\Archipelago\" >nul
+:: .apworld for Archipelago server
+if exist "%SRC%diablo2_archipelago.apworld" (
+    copy /Y "%SRC%diablo2_archipelago.apworld" "%REL%\files\Archipelago\" >nul
+    echo   .apworld: included
+)
 :: Source code and research docs are NOT shipped — internal development only
 
 :: ============================================
@@ -97,10 +112,15 @@ copy /Y "%SRC%Archipelago\skill_icon_map.dat" "%REL%\files\Archipelago\" >nul
 :: ============================================
 echo Copying MpqFixer...
 mkdir "%REL%\files\MpqFixer" 2>nul
-if exist "%SRC%MpqFixer\WinMPQ.exe" copy /Y "%SRC%MpqFixer\WinMPQ.exe" "%REL%\files\MpqFixer\" >nul
-if exist "%SRC%MpqFixer\MSCOMCTL.OCX" copy /Y "%SRC%MpqFixer\MSCOMCTL.OCX" "%REL%\files\MpqFixer\" >nul
-if exist "%SRC%MpqFixer\VB40032.DLL" copy /Y "%SRC%MpqFixer\VB40032.DLL" "%REL%\files\MpqFixer\" >nul
+:: Only SFMPQ.dll needed — no WinMPQ, no MSCOMCTL, no admin rights
 if exist "%SRC%MpqFixer\SFMPQ.dll" copy /Y "%SRC%MpqFixer\SFMPQ.dll" "%REL%\files\MpqFixer\" >nul
+
+:: ============================================
+:: ALSO copy Play Archipelago.exe directly to root
+:: (backup in case installer CopyFiles misses it)
+:: ============================================
+echo Copying Play Archipelago.exe to root...
+copy /Y "%SRC%Archipelago\src\D2ArchLauncher.exe" "%REL%\Play Archipelago.exe" >nul
 
 :: ============================================
 :: Verify
@@ -124,8 +144,13 @@ if not exist "%REL%\files\patch\Fog.dll" (echo     MISSING: files\patch\Fog.dll 
 if not exist "%REL%\files\patch\D2Debugger.dll" (echo     MISSING: files\patch\D2Debugger.dll & set OK=0)
 echo   Checking files\framework\...
 if not exist "%REL%\files\framework\D2.Detours.dll" (echo     MISSING: files\framework\D2.Detours.dll & set OK=0)
-if not exist "%REL%\files\framework\D2ArchLauncher.exe" (echo     MISSING: files\framework\D2ArchLauncher.exe & set OK=0)
+if not exist "%REL%\files\framework\Play Archipelago.exe" (echo     MISSING: files\framework\Play Archipelago.exe & set OK=0)
 if not exist "%REL%\files\framework\ddraw.dll" (echo     MISSING: files\framework\ddraw.dll & set OK=0)
+if not exist "%REL%\files\framework\ddraw.ini" (echo     MISSING: files\framework\ddraw.ini & set OK=0)
+if not exist "%REL%\files\framework\ap_bridge.exe" (echo     WARNING: files\framework\ap_bridge.exe missing - AP disabled)
+if not exist "%REL%\files\framework\D2.DetoursLauncher.exe" (echo     MISSING: files\framework\D2.DetoursLauncher.exe & set OK=0)
+echo   Checking files\Archipelago\...
+if not exist "%REL%\files\Archipelago\diablo2_archipelago.apworld" (echo     WARNING: .apworld missing - AP world not included)
 echo   Checking files\data\...
 if not exist "%REL%\files\data\global\excel\Skills.txt" (echo     MISSING: files\data\global\excel\Skills.txt & set OK=0)
 if not exist "%REL%\files\data\global\ui\SPELLS\AmSkillicon.DC6" (echo     MISSING: files\data\global\ui\SPELLS\AmSkillicon.DC6 & set OK=0)
