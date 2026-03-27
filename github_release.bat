@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago - GitHub Release beta-1.1.1
+title Diablo II Archipelago - GitHub Release beta-1.2.0
 echo ============================================
 echo   Diablo II Archipelago - GitHub Release
 echo ============================================
@@ -7,7 +7,7 @@ echo.
 
 set ROOT=%~dp0
 set REL=%ROOT%Release\Diablo II Archipelago
-set VERSION=beta-1.1.1
+set VERSION=beta-1.2.0
 set ZIPNAME=Diablo-II-Archipelago-%VERSION%.zip
 
 :: Git root is one level above D2MOO + AP

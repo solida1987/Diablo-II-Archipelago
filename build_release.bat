@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago beta-1.1.1 - Build Release Package
+title Diablo II Archipelago beta-1.2.0 - Build Release Package
 echo ============================================
 echo   Building Release Package (D2MOO + AP)
 echo ============================================
@@ -7,6 +7,49 @@ echo.
 
 set SRC=%~dp0
 set REL=%SRC%Release\Diablo II Archipelago
+
+:: ============================================
+:: Step 0: Compile D2Archipelago.dll
+:: ============================================
+echo Compiling D2Archipelago.dll...
+call "%SRC%build_d2arch.bat"
+if not exist "%SRC%patch\D2Archipelago.dll" (
+    echo ERROR: DLL compile failed!
+    exit /b 1
+)
+echo.
+
+:: ============================================
+:: Step 0b: Rebuild AP Bridge
+:: ============================================
+echo Rebuilding AP Bridge...
+if exist "%SRC%Archipelago\src\ap_bridge.py" (
+    pushd "%SRC%Archipelago\src"
+    python -m PyInstaller --onefile --name ap_bridge ap_bridge.py >nul 2>&1
+    if exist "dist\ap_bridge.exe" (
+        copy /Y "dist\ap_bridge.exe" "%SRC%ap_bridge.exe" >nul
+        echo   AP Bridge rebuilt.
+    ) else (
+        echo   WARNING: AP Bridge build failed.
+    )
+    popd
+)
+echo.
+
+:: ============================================
+:: Step 0c: Rebuild apworld
+:: ============================================
+echo Rebuilding apworld...
+if exist "%SRC%apworld\diablo2_archipelago" (
+    pushd "%SRC%apworld\diablo2_archipelago"
+    powershell -NoProfile -Command "Compress-Archive -Path * -DestinationPath ..\diablo2_archipelago.zip -Force" >nul 2>&1
+    popd
+    if exist "%SRC%apworld\diablo2_archipelago.zip" (
+        move /Y "%SRC%apworld\diablo2_archipelago.zip" "%SRC%apworld\diablo2_archipelago.apworld" >nul
+        echo   apworld rebuilt.
+    )
+)
+echo.
 
 :: Clean previous release
 if exist "%SRC%Release" (
@@ -170,6 +213,9 @@ echo   Checking files\data\...
 if not exist "%REL%\files\data\global\excel\Skills.txt" (echo     MISSING: files\data\global\excel\Skills.txt & set OK=0)
 if not exist "%REL%\files\data\global\excel\ItemTypes.txt" (echo     MISSING: files\data\global\excel\ItemTypes.txt & set OK=0)
 if not exist "%REL%\files\data\global\excel\inventory.txt" (echo     MISSING: files\data\global\excel\inventory.txt & set OK=0)
+if not exist "%REL%\files\data\global\excel\weapons.txt" (echo     MISSING: files\data\global\excel\weapons.txt & set OK=0)
+if not exist "%REL%\files\data\global\excel\charstats.txt" (echo     MISSING: files\data\global\excel\charstats.txt & set OK=0)
+if not exist "%REL%\files\data\global\excel\Armor.txt" (echo     MISSING: files\data\global\excel\Armor.txt & set OK=0)
 if not exist "%REL%\files\data\global\ui\SPELLS\AmSkillicon.DC6" (echo     MISSING: files\data\global\ui\SPELLS\AmSkillicon.DC6 & set OK=0)
 if not exist "%REL%\files\data\global\ui\panel\invchar6.dc6" (echo     MISSING: files\data\global\ui\panel\invchar6.dc6 & set OK=0)
 if not exist "%REL%\files\data\global\ui\panel\tradestash.dc6" (echo     MISSING: files\data\global\ui\panel\tradestash.dc6 & set OK=0)
@@ -199,4 +245,3 @@ echo.
 echo   To distribute: zip "Release\Diablo II Archipelago"
 echo ============================================
 echo.
-pause
