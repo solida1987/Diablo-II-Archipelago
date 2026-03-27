@@ -845,3 +845,4 @@ Countess Item (H)			5					19	"gld,mul=2048"	11	Act 1 (H) Equip C	19	Act 2 (H) Ju
 Countess			-2	883	883	883	1024	0	Countess Item	1	Countess Rune	1																				0
 Countess (N)			-2	883	883	983	1024	0	Countess Item (N)	1	Countess Rune (N)	1																				0
 Countess (H)			-2	883	883	983	1024	0	Countess Item (H)	1	Countess Rune (H)	1																				0
+TC_Goblin			3	800	800	800	800	0	Gold	10	Jewelry C	5	Runes 1	5																		
