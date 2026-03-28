@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago beta-1.3.0 - Build Release Package
+title Diablo II Archipelago beta-1.4.0 - Build Release Package
 echo ============================================
 echo   Building Release Package (D2MOO + AP)
 echo ============================================
@@ -20,6 +20,23 @@ if not exist "%SRC%patch\D2Archipelago.dll" (
 echo.
 
 :: ============================================
+:: Step 0a: Compile Play Archipelago.exe (launcher)
+:: ============================================
+echo Compiling Play Archipelago.exe...
+pushd "%SRC%Archipelago\src"
+call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86 >nul 2>&1
+rc /nologo launcher.rc >nul 2>&1
+cl /nologo /MT /O2 /W3 /D_CRT_SECURE_NO_WARNINGS launcher.c launcher.res /Fe:"Play Archipelago.exe" /link user32.lib gdi32.lib kernel32.lib advapi32.lib shell32.lib comdlg32.lib comctl32.lib >nul 2>&1
+if exist "Play Archipelago.exe" (
+    copy /Y "Play Archipelago.exe" "%SRC%Play Archipelago.exe" >nul
+    echo   Launcher compiled.
+) else (
+    echo   WARNING: Launcher compile failed!
+)
+popd
+echo.
+
+:: ============================================
 :: Step 0b: Rebuild AP Bridge
 :: ============================================
 echo Rebuilding AP Bridge...
@@ -37,7 +54,25 @@ if exist "%SRC%Archipelago\src\ap_bridge.py" (
 echo.
 
 :: ============================================
-:: Step 0c: Rebuild apworld
+:: Step 0c: Rebuild Monster Shuffle (C version — no PyInstaller/AV issues)
+:: ============================================
+echo Rebuilding Monster Shuffle (C)...
+if exist "%SRC%Archipelago\src\monster_shuffle.c" (
+    pushd "%SRC%Archipelago\src"
+    call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86 >nul 2>&1
+    cl /nologo /MT /O2 /W3 /D_CRT_SECURE_NO_WARNINGS monster_shuffle.c /Fe:monster_shuffle.exe /link kernel32.lib >nul 2>&1
+    if exist "monster_shuffle.exe" (
+        copy /Y "monster_shuffle.exe" "%SRC%Archipelago\monster_shuffle.exe" >nul
+        echo   Monster Shuffle C version rebuilt.
+    ) else (
+        echo   WARNING: Monster Shuffle C build failed.
+    )
+    popd
+)
+echo.
+
+:: ============================================
+:: Step 0d: Rebuild apworld
 :: ============================================
 echo Rebuilding apworld...
 if exist "%SRC%apworld\diablo2_archipelago" (
@@ -129,14 +164,14 @@ if exist "%SRC%Archipelago\src\dist\ap_bridge.exe" (
     echo   WARNING: ap_bridge.exe not found! AP connectivity disabled.
 )
 
-:: Monster Shuffle script
+:: Monster Shuffle (prefer C-compiled version over PyInstaller)
 mkdir "%REL%\files\Archipelago" >nul 2>nul
-if exist "%SRC%Archipelago\src\dist\monster_shuffle.exe" (
-    copy /Y "%SRC%Archipelago\src\dist\monster_shuffle.exe" "%REL%\files\Archipelago\" >nul
-    echo   Monster Shuffle: included (exe)
-) else if exist "%SRC%Archipelago\monster_shuffle.exe" (
+if exist "%SRC%Archipelago\monster_shuffle.exe" (
     copy /Y "%SRC%Archipelago\monster_shuffle.exe" "%REL%\files\Archipelago\" >nul
-    echo   Monster Shuffle: included (exe from Archipelago)
+    echo   Monster Shuffle: included (C version)
+) else if exist "%SRC%Archipelago\src\dist\monster_shuffle.exe" (
+    copy /Y "%SRC%Archipelago\src\dist\monster_shuffle.exe" "%REL%\files\Archipelago\" >nul
+    echo   Monster Shuffle: included (PyInstaller fallback)
 )
 :: Also copy .py as fallback
 mkdir "%REL%\files\Archipelago\src" >nul 2>nul
@@ -154,6 +189,12 @@ xcopy "%SRC%data\global\excel\*.txt" "%REL%\files\data\global\excel\" /Y /Q >nul
 xcopy "%SRC%data\global\ui\SPELLS\*" "%REL%\files\data\global\ui\SPELLS\" /Y /Q >nul 2>nul
 :: Panel graphics: expanded inventory, stash, and cube panels
 xcopy "%SRC%data\global\ui\panel\*" "%REL%\files\data\global\ui\panel\" /Y /Q >nul 2>nul
+:: String table: custom monster/item names (patchstring.tbl)
+if exist "%SRC%data\local\LNG\ENG\patchstring.tbl" (
+    mkdir "%REL%\files\data\local\LNG\ENG" 2>nul
+    copy /Y "%SRC%data\local\LNG\ENG\patchstring.tbl" "%REL%\files\data\local\LNG\ENG\" >nul
+    echo   patchstring.tbl: included (custom names)
+)
 
 :: ============================================
 :: files\Archipelago: config, icon map, apworld

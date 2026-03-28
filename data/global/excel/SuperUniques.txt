@@ -66,3 +66,4 @@ Baal Subject 2	Baal Subject 2	unraveler5	62		23	0	0	3	3	0	0	1		21	21	21	Act 5 Ch
 Baal Subject 3	Baal Subject 3	baalhighpriest	63		17	0	0	5	5	1	0	1		36	36	36	Act 5 Champ C	Act 5 (N) Champ C	Act 5 (H) Champ C	0
 Baal Subject 4	Baal Subject 4	venomlord	64		6	0	0	8	8	1	0	1		20	20	20	Act 5 Champ C	Act 5 (N) Champ C	Act 5 (H) Champ C	0
 Baal Subject 5	Baal Subject 5	baalminion1	65		27	0	0	5	5	1	0	1		20	20	20	Act 5 Champ C	Act 5 (N) Champ C	Act 5 (H) Champ C	0
+Treasure Cow	Treasure Cow	treasure_cow	704		0	0	0	1	1	0	1	0		0	0	0	Treasure Cow	Treasure Cow (N)	Treasure Cow (H)	0
