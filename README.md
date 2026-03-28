@@ -66,10 +66,16 @@ The console window shows AP connection status and events in real-time.
 
 | Key | Action |
 |-----|--------|
-| F1 | Open/Close Skill Editor |
-| F2 | Open/Close Quest Log |
-| F3 | Toggle Quest Tracker HUD |
+| Key | Action |
+| Configurable | Open/Close Skill Editor (default F1) |
+| Configurable | Open/Close Quest Log (default F2) |
+| Configurable | Toggle Quest Tracker HUD (default F3) |
+| Configurable | Toggle Quickcast (default F4) |
+| Configurable | Zone Map (default F5, Zone Explorer mode) |
 | ESC | Close any open panel |
+| Shift+P | Toggle packet logging (debug) |
+
+All keybindings are configurable in the launcher. Controller support available.
 
 ---
 
@@ -77,8 +83,8 @@ The console window shows AP connection status and events in real-time.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| goal_scope | Choice | full_game | Act 1 only / Acts 1-2 / Acts 1-3 / Acts 1-4 / Full Game |
-| difficulty_scope | Choice | normal_only | Normal / Normal+Nightmare / All Three |
+| game_mode | Choice | skill_hunt | Skill Hunt (skills are progression) / Zone Explorer (zone keys are progression) |
+| goal | Choice | full_game_normal | Combined act+difficulty: Act 1-5 x Normal/Nightmare/Hell (15 options) |
 | quest_story | Toggle | true | Include story quests |
 | quest_hunting | Toggle | true | Include Super Unique hunting quests |
 | quest_kill_zones | Toggle | true | Include zone clear quests |
@@ -92,8 +98,9 @@ The console window shows AP connection status and events in real-time.
 | filler_skill_pts_pct | 0-100 | 15 | Skill point filler weight |
 | filler_trap_pct | 0-100 | 15 | Trap filler weight |
 | filler_reset_pts_pct | 0-100 | 25 | Reset point filler weight |
-| starting_gold | 0-50000 | 0 | Starting gold amount |
 | death_link | Toggle | false | Enable DeathLink |
+| monster_shuffle | Toggle | false | Shuffle all monster types across areas |
+| boss_shuffle | Toggle | false | Shuffle all SuperUnique bosses across areas |
 
 ---
 

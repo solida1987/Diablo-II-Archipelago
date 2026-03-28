@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago - GitHub Release beta-1.2.0
+title Diablo II Archipelago - GitHub Release beta-1.3.0
 echo ============================================
 echo   Diablo II Archipelago - GitHub Release
 echo ============================================
@@ -7,7 +7,7 @@ echo.
 
 set ROOT=%~dp0
 set REL=%ROOT%Release\Diablo II Archipelago
-set VERSION=beta-1.2.0
+set VERSION=beta-1.3.0
 set ZIPNAME=Diablo-II-Archipelago-%VERSION%.zip
 
 :: Git root is one level above D2MOO + AP
@@ -100,10 +100,16 @@ echo ## Controls
 echo.
 echo ^| Key ^| Action ^|
 echo ^|-----^|--------^|
-echo ^| F1 ^| Open/Close Skill Editor ^|
-echo ^| F2 ^| Open/Close Quest Log ^|
-echo ^| F3 ^| Toggle Quest Tracker HUD ^|
+echo ^| Key ^| Action ^|
+echo ^| Configurable ^| Open/Close Skill Editor ^(default F1^) ^|
+echo ^| Configurable ^| Open/Close Quest Log ^(default F2^) ^|
+echo ^| Configurable ^| Toggle Quest Tracker HUD ^(default F3^) ^|
+echo ^| Configurable ^| Toggle Quickcast ^(default F4^) ^|
+echo ^| Configurable ^| Zone Map ^(default F5, Zone Explorer mode^) ^|
 echo ^| ESC ^| Close any open panel ^|
+echo ^| Shift+P ^| Toggle packet logging ^(debug^) ^|
+echo.
+echo All keybindings are configurable in the launcher. Controller support available.
 echo.
 echo ---
 echo.
@@ -111,8 +117,8 @@ echo ## AP World Options ^(YAML^)
 echo.
 echo ^| Option ^| Type ^| Default ^| Description ^|
 echo ^|--------^|------^|---------^|-------------^|
-echo ^| goal_scope ^| Choice ^| full_game ^| Act 1 only / Acts 1-2 / Acts 1-3 / Acts 1-4 / Full Game ^|
-echo ^| difficulty_scope ^| Choice ^| normal_only ^| Normal / Normal+Nightmare / All Three ^|
+echo ^| game_mode ^| Choice ^| skill_hunt ^| Skill Hunt ^(skills are progression^) / Zone Explorer ^(zone keys are progression^) ^|
+echo ^| goal ^| Choice ^| full_game_normal ^| Combined act+difficulty: Act 1-5 x Normal/Nightmare/Hell ^(15 options^) ^|
 echo ^| quest_story ^| Toggle ^| true ^| Include story quests ^|
 echo ^| quest_hunting ^| Toggle ^| true ^| Include Super Unique hunting quests ^|
 echo ^| quest_kill_zones ^| Toggle ^| true ^| Include zone clear quests ^|
@@ -126,8 +132,9 @@ echo ^| filler_stat_pts_pct ^| 0-100 ^| 15 ^| Stat point filler weight ^|
 echo ^| filler_skill_pts_pct ^| 0-100 ^| 15 ^| Skill point filler weight ^|
 echo ^| filler_trap_pct ^| 0-100 ^| 15 ^| Trap filler weight ^|
 echo ^| filler_reset_pts_pct ^| 0-100 ^| 25 ^| Reset point filler weight ^|
-echo ^| starting_gold ^| 0-50000 ^| 0 ^| Starting gold amount ^|
 echo ^| death_link ^| Toggle ^| false ^| Enable DeathLink ^|
+echo ^| monster_shuffle ^| Toggle ^| false ^| Shuffle all monster types across areas ^|
+echo ^| boss_shuffle ^| Toggle ^| false ^| Shuffle all SuperUnique bosses across areas ^|
 echo.
 echo ---
 echo.
@@ -260,35 +267,45 @@ cd /d "%GITROOT%"
 gh release delete %VERSION% -y >nul 2>&1
 gh release create %VERSION% "%GITROOT%%ZIPNAME%" --title "%VERSION% - Diablo II Archipelago" --notes "## Diablo II Archipelago %VERSION%
 
-### Critical Fixes
-- **AP checks now sent to server**: Fixed bridge character mismatch bug where checks were detected locally but never sent to AP server (tracker showed 0 checks)
-- **Bridge reconnect on character switch**: Bridge now properly disconnects and reconnects when switching characters instead of polling the wrong checks file
-- **Difficulty offset in checks**: WriteChecksFile now includes difficulty offsets (Normal+0, Nightmare+1000, Hell+2000) matching AP location IDs
-- **Skill icon mapping fixed**: 63 Druid, Assassin, and Paladin skill icons were showing wrong icons due to non-sequential vanilla IconCel values
-- **AP world generation fixes**: Fixed 3 bugs causing generation failures in ~68%% of seeds (Sisters to the Slaughter KeyError, duplicate Sewers location, FillError overflow)
-- **Gold rewards not applying**: Gold stat missing from new character save files caused gold to stay pending forever — now inserts STAT_GOLD if absent
+### New Game Mode: Zone Explorer
+- **Zone Explorer mode**: Zones are locked behind progression keys. Unlock zone keys to access new areas
+- **35 zone keys** across all 5 acts with prerequisite-based dependency graph
+- **Randomized zone unlock order**: Each character seed creates a unique labyrinth path through the game
+- **Reactive teleport-back**: Players entering locked zones are warped to town via LEVEL_WarpUnit
+- **Zone Map UI (F5)**: Shows all zones with OPEN/LOCKED status, difficulty tabs, scrollbar
+- **Per-character settings**: Each character preserves its own game mode, goal, quest toggles, and filler distribution
+
+### Combined Goal + Difficulty Setting
+- **15 goal options**: Choose act scope (1-5) AND difficulty (Normal/Nightmare/Hell) in one dropdown
+- Example: 'Acts 1-2 Nightmare' = play Acts 1-2 on Normal AND Nightmare, beat Duriel on NM to win
+- Replaces separate goal_scope and difficulty_scope settings
+
+### Customizable Keybindings
+- **Full keybinding support**: All 18 keybindings configurable in launcher (click button, press key)
+- **5 custom keys**: Skill Editor, Quest Log, Tracker, Quickcast, Zone Map
+- **13 vanilla D2 keys**: Inventory, Character, Spellbook, Automap, Run/Walk, Belt slots, etc.
+- **Vanilla key remapping**: D2's built-in keys can be rebound to any key
+- Keybindings saved per-installation in d2arch.ini
+
+### Controller Support (XInput)
+- **Enable Controller** checkbox in launcher
+- **Left stick**: Move mouse cursor with dead zone and acceleration
+- **A/B buttons**: Left/right click
+- **X/Y/LB/RB**: Belt slots 1-4
+- **D-Pad**: Inventory, Character, Skill Editor, Quest Log
+- **Triggers**: LT = show items (Alt), RT = stand still (Shift)
+- **Start/Back**: ESC / Automap
 
 ### Bugfixes
-- **Quest flag detection**: Story quests now correctly detected via server-side quest state polling
-- **Skill name mapping**: All 210 skill IDs now correctly mapped between AP world and game
-- **Corpsefire check**: Fixed hcIdx (was 41, now 40)
-- **8 Act 5 SuperUnique hcIdx**: All were off by +2, now corrected
-- **AP location IDs**: Bridge now sends correct AP location IDs (42000 + quest_id)
-- **The Smith**: Moved from Act 3 to Act 1 where it actually spawns
-- **3 waypoint names**: Rocky Waste/Dry Hills/Far Oasis corrected
-- **DLL build**: Added advapi32.lib for registry functions
-- **Removed Sewers quests**: 4 Sewers kill zone quests removed due to D2MOO pathfinding issues
-
-### New Features
-- **Expanded Inventory**: 10x8 character inventory (was 10x4)
-- **Expanded Stash**: 10x10 stash (was 6x8)
-- **Expanded Cube**: 10x8 cube (was 3x4)
-- **Increased Gold Cap**: 10,000,000 gold limit for both inventory and stash
-- **Custom Panel Graphics**: New DC6 panel files for expanded inventory, stash, and cube
-- **Classless Equipment**: All classes can now equip all weapon and armor types (claws, orbs, pelts, etc.)
-- **Assassin skill weapon restrictions removed**: Charge-up and finishing moves now work with any melee weapon, not just claws
-- **All melee weapons 1-handed**: Staves, polearms, spears, 2h axes, and hammers can now be held in one hand
-- **Universal dual-wield**: D2Common and D2Game patched to allow all classes to dual-wield (Left Hand Swing added to all classes)
+- **Skill point rewards**: Fixed skill points using cosmetic SetStat instead of .d2s modification
+- **Boss shuffle revert**: Fixed bosses staying shuffled when disabled — now always restores originals first
+- **Hunting quests**: Removed forced disable when monster shuffle is active
+- **Filler distribution**: DLL now reads user's filler percentage settings instead of hardcoded values
+- **Skill names fixed**: Werebear, Werewolf, Poison Creeper, Lycanthropy, Decoy corrected
+- **Monster density**: Increased density for small dungeon areas (Tower, Maggot Lair, Glacial Caves, etc.)
+- **Per-character persistence**: Settings, seed, and quest state now fully per-character
+- **AP/standalone sync**: All settings flow correctly through both AP and standalone pipelines
+- **starting_gold removed**: Gold is earned through gameplay, not given at start
 
 ### Installation
 1. Download and extract the ZIP below
