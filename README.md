@@ -31,7 +31,7 @@ Randomizes skill unlocks across a quest system spanning all 5 Acts. Complete que
 ### Steps
 1. Download the latest release ZIP from [Releases](https://github.com/solida1987/Diablo-II-Archipelago/releases)
 2. Extract the ZIP anywhere on your computer
-3. Run **D2ArchSetup.exe**
+3. **Run D2ArchSetup.exe as Administrator** (right-click > Run as administrator)
 4. Click Browse and select your Diablo II installation folder
 5. Click Install
 6. Launch with **Play Archipelago.exe**
@@ -66,7 +66,6 @@ The console window shows AP connection status and events in real-time.
 
 | Key | Action |
 |-----|--------|
-| Key | Action |
 | Configurable | Open/Close Skill Editor (default F1) |
 | Configurable | Open/Close Quest Log (default F2) |
 | Configurable | Toggle Quest Tracker HUD (default F3) |
@@ -101,6 +100,7 @@ All keybindings are configurable in the launcher. Controller support available.
 | death_link | Toggle | false | Enable DeathLink |
 | monster_shuffle | Toggle | false | Shuffle all monster types across areas |
 | boss_shuffle | Toggle | false | Shuffle all SuperUnique bosses across areas |
+| shop_shuffle | Toggle | false | Shuffle vendor inventories across acts |
 
 ---
 

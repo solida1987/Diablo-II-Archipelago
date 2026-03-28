@@ -846,3 +846,6 @@ Countess			-2	883	883	883	1024	0	Countess Item	1	Countess Rune	1																
 Countess (N)			-2	883	883	983	1024	0	Countess Item (N)	1	Countess Rune (N)	1																				0
 Countess (H)			-2	883	883	983	1024	0	Countess Item (H)	1	Countess Rune (H)	1																				0
 TC_Goblin			3	800	800	800	800	0	Gold	10	Jewelry C	5	Runes 1	5																		
+Treasure Cow			7	800	800	983	1024	0	Andarielq	3	Duriel - Base	3	Mephistoq	3	Diabloq	3	Baalq	3	gcv	2	gcr	2	gcb	2	gcg	2						
+Treasure Cow (N)			7	800	800	983	1024	0	Andarielq (N)	3	Duriel (N) - Base	3	Mephistoq (N)	3	Diabloq (N)	3	Baalq (N)	3	gzv	2	glr	2	glb	2	glg	2						
+Treasure Cow (H)			7	800	800	983	1024	0	Andarielq (H)	3	Duriel (H) - Base	3	Mephistoq (H)	3	Diabloq (H)	3	Baalq (H)	3	gpv	2	gpr	2	gpb	2	gpg	2						
