@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago beta-1.2.0 - Build Release Package
+title Diablo II Archipelago beta-1.3.0 - Build Release Package
 echo ============================================
 echo   Building Release Package (D2MOO + AP)
 echo ============================================
@@ -127,6 +127,22 @@ if exist "%SRC%Archipelago\src\dist\ap_bridge.exe" (
     echo   AP Bridge: included (from root)
 ) else (
     echo   WARNING: ap_bridge.exe not found! AP connectivity disabled.
+)
+
+:: Monster Shuffle script
+mkdir "%REL%\files\Archipelago" >nul 2>nul
+if exist "%SRC%Archipelago\src\dist\monster_shuffle.exe" (
+    copy /Y "%SRC%Archipelago\src\dist\monster_shuffle.exe" "%REL%\files\Archipelago\" >nul
+    echo   Monster Shuffle: included (exe)
+) else if exist "%SRC%Archipelago\monster_shuffle.exe" (
+    copy /Y "%SRC%Archipelago\monster_shuffle.exe" "%REL%\files\Archipelago\" >nul
+    echo   Monster Shuffle: included (exe from Archipelago)
+)
+:: Also copy .py as fallback
+mkdir "%REL%\files\Archipelago\src" >nul 2>nul
+if exist "%SRC%Archipelago\src\monster_shuffle.py" (
+    copy /Y "%SRC%Archipelago\src\monster_shuffle.py" "%REL%\files\Archipelago\src\" >nul
+    echo   Monster Shuffle: .py fallback included
 )
 
 :: ============================================
