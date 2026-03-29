@@ -41,11 +41,17 @@ Act	Place
 1	Griswold
 1	The Countess
 1	Pitspawn Fouldog
-1	Flamespike the Crawler
+1	TreasureCow
 1	Boneash
 1	The Smith
 1	The Cow King
 1	Corpsefire
+1	TreasureCow2
+1	TreasureCow3
+1	TreasureCow4
+1	TreasureCow5
+1	TreasureCow6
+1	TreasureCow7
 2	warriv2
 2	atma
 2	drognan
@@ -105,6 +111,11 @@ Act	Place
 2	sarcophagus
 2	tyrael1
 2	skeleton5
+2	TreasureCow8
+2	TreasureCow9
+2	TreasureCow10
+2	TreasureCow11
+2	TreasureCow12
 3	cain3
 3	place_champion
 3	act3male
@@ -144,6 +155,12 @@ Act	Place
 3	Toorc Icefist
 3	Wyand Voidfinger
 3	Maffer Dragonhand
+3	TreasureCow13
+3	TreasureCow14
+3	TreasureCow15
+3	TreasureCow16
+3	TreasureCow21
+3	TreasureCow22
 4	place_champion
 4	trap-horzmissile
 4	trap-vertmissile
@@ -172,6 +189,10 @@ Act	Place
 4	cain4
 4	malachai
 4	The Feature Creep
+4	TreasureCow17
+4	TreasureCow18
+4	TreasureCow19
+4	TreasureCow20
 5	larzuk
 5	drehya
 5	malah
@@ -228,3 +249,9 @@ Act	Place
 5	place_nothing
 5	place_nothing
 5	place_nothing
+5	TreasureCow23
+5	TreasureCow24
+5	TreasureCow25
+5	TreasureCow26
+5	TreasureCow27
+5	TreasureCow28

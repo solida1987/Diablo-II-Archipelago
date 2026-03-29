@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago beta-1.4.0 - Build Release Package
+title Diablo II Archipelago beta-1.5.0 - Build Release Package
 echo ============================================
 echo   Building Release Package (D2MOO + AP)
 echo ============================================
@@ -189,11 +189,50 @@ xcopy "%SRC%data\global\excel\*.txt" "%REL%\files\data\global\excel\" /Y /Q >nul
 xcopy "%SRC%data\global\ui\SPELLS\*" "%REL%\files\data\global\ui\SPELLS\" /Y /Q >nul 2>nul
 :: Panel graphics: expanded inventory, stash, and cube panels
 xcopy "%SRC%data\global\ui\panel\*" "%REL%\files\data\global\ui\panel\" /Y /Q >nul 2>nul
+:: Regenerate patchstring.tbl using d2tbl.exe (imports custom names into original TBL with correct CRC)
+echo Regenerating patchstring.tbl...
+if exist "%SRC%d2tbl\d2tbl.exe" (
+    pushd "%SRC%d2tbl"
+    .\d2tbl.exe -import cow_names.txt -source patchstring.tbl -ansi -always-insert >nul 2>&1
+    if exist "d2tbl_ouput.tbl" (
+        copy /Y "d2tbl_ouput.tbl" "%SRC%data\local\LNG\ENG\patchstring.tbl" >nul
+        echo   patchstring.tbl: regenerated with custom names
+    )
+    popd
+)
 :: String table: custom monster/item names (patchstring.tbl)
 if exist "%SRC%data\local\LNG\ENG\patchstring.tbl" (
     mkdir "%REL%\files\data\local\LNG\ENG" 2>nul
     copy /Y "%SRC%data\local\LNG\ENG\patchstring.tbl" "%REL%\files\data\local\LNG\ENG\" >nul
     echo   patchstring.tbl: included (custom names)
+    :: Also copy to root for direct testing
+    mkdir "%REL%\data\local\LNG\ENG" 2>nul
+    copy /Y "%SRC%data\local\LNG\ENG\patchstring.tbl" "%REL%\data\local\LNG\ENG\" >nul
+)
+
+:: DS1 tile files: custom SuperUnique placements (Treasure Cows)
+:: Copy to BOTH files\data\ (for installer) AND root data\ (for direct testing)
+echo Copying DS1 tile files...
+for %%D in (Act1 Act2 Act3 Act4) do (
+    if exist "%SRC%data\global\tiles\%%D" (
+        xcopy "%SRC%data\global\tiles\%%D" "%REL%\files\data\global\tiles\%%D\" /Y /Q /S /E >nul 2>nul
+        xcopy "%SRC%data\global\tiles\%%D" "%REL%\data\global\tiles\%%D\" /Y /Q /S /E >nul 2>nul
+    )
+)
+if exist "%SRC%data\global\tiles\expansion" (
+    xcopy "%SRC%data\global\tiles\expansion" "%REL%\files\data\global\tiles\expansion\" /Y /Q /S /E >nul 2>nul
+    xcopy "%SRC%data\global\tiles\expansion" "%REL%\data\global\tiles\expansion\" /Y /Q /S /E >nul 2>nul
+)
+echo   DS1 tiles: included (files + root)
+
+:: d2tbl tool (for custom name generation)
+if exist "%SRC%d2tbl\d2tbl.exe" (
+    mkdir "%REL%\files\d2tbl" 2>nul
+    copy /Y "%SRC%d2tbl\d2tbl.exe" "%REL%\files\d2tbl\" >nul
+    copy /Y "%SRC%d2tbl\patchstring.tbl" "%REL%\files\d2tbl\" >nul
+    copy /Y "%SRC%d2tbl\cow_names.txt" "%REL%\files\d2tbl\" >nul
+    copy /Y "%SRC%d2tbl\import_cows.bat" "%REL%\files\d2tbl\" >nul
+    echo   d2tbl tool: included
 )
 
 :: ============================================

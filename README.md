@@ -69,8 +69,7 @@ The console window shows AP connection status and events in real-time.
 | Configurable | Open/Close Skill Editor (default F1) |
 | Configurable | Open/Close Quest Log (default F2) |
 | Configurable | Toggle Quest Tracker HUD (default F3) |
-| Configurable | Toggle Quickcast (default F4) |
-| Configurable | Zone Map (default F5, Zone Explorer mode) |
+| Configurable | Zone Map (default F4, Zone Explorer mode) |
 | ESC | Close any open panel |
 | Shift+P | Toggle packet logging (debug) |
 
@@ -101,6 +100,7 @@ All keybindings are configurable in the launcher. Controller support available.
 | monster_shuffle | Toggle | false | Shuffle all monster types across areas |
 | boss_shuffle | Toggle | false | Shuffle all SuperUnique bosses across areas |
 | shop_shuffle | Toggle | false | Shuffle vendor inventories across acts |
+| treasure_cows | Toggle | true | Enable 28 Treasure Cow SuperUnique bosses across all acts |
 
 ---
 
