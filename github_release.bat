@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago - GitHub Release beta-1.4.0
+title Diablo II Archipelago - GitHub Release beta-1.5.0
 echo ============================================
 echo   Diablo II Archipelago - GitHub Release
 echo ============================================
@@ -7,7 +7,7 @@ echo.
 
 set ROOT=%~dp0
 set REL=%ROOT%Release\Diablo II Archipelago
-set VERSION=beta-1.4.0
+set VERSION=beta-1.5.0
 set ZIPNAME=Diablo-II-Archipelago-%VERSION%.zip
 
 :: Git root is one level above D2MOO + AP
@@ -103,8 +103,7 @@ echo [2/9] Generating README.md...
 >> "%GITROOT%README.md" echo ^| Configurable ^| Open/Close Skill Editor ^(default F1^) ^|
 >> "%GITROOT%README.md" echo ^| Configurable ^| Open/Close Quest Log ^(default F2^) ^|
 >> "%GITROOT%README.md" echo ^| Configurable ^| Toggle Quest Tracker HUD ^(default F3^) ^|
->> "%GITROOT%README.md" echo ^| Configurable ^| Toggle Quickcast ^(default F4^) ^|
->> "%GITROOT%README.md" echo ^| Configurable ^| Zone Map ^(default F5, Zone Explorer mode^) ^|
+>> "%GITROOT%README.md" echo ^| Configurable ^| Zone Map ^(default F4, Zone Explorer mode^) ^|
 >> "%GITROOT%README.md" echo ^| ESC ^| Close any open panel ^|
 >> "%GITROOT%README.md" echo ^| Shift+P ^| Toggle packet logging ^(debug^) ^|
 >> "%GITROOT%README.md" echo.
@@ -135,6 +134,7 @@ echo [2/9] Generating README.md...
 >> "%GITROOT%README.md" echo ^| monster_shuffle ^| Toggle ^| false ^| Shuffle all monster types across areas ^|
 >> "%GITROOT%README.md" echo ^| boss_shuffle ^| Toggle ^| false ^| Shuffle all SuperUnique bosses across areas ^|
 >> "%GITROOT%README.md" echo ^| shop_shuffle ^| Toggle ^| false ^| Shuffle vendor inventories across acts ^|
+>> "%GITROOT%README.md" echo ^| treasure_cows ^| Toggle ^| true ^| Enable 28 Treasure Cow SuperUnique bosses across all acts ^|
 >> "%GITROOT%README.md" echo.
 >> "%GITROOT%README.md" echo ---
 >> "%GITROOT%README.md" echo.
@@ -195,6 +195,15 @@ if exist "%ROOT%data\local\LNG\ENG\patchstring.tbl" (
     mkdir "%GITROOT%data\local\LNG\ENG" >nul 2>&1
     copy /Y "%ROOT%data\local\LNG\ENG\patchstring.tbl" "%GITROOT%data\local\LNG\ENG\" >nul 2>&1
 )
+:: DS1 tile files (Treasure Cow presets)
+for %%D in (Act1 Act2 Act3 Act4) do (
+    if exist "%ROOT%data\global\tiles\%%D" (
+        xcopy /E /Y /I "%ROOT%data\global\tiles\%%D" "%GITROOT%data\global\tiles\%%D\" >nul 2>&1
+    )
+)
+if exist "%ROOT%data\global\tiles\expansion" (
+    xcopy /E /Y /I "%ROOT%data\global\tiles\expansion" "%GITROOT%data\global\tiles\expansion\" >nul 2>&1
+)
 copy /Y "%ROOT%build_release.bat" "%GITROOT%build_release.bat" >nul 2>&1
 copy /Y "%ROOT%github_release.bat" "%GITROOT%github_release.bat" >nul 2>&1
 copy /Y "%ROOT%ddraw.ini" "%GITROOT%ddraw.ini" >nul 2>&1
@@ -223,6 +232,7 @@ git add build_release.bat
 git add github_release.bat
 git add ddraw.ini
 git add data/local/LNG/ENG/patchstring.tbl 2>nul
+git add data/global/tiles/ 2>nul
 echo   Done.
 echo.
 
@@ -231,7 +241,7 @@ echo.
 :: ============================================
 echo [6/9] Committing...
 cd /d "%GITROOT%"
-git commit -m "Release %VERSION% - Quest flag detection, skill mapping, expanded inventory, bugfixes"
+git commit -m "Release %VERSION% - Treasure Cows, Zone Explorer fix, SuperUnique limit expanded, quickcast removed"
 if errorlevel 1 (
     echo   ERROR: Commit failed!
     pause
@@ -274,39 +284,41 @@ gh release delete %VERSION% -y >nul 2>&1
 set "NOTESFILE=%TEMP%\d2arch_release_notes.md"
 > "%NOTESFILE%" echo ## Diablo II Archipelago %VERSION%
 >> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### Custom Monsters
->> "%NOTESFILE%" echo - **Treasure Cow**: Custom monster with boss-tier loot table
->> "%NOTESFILE%" echo - Spawns rarely across 36 areas in all 5 acts
->> "%NOTESFILE%" echo - Custom name via patchstring.tbl string table system
->> "%NOTESFILE%" echo - Drops 7 items per kill including gems and boss loot
+>> "%NOTESFILE%" echo ### Treasure Cows - 28 SuperUnique Bosses
+>> "%NOTESFILE%" echo - **28 Treasure Cows** placed across all 5 Acts as SuperUnique bosses with gold names
+>> "%NOTESFILE%" echo - Toggle on/off via Treasure Cows checkbox in launcher
+>> "%NOTESFILE%" echo - Excluded from Boss Shuffle - always appear as Treasure Cows
+>> "%NOTESFILE%" echo - AP option: treasure_cows toggle in YAML
 >> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### XP Multiplier
->> "%NOTESFILE%" echo - **1x to 5x XP slider** in launcher settings
->> "%NOTESFILE%" echo - Divides XP requirements AND increases ExpRatio
+>> "%NOTESFILE%" echo ### SuperUnique Limit Expanded
+>> "%NOTESFILE%" echo - D2MOO rebuilt with **2048 SuperUnique slots** ^(was 66^)
+>> "%NOTESFILE%" echo - Supports unlimited custom bosses for future content
 >> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### Shop Shuffle
->> "%NOTESFILE%" echo - **Randomize vendor inventories** across all acts
+>> "%NOTESFILE%" echo ### Zone Explorer Fix
+>> "%NOTESFILE%" echo - Fixed circular dependency in zone gating logic
+>> "%NOTESFILE%" echo - All 6 test configurations generate successfully
+>> "%NOTESFILE%" echo - Boss kills no longer placed behind zone keys
 >> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### Antivirus Fix
->> "%NOTESFILE%" echo - **Monster shuffle rewritten in C** - no more false positives
+>> "%NOTESFILE%" echo ### Quickcast Removed
+>> "%NOTESFILE%" echo - Removed entire quickcast system ^(caused crashes^)
+>> "%NOTESFILE%" echo - Zone Map moved to F4 ^(was F5^)
 >> "%NOTESFILE%" echo.
 >> "%NOTESFILE%" echo ### Bugfixes
->> "%NOTESFILE%" echo - Flamespike hunt removed - does not exist in LoD
->> "%NOTESFILE%" echo - Missing quests added: Cave L2, UG Passage L2, Hole L1/L2
->> "%NOTESFILE%" echo - Menu button repositioned - no longer covers HP bar
->> "%NOTESFILE%" echo - Quickcast crash fix
->> "%NOTESFILE%" echo - Controller skill assignment fix
->> "%NOTESFILE%" echo - Monster shuffle default behavior fix
->> "%NOTESFILE%" echo - .bin cache clearing on every launch
->> "%NOTESFILE%" echo - XP multiplier now divides XP requirements
+>> "%NOTESFILE%" echo - Buffer overflow fixes in d2arch.c
+>> "%NOTESFILE%" echo - Flamespike hunt removed ^(does not exist in LoD^)
+>> "%NOTESFILE%" echo - Ancients excluded from boss shuffle
+>> "%NOTESFILE%" echo - AP bridge: fsync, death link race condition fix
+>> "%NOTESFILE%" echo - Monster shuffle restore uses correct CRLF
+>> "%NOTESFILE%" echo - patchstring.tbl generated via d2tbl ^(correct CRC^)
 >> "%NOTESFILE%" echo.
 >> "%NOTESFILE%" echo ### Previous Features
 >> "%NOTESFILE%" echo - Zone Explorer game mode with 35 zone keys
->> "%NOTESFILE%" echo - Combined Goal + Difficulty - 15 options
->> "%NOTESFILE%" echo - Customizable keybindings - 18 keys
->> "%NOTESFILE%" echo - Controller support - XInput gamepad
->> "%NOTESFILE%" echo - Per-character settings persistence
+>> "%NOTESFILE%" echo - 210 skills from all 7 classes
+>> "%NOTESFILE%" echo - 224+ quests across 5 Acts
 >> "%NOTESFILE%" echo - Boss shuffle, monster shuffle, shop shuffle
+>> "%NOTESFILE%" echo - XP multiplier 1x-5x
+>> "%NOTESFILE%" echo - Controller support
+>> "%NOTESFILE%" echo - Expanded inventory/stash/cube
 >> "%NOTESFILE%" echo.
 >> "%NOTESFILE%" echo ### Installation
 >> "%NOTESFILE%" echo 1. Download and extract the ZIP below
