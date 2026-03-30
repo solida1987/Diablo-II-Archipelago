@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago beta-1.5.0 - Build Release Package
+title Diablo II Archipelago beta-1.5.1 - Build Release Package
 echo ============================================
 echo   Building Release Package (D2MOO + AP)
 echo ============================================
@@ -23,33 +23,29 @@ echo.
 :: Step 0a: Compile Play Archipelago.exe (launcher)
 :: ============================================
 echo Compiling Play Archipelago.exe...
-pushd "%SRC%Archipelago\src"
-call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86 >nul 2>&1
-rc /nologo launcher.rc >nul 2>&1
-cl /nologo /MT /O2 /W3 /D_CRT_SECURE_NO_WARNINGS launcher.c launcher.res /Fe:"Play Archipelago.exe" /link user32.lib gdi32.lib kernel32.lib advapi32.lib shell32.lib comdlg32.lib comctl32.lib >nul 2>&1
-if exist "Play Archipelago.exe" (
-    copy /Y "Play Archipelago.exe" "%SRC%Play Archipelago.exe" >nul
+call "%SRC%Archipelago\src\build_launcher.bat"
+if exist "%SRC%Play Archipelago.exe" (
     echo   Launcher compiled.
 ) else (
     echo   WARNING: Launcher compile failed!
 )
-popd
 echo.
 
 :: ============================================
-:: Step 0b: Rebuild AP Bridge
+:: Step 0b: AP Bridge — use pre-built standalone folder from ap_bridge_dist\
+:: To rebuild: cd Archipelago\src && python -m nuitka --standalone --output-dir=bridge_build ap_bridge.py
+:: Then copy bridge_build\ap_bridge.dist\* to %SRC%ap_bridge_dist\
 :: ============================================
-echo Rebuilding AP Bridge...
-if exist "%SRC%Archipelago\src\ap_bridge.py" (
-    pushd "%SRC%Archipelago\src"
-    python -m PyInstaller --onefile --name ap_bridge ap_bridge.py >nul 2>&1
-    if exist "dist\ap_bridge.exe" (
-        copy /Y "dist\ap_bridge.exe" "%SRC%ap_bridge.exe" >nul
-        echo   AP Bridge rebuilt.
-    ) else (
-        echo   WARNING: AP Bridge build failed.
-    )
-    popd
+echo Checking AP Bridge...
+if exist "%SRC%ap_bridge_dist\ap_bridge.exe" (
+    echo   AP Bridge: using pre-built standalone folder.
+) else if exist "%SRC%ap_bridge.exe" (
+    echo   AP Bridge: using single exe ^(legacy, may trigger AV^).
+    mkdir "%SRC%ap_bridge_dist" >nul 2>&1
+    copy /Y "%SRC%ap_bridge.exe" "%SRC%ap_bridge_dist\ap_bridge.exe" >nul
+) else (
+    echo   WARNING: ap_bridge not found! AP connectivity disabled.
+    echo   Build it: cd Archipelago\src ^&^& python -m nuitka --standalone --output-dir=bridge_build ap_bridge.py
 )
 echo.
 
@@ -57,17 +53,23 @@ echo.
 :: Step 0c: Rebuild Monster Shuffle (C version — no PyInstaller/AV issues)
 :: ============================================
 echo Rebuilding Monster Shuffle (C)...
-if exist "%SRC%Archipelago\src\monster_shuffle.c" (
-    pushd "%SRC%Archipelago\src"
-    call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86 >nul 2>&1
-    cl /nologo /MT /O2 /W3 /D_CRT_SECURE_NO_WARNINGS monster_shuffle.c /Fe:monster_shuffle.exe /link kernel32.lib >nul 2>&1
-    if exist "monster_shuffle.exe" (
-        copy /Y "monster_shuffle.exe" "%SRC%Archipelago\monster_shuffle.exe" >nul
-        echo   Monster Shuffle C version rebuilt.
-    ) else (
-        echo   WARNING: Monster Shuffle C build failed.
-    )
-    popd
+call "%SRC%Archipelago\src\build_monster_shuffle.bat"
+if exist "%SRC%Archipelago\monster_shuffle.exe" (
+    echo   Monster Shuffle rebuilt.
+) else (
+    echo   WARNING: Monster Shuffle build failed.
+)
+echo.
+
+:: ============================================
+:: Step 0c2: Rebuild D2ArchSetup.exe (installer)
+:: ============================================
+echo Rebuilding D2ArchSetup.exe...
+call "%SRC%Archipelago\src\build_installer.bat"
+if exist "%SRC%Archipelago\src\D2ArchSetup.exe" (
+    echo   Installer rebuilt.
+) else (
+    echo   WARNING: Installer compile failed!
 )
 echo.
 
@@ -76,13 +78,14 @@ echo.
 :: ============================================
 echo Rebuilding apworld...
 if exist "%SRC%apworld\diablo2_archipelago" (
-    pushd "%SRC%apworld\diablo2_archipelago"
-    powershell -NoProfile -Command "Compress-Archive -Path * -DestinationPath ..\diablo2_archipelago.zip -Force" >nul 2>&1
-    popd
-    if exist "%SRC%apworld\diablo2_archipelago.zip" (
-        move /Y "%SRC%apworld\diablo2_archipelago.zip" "%SRC%apworld\diablo2_archipelago.apworld" >nul
+    pushd "%SRC%apworld"
+    powershell -NoProfile -Command "Compress-Archive -Path 'diablo2_archipelago' -DestinationPath 'diablo2_archipelago.zip' -Force" >nul 2>&1
+    if exist "diablo2_archipelago.zip" (
+        del "diablo2_archipelago.apworld" 2>nul
+        move /Y "diablo2_archipelago.zip" "diablo2_archipelago.apworld" >nul
         echo   apworld rebuilt.
     )
+    popd
 )
 echo.
 
@@ -153,31 +156,30 @@ if exist "%SRC%Play Archipelago.exe" (
 )
 copy /Y "%SRC%ddraw.dll" "%REL%\files\framework\" >nul
 copy /Y "%SRC%ddraw.ini" "%REL%\files\framework\" >nul
-:: AP Bridge executable (PyInstaller-built)
-if exist "%SRC%Archipelago\src\dist\ap_bridge.exe" (
-    copy /Y "%SRC%Archipelago\src\dist\ap_bridge.exe" "%REL%\files\framework\" >nul
-    echo   AP Bridge: included
+:: AP Bridge (standalone folder — low AV flags)
+if exist "%SRC%ap_bridge_dist\ap_bridge.exe" (
+    mkdir "%REL%\files\framework\ap_bridge" >nul 2>&1
+    xcopy "%SRC%ap_bridge_dist" "%REL%\files\framework\ap_bridge\" /Y /Q /S /E >nul
+    echo   AP Bridge: included - standalone folder
 ) else if exist "%SRC%ap_bridge.exe" (
     copy /Y "%SRC%ap_bridge.exe" "%REL%\files\framework\" >nul
-    echo   AP Bridge: included (from root)
+    echo   AP Bridge: included - single exe ^(legacy^)
 ) else (
-    echo   WARNING: ap_bridge.exe not found! AP connectivity disabled.
+    echo   WARNING: ap_bridge not found! AP connectivity disabled.
 )
 
-:: Monster Shuffle (prefer C-compiled version over PyInstaller)
+:: Monster Shuffle (C-compiled only — no PyInstaller, no AV flags)
 mkdir "%REL%\files\Archipelago" >nul 2>nul
 if exist "%SRC%Archipelago\monster_shuffle.exe" (
     copy /Y "%SRC%Archipelago\monster_shuffle.exe" "%REL%\files\Archipelago\" >nul
-    echo   Monster Shuffle: included (C version)
-) else if exist "%SRC%Archipelago\src\dist\monster_shuffle.exe" (
-    copy /Y "%SRC%Archipelago\src\dist\monster_shuffle.exe" "%REL%\files\Archipelago\" >nul
-    echo   Monster Shuffle: included (PyInstaller fallback)
+    echo   Monster Shuffle: included - C native
+) else (
+    echo   WARNING: monster_shuffle.exe not found!
 )
-:: Also copy .py as fallback
+:: Also copy .py as fallback for systems without the C version
 mkdir "%REL%\files\Archipelago\src" >nul 2>nul
 if exist "%SRC%Archipelago\src\monster_shuffle.py" (
     copy /Y "%SRC%Archipelago\src\monster_shuffle.py" "%REL%\files\Archipelago\src\" >nul
-    echo   Monster Shuffle: .py fallback included
 )
 
 :: ============================================
@@ -225,15 +227,9 @@ if exist "%SRC%data\global\tiles\expansion" (
 )
 echo   DS1 tiles: included (files + root)
 
-:: d2tbl tool (for custom name generation)
-if exist "%SRC%d2tbl\d2tbl.exe" (
-    mkdir "%REL%\files\d2tbl" 2>nul
-    copy /Y "%SRC%d2tbl\d2tbl.exe" "%REL%\files\d2tbl\" >nul
-    copy /Y "%SRC%d2tbl\patchstring.tbl" "%REL%\files\d2tbl\" >nul
-    copy /Y "%SRC%d2tbl\cow_names.txt" "%REL%\files\d2tbl\" >nul
-    copy /Y "%SRC%d2tbl\import_cows.bat" "%REL%\files\d2tbl\" >nul
-    echo   d2tbl tool: included
-)
+:: d2tbl tool: NOT shipped to users (UPX packed = AV risk)
+:: Only used during build to regenerate patchstring.tbl
+:: The generated patchstring.tbl IS shipped (see above)
 
 :: ============================================
 :: files\Archipelago: config, icon map, apworld
@@ -301,7 +297,9 @@ if not exist "%REL%\files\framework\D2.Detours.dll" (echo     MISSING: files\fra
 if not exist "%REL%\files\framework\Play Archipelago.exe" (echo     MISSING: files\framework\Play Archipelago.exe & set OK=0)
 if not exist "%REL%\files\framework\ddraw.dll" (echo     MISSING: files\framework\ddraw.dll & set OK=0)
 if not exist "%REL%\files\framework\ddraw.ini" (echo     MISSING: files\framework\ddraw.ini & set OK=0)
-if not exist "%REL%\files\framework\ap_bridge.exe" (echo     WARNING: files\framework\ap_bridge.exe missing - AP disabled)
+if not exist "%REL%\files\framework\ap_bridge\ap_bridge.exe" (
+    if not exist "%REL%\files\framework\ap_bridge.exe" (echo     WARNING: ap_bridge missing - AP disabled)
+)
 if not exist "%REL%\files\framework\D2.DetoursLauncher.exe" (echo     MISSING: files\framework\D2.DetoursLauncher.exe & set OK=0)
 echo   Checking files\Archipelago\...
 if not exist "%REL%\files\Archipelago\diablo2_archipelago.apworld" (echo     WARNING: .apworld missing - AP world not included)

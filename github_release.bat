@@ -1,5 +1,5 @@
 @echo off
-title Diablo II Archipelago - GitHub Release beta-1.5.0
+title Diablo II Archipelago - GitHub Release beta-1.5.1
 echo ============================================
 echo   Diablo II Archipelago - GitHub Release
 echo ============================================
@@ -7,7 +7,7 @@ echo.
 
 set ROOT=%~dp0
 set REL=%ROOT%Release\Diablo II Archipelago
-set VERSION=beta-1.5.0
+set VERSION=beta-1.5.1
 set ZIPNAME=Diablo-II-Archipelago-%VERSION%.zip
 
 :: Git root is one level above D2MOO + AP
@@ -241,7 +241,7 @@ echo.
 :: ============================================
 echo [6/9] Committing...
 cd /d "%GITROOT%"
-git commit -m "Release %VERSION% - Treasure Cows, Zone Explorer fix, SuperUnique limit expanded, quickcast removed"
+git commit -m "Release %VERSION% - Bugfix release: 12 fixes from full codebase audit"
 if errorlevel 1 (
     echo   ERROR: Commit failed!
     pause
@@ -284,41 +284,27 @@ gh release delete %VERSION% -y >nul 2>&1
 set "NOTESFILE=%TEMP%\d2arch_release_notes.md"
 > "%NOTESFILE%" echo ## Diablo II Archipelago %VERSION%
 >> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### Treasure Cows - 28 SuperUnique Bosses
->> "%NOTESFILE%" echo - **28 Treasure Cows** placed across all 5 Acts as SuperUnique bosses with gold names
->> "%NOTESFILE%" echo - Toggle on/off via Treasure Cows checkbox in launcher
->> "%NOTESFILE%" echo - Excluded from Boss Shuffle - always appear as Treasure Cows
->> "%NOTESFILE%" echo - AP option: treasure_cows toggle in YAML
+>> "%NOTESFILE%" echo Bugfix release based on full codebase audit. 12 bugs fixed.
 >> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### SuperUnique Limit Expanded
->> "%NOTESFILE%" echo - D2MOO rebuilt with **2048 SuperUnique slots** ^(was 66^)
->> "%NOTESFILE%" echo - Supports unlimited custom bosses for future content
+>> "%NOTESFILE%" echo ### Critical Fixes
+>> "%NOTESFILE%" echo - **AP Bridge**: Fixed WebSocket dependency missing in packaged build ^(No module named websockets.asyncio^)
+>> "%NOTESFILE%" echo - **Save Path**: Fixed save directory detection failing silently - now has 4-level fallback chain with logging
+>> "%NOTESFILE%" echo - **SuperUnique Hunts**: Fixed Corpsefire and other hunt kills not registering - added UNITFLAG_ISDEAD check
+>> "%NOTESFILE%" echo - **AP Reconnect**: Fixed filler items ^(gold, stat points, traps^) duplicating on reconnect
+>> "%NOTESFILE%" echo - **Quest ID Collision**: Fixed duplicate quest ID 57 ^(Hole Level 1 vs Catacombs Waypoint^) - 4 missing locations added
 >> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### Zone Explorer Fix
->> "%NOTESFILE%" echo - Fixed circular dependency in zone gating logic
->> "%NOTESFILE%" echo - All 6 test configurations generate successfully
->> "%NOTESFILE%" echo - Boss kills no longer placed behind zone keys
+>> "%NOTESFILE%" echo ### Gameplay Fixes
+>> "%NOTESFILE%" echo - **Singleplayer Sync**: Gold, stat points, and skill points now show immediately instead of requiring save-exit
+>> "%NOTESFILE%" echo - **XP Multiplier**: Fixed counterproductive ExpRatio modification - now correctly divides level thresholds only
+>> "%NOTESFILE%" echo - **Assassin Weapons**: Katars ^(h2h^) removed from shops to prevent crash when equipped by non-Assassin classes
+>> "%NOTESFILE%" echo - **Skill Points**: Fixed skill points jumping to wrong skills after reload - reinvest now validates against current tree
+>> "%NOTESFILE%" echo - **Boss Shuffle**: Improved randomization - retry mechanism ensures 75%%+ of bosses actually change position
 >> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### Quickcast Removed
->> "%NOTESFILE%" echo - Removed entire quickcast system ^(caused crashes^)
->> "%NOTESFILE%" echo - Zone Map moved to F4 ^(was F5^)
->> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### Bugfixes
->> "%NOTESFILE%" echo - Buffer overflow fixes in d2arch.c
->> "%NOTESFILE%" echo - Flamespike hunt removed ^(does not exist in LoD^)
->> "%NOTESFILE%" echo - Ancients excluded from boss shuffle
->> "%NOTESFILE%" echo - AP bridge: fsync, death link race condition fix
->> "%NOTESFILE%" echo - Monster shuffle restore uses correct CRLF
->> "%NOTESFILE%" echo - patchstring.tbl generated via d2tbl ^(correct CRC^)
->> "%NOTESFILE%" echo.
->> "%NOTESFILE%" echo ### Previous Features
->> "%NOTESFILE%" echo - Zone Explorer game mode with 35 zone keys
->> "%NOTESFILE%" echo - 210 skills from all 7 classes
->> "%NOTESFILE%" echo - 224+ quests across 5 Acts
->> "%NOTESFILE%" echo - Boss shuffle, monster shuffle, shop shuffle
->> "%NOTESFILE%" echo - XP multiplier 1x-5x
->> "%NOTESFILE%" echo - Controller support
->> "%NOTESFILE%" echo - Expanded inventory/stash/cube
+>> "%NOTESFILE%" echo ### Technical
+>> "%NOTESFILE%" echo - Dead monster tracking: circular buffer instead of full reset on overflow
+>> "%NOTESFILE%" echo - AP items_received_index: persistent to disk, prevents item loss on bridge restart
+>> "%NOTESFILE%" echo - Forward declaration fix for Log^(^) function ^(compile error prevention^)
+>> "%NOTESFILE%" echo - Full codebase audit documentation in Research/FULL_CODEBASE_MAP.md
 >> "%NOTESFILE%" echo.
 >> "%NOTESFILE%" echo ### Installation
 >> "%NOTESFILE%" echo 1. Download and extract the ZIP below
