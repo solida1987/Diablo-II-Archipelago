@@ -116,6 +116,7 @@ Act	Place
 2	TreasureCow10
 2	TreasureCow11
 2	TreasureCow12
+2	Maegis
 3	cain3
 3	place_champion
 3	act3male

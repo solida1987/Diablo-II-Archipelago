@@ -8,6 +8,7 @@ Griswold	Griswold	griswold	5		7	0	0	0	0	0	1	0	1	17	17	17	Griswold	Griswold (N)	G
 The Countess	The Countess	corruptrogue3	6	countess	9	0	0	6	6	0	1	0		16	16	16	Countess	Countess (N)	Countess (H)	0
 Pitspawn Fouldog	Pitspawn Fouldog	bighead2	7		7	18	0	4	4	0	1	0		31	31	31	Act 1 Super B	Act 1 (N) Super B	Act 1 (H) Super B	0
 TreasureCow	TreasureCow	treasure_cow	8		0	0	0	0	0	0	1	0		16	16	16	Act 1 Unique C	Act 1 (N) Unique C	Act 1 (H) Unique C	0
+Maegis	Maegis	maegis	750		27	5	25	0	0	0	1	0		2	2	2	Act 1 Unique C	Act 1 (N) Unique C	Act 1 (H) Unique C	0
 TreasureCow2	TreasureCow2	treasure_cow	200		0	0	0	0	0	0	1	0		16	16	16	Act 1 Unique C	Act 1 (N) Unique C	Act 1 (H) Unique C	0
 TreasureCow3	TreasureCow3	treasure_cow	201		0	0	0	0	0	0	1	0		16	16	16	Act 1 Unique C	Act 1 (N) Unique C	Act 1 (H) Unique C	0
 TreasureCow4	TreasureCow4	treasure_cow	202		0	0	0	0	0	0	1	0		16	16	16	Act 1 Unique C	Act 1 (N) Unique C	Act 1 (H) Unique C	0
