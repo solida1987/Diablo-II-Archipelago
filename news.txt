@@ -2,48 +2,26 @@
 IF YOU WANT TO CREATE A NEW CHARACTER AFTER PLAYING ANOTHER ONE,
 CLOSE THE GAME COMPLETELY AND RESTART IT BEFORE CREATING A NEW CHARACTER.
 DO NOT SWITCH CHARACTERS FROM THE CHARACTER SELECT SCREEN.
-THIS PREVENTS POTENTIAL SAVE DATA ISSUES UNTIL ALL BUGS ARE FULLY RESOLVED.
 
-Welcome to Diablo II Archipelago Beta 1.6.0!
+=== Beta 1.6.2 Released! ===
 
-This is the first public beta release of Diablo II Archipelago,
-a multiworld randomizer mod for Diablo II: Lord of Destruction.
+Monster Shuffle completely rebuilt!
+Monsters are now fully replaced with correct animations and AI.
+No more invisible monsters, missing body parts, or broken animations.
+20 preset shuffle configurations for variety.
 
-=== What's New ===
-- New launcher with auto-update and game settings
-- Skill editor: drag and drop skills freely
-- Skill tree: spend skill points on any class skills
-- Quest book: 276+ quests across all 5 acts and 3 difficulties
-- Monster shuffle: randomized monster appearances (seed-based)
-- Boss shuffle: act bosses swap positions
-- XP multiplier: configurable experience rate
-- Expanded inventory: 10x8 inv, 10x8 cube, 10x10 stash
-- Archipelago multiworld bridge integration
-- Live game log and AP bridge log in launcher
-- Delta updates: only changed files downloaded on update
+All class names fixed (Battlerager->Barbarian, Shalafi->Sorceress, etc.)
 
 === Known Bugs ===
-- Skill names in the editor show internal names (e.g. "Quickness"
-  instead of "Burst of Speed"). The skills work correctly.
-- Some skill icons may not match the skill name in the editor.
-- Monster traps may occasionally fail to spawn visible monsters.
-- Switching characters without restarting the game can cause
-  settings and quest progress to carry over incorrectly.
-  WORKAROUND: Always fully close and restart the game between characters.
+- Skill names in editor show internal names (cosmetic only)
+- Some skill icons may not match in editor
+- Always restart game between characters (see above)
 
 === Report Bugs ===
-Found a bug? Please report it!
-Click the "Report Bug" button in the launcher to open the bug tracker.
-Include as much detail as possible:
-- What you were doing when the bug happened
-- Your character name and class
-- Whether you were in standalone or AP mode
-- Screenshots if possible
-
-Join our Discord for help and discussion!
+Click "Report Bug" in the launcher!
+Join our Discord for help and discussion.
 
 === Tips ===
-- Press F1 to open the Skill Editor (page 1) and Quest Book (page 2)
-- Press Ctrl+O in-game for graphics settings (d2gl options)
-- Use the launcher Settings tab to configure resolution and features
-- The game runs at 1068x600 widescreen by default
+- Press F1 for Skill Editor (page 1) and Quest Book (page 2)
+- Press Ctrl+O in-game for graphics settings
+- Use launcher Settings tab for resolution and features
