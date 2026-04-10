@@ -3,19 +3,17 @@ IF YOU WANT TO CREATE A NEW CHARACTER AFTER PLAYING ANOTHER ONE,
 CLOSE THE GAME COMPLETELY AND RESTART IT BEFORE CREATING A NEW CHARACTER.
 DO NOT SWITCH CHARACTERS FROM THE CHARACTER SELECT SCREEN.
 
-=== Beta 1.6.2 Released! ===
+=== Beta 1.6.3 ===
 
-Monster Shuffle completely rebuilt!
-Monsters are now fully replaced with correct animations and AI.
-No more invisible monsters, missing body parts, or broken animations.
-20 preset shuffle configurations for variety.
-
-All class names fixed (Battlerager->Barbarian, Shalafi->Sorceress, etc.)
+New: Skill tree tier colors now hidden by default
+Click "Show Colors" to toggle. Your preference is saved between sessions.
 
 === Known Bugs ===
+- Skill tooltips still missing some information (full overhaul planned)
 - Skill names in editor show internal names (cosmetic only)
 - Some skill icons may not match in editor
 - Always restart game between characters (see above)
+- Multiplayer (multiple players in same game) not yet fully supported
 
 === Report Bugs ===
 Click "Report Bug" in the launcher!

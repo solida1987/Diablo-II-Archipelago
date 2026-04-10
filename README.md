@@ -2,63 +2,64 @@
 
 A randomizer mod for Diablo II: Lord of Destruction (1.10f) with [Archipelago](https://archipelago.gg/) multiworld support.
 
-Randomizes skill unlocks across a quest system spanning all 5 Acts. Complete quests to earn skills from any of the 7 character classes. Play solo with custom settings or connect to an Archipelago multiworld server for cross-game randomization.
+Randomizes skill unlocks across a quest system spanning all 5 Acts and 3 difficulties. Complete quests to earn skills from any of the 7 character classes. Play solo with custom settings or connect to an Archipelago multiworld server for cross-game randomization.
+
+---
+
+## Download & Install
+
+1. Download **launcher_package.zip** from [Releases](https://github.com/solida1987/Diablo-II-Archipelago/releases/latest)
+2. Extract to a folder
+3. Run **Diablo II Archipelago.exe**
+4. The launcher downloads and installs the game automatically
+
+### Requirements
+- Windows 10/11
+- .NET 8 Runtime
+- Valid Diablo II + Lord of Destruction CD keys
+
+### Windows SmartScreen
+Click **"More info"** then **"Run anyway"** on the blue warning screen.
 
 ---
 
 ## Features
 
-- **210 Skills** from all 7 classes (Amazon, Sorceress, Necromancer, Paladin, Barbarian, Druid, Assassin) randomized into a quest reward pool
-- **227 Quests** across 5 Acts: Story, Super Unique Hunting, Zone Clears, Exploration, Waypoints, Level Milestones
+- **210 Skills** from all 7 classes randomized into a quest reward pool
+- **276+ Quests** across 5 Acts and 3 difficulties: Story, Hunting, Kill Zones, Exploration, Waypoints, Level Milestones
+- **Skill Editor** (F1 page 1): Drag and drop skills into 3 tiers with 10 slots each
+- **Skill Tree** (S key): Spend skill points on assigned skills with tier-colored layout
+- **Quest Book** (F1 page 2): Scrollable quest log with filter tabs and act/difficulty selection
+- **AP Connection** (F1 page 3): Connect to Archipelago multiworld servers
+- **Monster Shuffle**: 20 preset configurations randomize monster appearances and abilities
+- **Boss Shuffle**: Act end bosses swap positions
+- **XP Multiplier**: Configurable experience rate (1x-10x)
 - **Expanded Inventory**: 10x8 inventory, 10x10 stash, 10x8 cube
-- **Skill Editor** (F1): Assign unlocked skills to your build with 3 tabs and 10 slots per tab
-- **Quest Log** (F2): Track progress with Main/Side quest tabs, scrollbar, and per-difficulty tracking
-- **Quest Tracker HUD** (F3): Shows current objectives and goal progress
-- **Trap System**: Certain quests spawn dangerous Super Unique monsters near you
-- **Reset Points**: Earned from quests, used to reassign skills
-- **Tier System**: T1 (Level 1+), T2 (Level 20+), T3 (Level 40+) skill gating
-- **Archipelago Integration**: Full multiworld support with item sending/receiving, DeathLink, and goal tracking
-- **Configurable Settings**: Quest types, skill pool size, filler distribution, and more
-
----
-
-## Installation
-
-### Requirements
-- Diablo II + Lord of Destruction (original installation required)
-- Windows 10 or later
-
-### Steps
-1. Download the latest release ZIP from [Releases](https://github.com/solida1987/Diablo-II-Archipelago/releases)
-2. Extract the ZIP anywhere on your computer
-3. **Run D2ArchSetup.exe as Administrator** (right-click > Run as administrator)
-4. Click Browse and select your Diablo II installation folder
-5. Click Install
-6. Launch with **Play Archipelago.exe**
-
-The installer copies required files from your Diablo II installation. Your original game is not modified.
+- **Zone Explorer Mode**: Zone keys gate area access for exploration-focused gameplay
+- **Trap System**: Filler quests spawn dangerous monsters near you
+- **Reset Points**: Earned from quests, used to reassign skills in the editor
+- **Tier System**: T1 (green), T2 (blue), T3 (orange) skill gating
+- **Cheat Menu** (Ctrl+V): Debug tools for testing
+- **Delta Updates**: Launcher downloads only changed files on update
+- **Launcher Self-Update**: Launcher checks for new versions automatically
 
 ---
 
 ## How to Play
 
-### Singleplayer
-1. Run **Play Archipelago.exe**
-2. Select **Singleplayer**
-3. Configure game settings (goal scope, quest types, skill pool, filler distribution)
-4. Click **Play**
-5. Create a new character or continue an existing one
+### Standalone (Singleplayer)
+1. Open the launcher
+2. Configure settings (goal, quest types, skill pool, monster shuffle, etc.)
+3. Click **PLAY**
+4. Create a new character
 
 ### Archipelago Multiworld
-1. Install the **.apworld** file (found in files/Archipelago/) into your Archipelago installation
-2. Generate a multiworld with your YAML settings
-3. Host or connect to an AP server
-4. Run **Play Archipelago.exe**
-5. Select **Archipelago**
-6. Enter server address, slot name, and password
-7. Click **Play**
+1. Open the launcher
+2. Start a game, press F1, go to page 3 (AP Connection)
+3. Enter server address, slot name, and password
+4. Click **Connect**
 
-The console window shows AP connection status and events in real-time.
+**Important:** Always fully close and restart the game before creating a new character.
 
 ---
 
@@ -66,50 +67,23 @@ The console window shows AP connection status and events in real-time.
 
 | Key | Action |
 |-----|--------|
-| Configurable | Open/Close Skill Editor (default F1) |
-| Configurable | Open/Close Quest Log (default F2) |
-| Configurable | Toggle Quest Tracker HUD (default F3) |
-| Configurable | Zone Map (default F4, Zone Explorer mode) |
+| F1 | Skill Editor (page 1), Quest Book (page 2), AP Connection (page 3) |
+| S | Open Skill Tree (spend skill points) |
+| F3 | Toggle Quest Tracker HUD |
+| F4 | Zone Map (Zone Explorer mode) |
+| Ctrl+V | Cheat Menu |
+| Ctrl+O | Graphics Settings (d2gl) |
 | ESC | Close any open panel |
-| Shift+P | Toggle packet logging (debug) |
-
-All keybindings are configurable in the launcher. Controller support available.
-
----
-
-## AP World Options (YAML)
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| game_mode | Choice | skill_hunt | Skill Hunt (skills are progression) / Zone Explorer (zone keys are progression) |
-| goal | Choice | full_game_normal | Combined act+difficulty: Act 1-5 x Normal/Nightmare/Hell (15 options) |
-| quest_story | Toggle | true | Include story quests |
-| quest_hunting | Toggle | true | Include Super Unique hunting quests |
-| quest_kill_zones | Toggle | true | Include zone clear quests |
-| quest_exploration | Toggle | true | Include area entry quests |
-| quest_waypoints | Toggle | true | Include waypoint quests |
-| quest_level_milestones | Toggle | true | Include level milestone quests |
-| skill_pool_size | 20-210 | 210 | Number of skills in the item pool |
-| starting_skills | 1-20 | 6 | Skills unlocked at start |
-| filler_gold_pct | 0-100 | 30 | Gold filler weight |
-| filler_stat_pts_pct | 0-100 | 15 | Stat point filler weight |
-| filler_skill_pts_pct | 0-100 | 15 | Skill point filler weight |
-| filler_trap_pct | 0-100 | 15 | Trap filler weight |
-| filler_reset_pts_pct | 0-100 | 25 | Reset point filler weight |
-| death_link | Toggle | false | Enable DeathLink |
-| monster_shuffle | Toggle | false | Shuffle all monster types across areas |
-| boss_shuffle | Toggle | false | Shuffle all SuperUnique bosses across areas |
-| shop_shuffle | Toggle | false | Shuffle vendor inventories across acts |
-| treasure_cows | Toggle | true | Enable 28 Treasure Cow SuperUnique bosses across all acts |
 
 ---
 
 ## Built With
 
-- [D2MOO](https://github.com/nicodoctor/D2MOO) - Diablo II open-source reimplementation for D2Common, D2Game, and Fog DLLs
-- [D2.Detours](https://github.com/nicodoctor/D2.Detours) - DLL patching and injection framework
-- [cnc-ddraw](https://github.com/FunkyFr3sh/cnc-ddraw) - Graphics wrapper for windowed mode on modern Windows
-- [Archipelago](https://archipelago.gg/) - Cross-game multiworld randomizer framework
+- [D2MOO](https://github.com/nicodoctor/D2MOO) - Diablo II open-source reimplementation
+- [D2.Detours](https://github.com/nicodoctor/D2.Detours) - DLL patching framework
+- [d2gl](https://github.com/nicodoctor/d2gl) - HD graphics renderer
+- [cnc-ddraw](https://github.com/FunkyFr3sh/cnc-ddraw) - Graphics wrapper
+- [Archipelago](https://archipelago.gg/) - Multiworld randomizer framework
 
 ## Credits
 

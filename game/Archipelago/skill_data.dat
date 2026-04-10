@@ -1,210 +1,210 @@
-6|Magic Arrow|ama|1||12|-1|0|5||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-7|Fire Arrow|ama|1||24|1|1|5|fire|1|2|3|6|12|24|4|2|3|7|14|27|(skill('Exploding Arrow'.blvl)) * par8|12|8
-8|Inner Sight|ama|1||10|0|1|7||40|25|45|60|80|100|0|0|0|0|0|0||0|8
-9|Critical Strike|ama|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-10|Jab|ama|1||8|1|1|6||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-11|Cold Arrow|ama|6||28|1|1|5|cold|6|4|5|8|16|42|8|4|5|9|17|44|(skill('Ice Arrow'.blvl)) * par8|12|7
-12|Multiple Shot|ama|6|Magic Arrow|4|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-13|Dodge|ama|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-14|Power Strike|ama|6|Jab|8|1|1|6|ltng|1|0|0|0|0|0|16|18|36|54|72|90|(skill('Lightning Strike'.blvl)+skill('Lightning Bolt'.blvl)+skill('Charged Strike'.blvl)+skill('Lightning Fury'.blvl)) * par8|10|8
-15|Poison Javelin|ama|6||16|1|1|6|pois|32|16|32|48|64|96|48|16|36|52|68|84|(skill('Plague Javelin'.blvl)) * par8|12|0
-16|Exploding Arrow|ama|12|Fire Arrow|10|1|1|7|fire|2|5|7|9|12|20|6|5|8|11|14|23|(skill('Fire Arrow'.blvl)) * par8|12|8
-17|Slow Missiles|ama|12|Inner Sight|10|0|1|7||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-18|Avoid|ama|12|Dodge|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-19|Impale|ama|12|Jab|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-20|Lightning Bolt|ama|12|Poison Javelin|24|1|1|6|ltng|1|0|0|0|0|0|40|12|18|28|48|88|(skill('Lightning Strike'.blvl)+skill('Power Strike'.blvl)+skill('Charged Strike'.blvl)+skill('Lightning Fury'.blvl)) * par8|3|8
-21|Ice Arrow|ama|18|Cold Arrow|16|1|1|6|cold|6|6|12|18|26|36|10|6|13|19|27|38|(skill('Cold Arrow'.blvl))*par8|8|8
-22|Guided Arrow|ama|18|Cold Arrow|32|-1|1|6||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-23|Penetrate|ama|18|Critical Strike|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-24|Charged Strike|ama|18|Power Strike|16|1|1|6|ltng|1|0|0|0|0|0|30|12|16|20|24|28|(skill('Lightning Strike'.blvl)+skill('Lightning Bolt'.blvl)+skill('Power Strike'.blvl)+skill('Lightning Fury'.blvl)) * par8|10|8
-25|Plague Javelin|ama|18|Lightning Bolt|14|1|1|7|pois|10|6|12|20|40|60|16|6|12|20|40|60|(skill('Poison Javelin'.blvl))*par8|10|3
-26|Strafe|ama|24|Guided Arrow|11|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-27|Immolation Arrow|ama|24|Exploding Arrow|12|1|1|7|fire|10|10|20|30|32|34|20|10|20|30|32|34|(skill('Exploding Arrow'.blvl)) * par8|10|8
-28|Dopplezon|ama|24|Slow Missiles|76|-3|1|6||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-29|Evade|ama|24|Avoid|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-30|Fend|ama|24|Impale|5|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-31|Freezing Arrow|ama|30|Ice Arrow|18|1|1|7|cold|40|10|15|20|22|24|50|10|15|20|22|24|(skill('Cold Arrow'.blvl))*par8|12|8
-32|Valkyrie|ama|30|Dopplezon|25|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||20|8
-33|Pierce|ama|30|Penetrate|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-34|Lightning Strike|ama|30|Charged Strike|9|0|1|8|ltng|1|0|0|0|0|0|25|10|15|20|25|30|(skill('Charged Strike'.blvl)+skill('Lightning Bolt'.blvl)+skill('Power Strike'.blvl)+skill('Lightning Fury'.blvl)) * par8|8|8
-35|Lightning Fury|ama|30|Plague Javelin|20|1|1|7|ltng|1|0|0|0|0|0|40|20|30|40|50|50|(skill('Charged Strike'.blvl)+skill('Lightning Bolt'.blvl)+skill('Power Strike'.blvl)+skill('Lightning Strike'.blvl)) * par8|1|8
-36|Fire Bolt|sor|1||5|0|1|7|fire|6|3|4|8|18|54|12|3|6|10|20|56|(skill('Fire Ball'.blvl)+skill('Meteor'.blvl))*par8|16|7
-37|Warmth|sor|1||0|0|0|8|fire|0|0|0|0|0|0|0|0|0|0|0|0||0|8
-38|Charged Bolt|sor|1||24|4|1|5|ltng|4|1|1|2|3|4|8|1|1|2|3|4|(skill('Lightning'.blvl))*par8|6|7
-39|Ice Bolt|sor|1||3|0|1|8|cold|6|2|4|6|8|10|10|3|5|7|9|11|(skill('Frost Nova'.blvl)+skill('Ice Blast'.blvl)+skill('Glacial Spike'.blvl)+skill('Blizzard'.blvl)+skill('Frozen Orb'.blvl))*par8|15|7
-40|Frozen Armor|sor|1||7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8
-41|Inferno|sor|6||36|1|0|2|fire|32|24|26|28|32|36|64|24|27|29|33|37|(skill('Warmth'.blvl))*par8|13|2
-42|Static Field|sor|6||9|0|1|8|ltng|0|0|0|0|0|0|0|0|0|0|0|0||0|8
-43|Telekinesis|sor|6||7|0|1|8|ltng|1|1|1|1|1|1|2|1|1|1|1|1||0|8
-44|Frost Nova|sor|6||9|1|1|8|cold|4|4|6|8|10|12|8|5|7|9|11|13|(skill('Blizzard'.blvl)+skill('Frozen Orb'.blvl))*par8|10|7
-45|Ice Blast|sor|6|Ice Bolt|12|1|1|7|cold|16|14|28|42|56|70|24|15|29|43|57|71|(skill('Ice Bolt'.blvl)+skill('Blizzard'.blvl)+skill('Frozen Orb'.blvl))*par8|8|7
-46|Blaze|sor|12|Inferno|22|1|1|7|fire|4|2|3|4|6|9|8|2|3|4|6|9||0|4
-47|Fire Ball|sor|12|Fire Bolt|10|1|1|7|fire|12|13|23|28|33|38|28|15|25|30|35|40|(skill('Fire Bolt'.blvl)+skill('Meteor'.blvl))*par8|14|7
-48|Nova|sor|12|Static Field|15|1|1|8|ltng|1|6|7|8|9|10|20|8|9|10|11|12||0|8
-49|Lightning|sor|12|Charged Bolt|16|1|1|7|ltng|1|0|0|0|0|0|40|8|12|20|28|36|(skill('Charged Bolt'.blvl)+skill('Chain Lightning'.blvl)+skill('Nova'.blvl))*par8|8|8
-50|Shiver Armor|sor|12|Ice Blast|11|0|1|8|cold|12|4|6|8|10|12|16|5|7|9|11|13|(skill('Frozen Armor'.blvl)+skill('Chilling Armor'.blvl))*par8|9|7
-51|Fire Wall|sor|18|Blaze|22|1|1|8|fire|15|9|14|21|21|21|20|9|14|21|21|21||0|4
-52|Enchant|sor|18|Warmth|25|1|1|8|fire|16|3|7|11|15|19|20|5|9|13|17|21|(skill('Warmth'.blvl))*par8|9|7
-53|Chain Lightning|sor|18|Lightning|9|1|1|8|ltng|1|0|0|0|0|0|40|11|13|15|15|15|(skill('Charged Bolt'.blvl)+skill('Lightning'.blvl)+skill('Nova'.blvl))*par8|4|8
-54|Teleport|sor|18|Telekinesis|24|-1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-55|Glacial Spike|sor|18|Ice Blast|20|1|1|7|cold|32|14|26|28|30|32|48|15|27|29|31|33|(skill('Ice Bolt'.blvl)+skill('Ice Blast'.blvl)+skill('Frozen Orb'.blvl))*par8|5|7
-56|Meteor|sor|24|Fire Ball|34|1|1|7|fire|80|23|39|79|81|83|100|25|41|81|83|85|(skill('Fire Bolt'.blvl)+skill('Fire Ball'.blvl))*par8|5|8
-57|Thunder Storm|sor|24|Nova|19|0|1|8|ltng|1|10|10|11|11|11|100|10|10|11|11|11||0|8
-58|Energy Shield|sor|24|Teleport|5|0|1|8||20|5|2|1|1|1|0|0|0|0|0|0||0|8
-59|Blizzard|sor|24|Frost Nova|23|1|1|8|cold|45|15|30|45|55|65|75|16|31|46|56|66|(skill('Ice Bolt'.blvl)+skill('Ice Blast'.blvl)+skill('Glacial Spike'.blvl))*par8|5|8
-60|Chilling Armor|sor|24|Shiver Armor|17|0|1|8|cold|8|2|4|6|8|10|12|3|5|7|9|11|(skill('Frozen Armor'.blvl)+skill('Shiver Armor'.blvl))*par8|7|7
-61|Fire Mastery|sor|30||0|0|0|8|fire|0|0|0|0|0|0|0|0|0|0|0|0||0|8
-62|Hydra|sor|30|Enchant|40|1|1|7|fire|24|9|13|17|21|25|34|11|15|19|23|27|(skill('Fire Bolt'.blvl) + skill('Fire Ball'.blvl))*par8|3|7
-63|Lightning Mastery|sor|30||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-64|Frozen Orb|sor|30|Blizzard|50|1|1|7|cold|80|20|24|28|29|30|90|21|25|29|30|31|(skill('Ice Bolt'.blvl))*par8|2|7
-65|Cold Mastery|sor|30||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-66|Amplify Damage|nec|1||4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-67|Teeth|nec|1||6|1|1|7|mag|4|2|2|3|4|5|8|2|3|4|5|6|(skill('Bone Wall'.blvl)+skill('Bone Prison'.blvl)+skill('Bone Spear'.blvl)+skill('Bone Spirit'.blvl))*par8|15|7
-68|Bone Armor|nec|1||11|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||15|8
-69|Skeleton Mastery|nec|1|Raise Skeleton|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-70|Raise Skeleton|nec|1||6|1|1|8||0|0|1|2|3|4|0|0|0|0|0|0||0|8
-71|Dim Vision|nec|6||9|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-72|Weaken|nec|6|Amplify Damage|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-73|Poison Dagger|nec|6||12|1|1|6|pois|18|10|15|20|23|26|40|10|15|20|23|26|(skill('Poison Explosion'.blvl)+skill('Poison Nova'.blvl))*par8|20|1
-74|Corpse Explosion|nec|6|Teeth|15|1|1|8|fire|0|0|0|0|0|0|0|0|0|0|0|0||0|8
-75|Clay Golem|nec|6||15|3|1|8||0|0|0|0|0|0|0|0|0|0|0|0||20|8
-76|Iron Maiden|nec|12|Amplify Damage|5|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-77|Terror|nec|12|Weaken|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-78|Bone Wall|nec|12|Bone Armor|17|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||10|8
-79|Golem Mastery|nec|12|Clay Golem|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-80|Raise Skeletal Mage|nec|12|Raise Skeleton|8|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-81|Confuse|nec|18|Dim Vision|13|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-82|Life Tap|nec|18|Iron Maiden|9|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-83|Poison Explosion|nec|18|Poison Dagger|8|0|1|8|pois|8|2|4|6|8|10|24|2|4|6|8|10|(skill('Poison Dagger'.blvl)+skill('Poison Nova'.blvl))*par8|15|4
-84|Bone Spear|nec|18|Corpse Explosion|28|1|1|6|mag|16|8|9|12|18|24|24|8|9|13|19|25|(skill('Bone Wall'.blvl)+skill('Bone Prison'.blvl)+skill('Teeth'.blvl)+skill('Bone Spirit'.blvl))*par8|7|8
-85|BloodGolem|nec|18|Clay Golem|25|4|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8
-86|Attract|nec|24|Confuse|17|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-87|Decrepify|nec|24|Terror|11|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-88|Bone Prison|nec|24|Bone Wall|27|-1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||8|8
-89|Summon Resist|nec|24|Golem Mastery|44|-3|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-90|IronGolem|nec|24|BloodGolem|35|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||35|8
-91|Lower Resist|nec|30|Life Tap|22|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-92|Poison Nova|nec|30|Poison Explosion|20|0|1|8|pois|14|4|5|8|12|14|25|4|5|8|12|14|(skill('Poison Dagger'.blvl)+skill('Poison Explosion'.blvl))*par8|10|4
-93|Bone Spirit|nec|30|Bone Spear|24|1|1|7|mag|20|16|17|18|19|20|30|17|18|19|20|21|(skill('Bone Wall'.blvl)+skill('Bone Prison'.blvl)+skill('Teeth'.blvl)+skill('Bone Spear'.blvl))*par8|6|8
-94|FireGolem|nec|30|IronGolem|50|10|1|8|fire|10|9|10|11|12|13|27|10|11|12|13|14||6|8
-95|Revive|nec|30|Raise Skeletal Mage|45|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-96|Sacrifice|pal|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||15|8
-97|Smite|pal|1||2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-98|Might|pal|1||0|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-99|Prayer|pal|1||16|3|1|4||2|1|1|2|2|3|0|0|0|0|0|0||0|8
-100|Resist Fire|pal|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-101|Holy Bolt|pal|6||32|1|1|4|mag|8|8|10|13|16|20|16|8|11|15|18|23|(skill('Blessed Hammer'.blvl)+skill('Fist of the Heavens'.blvl))*par8|50|8
-102|Holy Fire|pal|6|Might|0|0|0|8|fire|2|1|2|3|5|7|6|1|2|3|5|7|skill('Resist Fire'.blvl)*par8+skill('Salvation'.blvl)*par7|18|7
-103|Thorns|pal|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-104|Defiance|pal|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-105|Resist Cold|pal|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-106|Zeal|pal|12|Sacrifice|2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||12|8
-107|Charge|pal|12|Smite|9|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||20|8
-108|Blessed Aim|pal|12|Might|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8
-109|Cleansing|pal|12|Prayer|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-110|Resist Lightning|pal|12||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-111|Vengeance|pal|18|Zeal|16|1|1|6|cold|0|0|0|0|0|0|0|0|0|0|0|0||10|8
-112|Blessed Hammer|pal|18|Holy Bolt|20|1|1|6|mag|12|8|10|12|13|14|16|8|10|12|13|14|(skill('Vigor'.blvl)+skill('Blessed Aim'.blvl))*par8|14|8
-113|Concentration|pal|18|Blessed Aim|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-114|Holy Freeze|pal|18|Holy Fire|0|0|0|8|cold|2|1|2|3|4|5|3|1|2|3|4|5|skill('Resist Cold'.blvl)*par8+skill('Salvation'.blvl)*par7|15|8
-115|Vigor|pal|18|Cleansing|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-116|Conversion|pal|24|Vengeance|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-117|Holy Shield|pal|24|Charge|35|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||15|8
-118|Holy Shock|pal|24|Holy Freeze|0|0|0|8|ltng|1|0|0|0|0|0|10|6|8|10|12|15|skill('Resist Lightning'.blvl)*par8+skill('Salvation'.blvl)*par7|12|8
-119|Sanctuary|pal|24|Thorns|1|0|1|8|mag|8|4|4|5|5|6|16|4|5|6|6|7|skill('Cleansing'.blvl)*par8|7|8
-120|Meditation|pal|24|Cleansing|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-121|Fist of the Heavens|pal|30|Blessed Hammer|25|0|1|8|ltng|150|15|30|45|55|65|200|15|30|45|55|65|skill('Holy Shock'.blvl)*par8|7|8
-122|Fanaticism|pal|30|Concentration|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-123|Conviction|pal|30|Sanctuary|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-124|Redemption|pal|30|Vigor|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-125|Salvation|pal|30||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-126|Bash|bar|1||2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8
-127|Sword Mastery|bar|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-128|Axe Mastery|bar|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-129|Mace Mastery|bar|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-130|Howl|bar|1||4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-131|Find Potion|bar|1||2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-132|Leap|bar|6||2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-133|Double Swing|bar|6|Bash|8|-1|0|5||0|0|0|0|0|0|0|0|0|0|0|0||10|8
-134|Pole Arm Mastery|bar|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-135|Throwing Mastery|bar|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-136|Spear Mastery|bar|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-137|Taunt|bar|6|Howl|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-138|Shout|bar|6|Howl|6|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||125|8
-139|Stun|bar|12|Bash|2|0|1|8|stun|0|0|0|0|0|0|0|0|0|0|0|0||8|8
-140|Double Throw|bar|12|Double Swing|1|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||8|8
-141|Increased Stamina|bar|12||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-142|Find Item|bar|12|Find Potion|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-143|Leap Attack|bar|18|Leap|9|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||10|8
-144|Concentrate|bar|18|Stun|2|0|1|8|mag|0|0|0|0|0|0|0|0|0|0|0|0||5|8
-145|Iron Skin|bar|18||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-146|Battle Cry|bar|18|Taunt|5|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-147|Frenzy|bar|24|Double Throw|3|0|1|7|mag|0|0|0|0|0|0|0|0|0|0|0|0||8|8
-148|Increased Speed|bar|24|Increased Stamina|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-149|Battle Orders|bar|24|Shout|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||125|8
-150|Grim Ward|bar|24|Find Item|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-151|Whirlwind|bar|30|Leap Attack|50|1|1|7||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-152|Berserk|bar|30|Concentrate|4|0|1|8|mag|0|0|0|0|0|0|0|0|0|0|0|0||10|8
-153|Natural Resistance|bar|30|Iron Skin|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-154|War Cry|bar|30|Battle Cry|10|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||6|8
-155|Battle Command|bar|30|Battle Orders|11|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||125|8
-221|Raven|dru|1||6|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-222|Plague Poppy|dru|1||8|0|1|8|pois|12|7|12|15|17|19|16|7|12|15|17|19||0|0
-223|Wearwolf|dru|1||15|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-224|Shape Shifting|dru|1|Wearwolf|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-225|Firestorm|dru|1||4|0|1|8|fire|3|3|5|7|14|21|6|3|6|8|15|23|(skill('Molten Boulder'.blvl)+skill('Eruption'.blvl))*par8|23|2
-226|Oak Sage|dru|6||15|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||2|8
-227|Summon Spirit Wolf|dru|6|Raven|15|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8
-228|Wearbear|dru|6||15|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-229|Molten Boulder|dru|6|Firestorm|20|1|1|7|fire|6|4|7|10|13|16|12|5|8|11|14|17|skill('Firestorm'.blvl)*par8|8|8
-230|Arctic Blast|dru|6||24|1|0|2|cold|21|16|18|20|24|29|40|16|19|21|25|31|(skill('Cyclone Armor'.blvl)+skill('Hurricane'.blvl))*par8|15|2
-231|Cycle of Life|dru|12|Plague Poppy|10|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-232|Feral Rage|dru|12|Wearwolf|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||3|8
-233|Maul|dru|12|Wearbear|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||3|8
-234|Eruption|dru|12|Molten Boulder|15|0|1|8|fire|15|6|12|16|18|22|25|6|12|16|19|23|(skill('Firestorm'.blvl)+skill('Volcano'.blvl))*par8|12|8
-235|Cyclone Armor|dru|12|Arctic Blast|5|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||7|8
-236|Heart of Wolverine|dru|18|Oak Sage|20|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||2|8
-237|Summon Fenris|dru|18|Oak Sage|20|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8
-238|Rabies|dru|18|Feral Rage|10|0|1|8|pois|6|4|5|7|11|16|14|4|5|7|11|16|(skill('Plague Poppy'.blvl))*par8|18|3
-239|Fire Claws|dru|18|Feral Rage|4|0|1|8|fire|15|8|12|20|24|30|20|8|12|22|26|34|(skill('Firestorm'.blvl)+skill('Molten Boulder'.blvl)+skill('Volcano'.blvl)+skill('Eruption'.blvl))*par8|22|8
-240|Twister|dru|18|Cyclone Armor|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||10|7
-241|Vines|dru|24|Cycle of Life|14|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-242|Hunger|dru|24|Fire Claws|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-243|Shock Wave|dru|24|Maul|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-244|Volcano|dru|24|Eruption|25|0|1|8|fire|8|2|4|6|8|11|10|2|4|6|8|13|(skill('Eruption'.blvl)+skill('Armageddon'.blvl))*par8|12|8
-245|Tornado|dru|24|Twister|10|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||9|8
-246|Spirit of Barbs|dru|30|Heart of Wolverine|25|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||2|8
-247|Summon Grizzly|dru|30|Summon Fenris|40|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8
-248|Fury|dru|30|Rabies|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-249|Armageddon|dru|30|Volcano|35|0|1|8|fire|25|15|20|25|31|38|75|16|22|27|34|40|(skill('Firestorm'.blvl)+skill('Molten Boulder'.blvl)+skill('Volcano'.blvl))*par8|14|8
-250|Hurricane|dru|30|Tornado|30|0|1|8|cold|25|7|10|12|14|16|50|7|10|12|14|16|(skill('Twister'.blvl)+skill('Tornado'.blvl))*par8|9|8
-251|Fire Trauma|ass|1||24|1|1|5|fire|6|3|8|20|38|58|8|5|11|24|44|66|(skill('Shock Field'.blvl) + skill('Death Sentry'.blvl) + skill('Charged Bolt Sentry'.blvl) + skill('Lightning Sentry'.blvl) + skill('Wake of Fire Sentry'.blvl) + skill('Inferno Sentry'.blvl)) * par8|9|7
-252|Claw Mastery|ass|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-253|Psychic Hammer|ass|1||16|1|1|6|mag|2|2|3|4|5|6|6|3|4|5|6|7||0|7
-254|Tiger Strike|ass|1||1|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-255|Dragon Talon|ass|1||6|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-256|Shock Field|ass|6|Fire Trauma|6|0|1|8|ltng|2|0|0|0|0|0|20|6|12|20|30|42|(skill('Charged Bolt Sentry'.blvl) + skill('Lightning Sentry'.blvl) + skill('Death Sentry'.blvl)) * par8|11|7
-257|Blade Sentinel|ass|6||7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-258|Quickness|ass|6|Claw Mastery|10|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-259|Fists of Fire|ass|6||2|0|1|8|fire|6|5|10|20|30|40|10|5|11|22|33|44|(skill('Royal Strike'.blvl)) * par8|12|8
-260|Dragon Claw|ass|6|Dragon Talon|2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-261|Charged Bolt Sentry|ass|12|Shock Field|13|0|1|8|ltng|2|0|0|0|0|0|14|6|8|12|14|16|(skill('Fire Trauma'.blvl) + skill('Lightning Sentry'.blvl) + skill('Death Sentry'.blvl)) * par8|6|7
-262|Wake of Fire Sentry|ass|12|Fire Trauma|13|0|1|8|fire|5|2|3|5|7|9|10|2|3|6|8|10|(skill('Fire Trauma'.blvl) + skill('Inferno Sentry'.blvl)) * par8|8|8
-263|Weapon Block|ass|12|Claw Mastery|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-264|Cloak of Shadows|ass|12|Psychic Hammer|13|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||3|8
-265|Cobra Strike|ass|12|Tiger Strike|2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-266|Blade Fury|ass|18|Blade Sentinel|8|1|0|5||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-267|Fade|ass|18|Quickness|10|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||1|8
-268|Shadow Warrior|ass|18|Cloak of Shadows|54|1|1|7||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-269|Claws of Thunder|ass|18|Fists of Fire|4|0|1|8|ltng|1|0|0|0|0|0|80|20|40|60|80|100|(skill('Royal Strike'.blvl)) * par8|8|8
-270|Dragon Tail|ass|18|Dragon Claw|10|0|1|8|fire|0|0|0|0|0|0|0|0|0|0|0|0||0|8
-271|Lightning Sentry|ass|24|Charged Bolt Sentry|20|0|1|8|ltng|1|0|0|0|0|0|20|10|16|24|34|44|(skill('Shock Field'.blvl) + skill('Charged Bolt Sentry'.blvl) + skill('Death Sentry'.blvl))*par8|12|8
-272|Inferno Sentry|ass|24|Wake of Fire Sentry|20|0|1|8|fire|20|17|21|26|32|39|50|19|23|28|34|41|(skill('Fire Trauma'.blvl) + skill('Death Sentry'.blvl)) * par7 + skill('Wake of Fire Sentry'.blvl)*par8|7|4
-273|Mind Blast|ass|24|Cloak of Shadows|15|0|1|8|stun|0|0|0|0|0|0|0|0|0|0|0|0||0|8
-274|Blades of Ice|ass|24|Claws of Thunder|3|0|1|8|cold|15|8|10|20|30|40|35|8|10|22|32|42|(skill('Royal Strike'.blvl)) * par8|8|8
-275|Dragon Flight|ass|24|Dragon Tail|15|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-276|Death Sentry|ass|30|Lightning Sentry|20|0|1|8|ltng|1|0|0|0|0|0|50|8|14|22|28|34|(skill('Lightning Sentry'.blvl))*par8|12|8
-277|Blade Shield|ass|30|Blade Fury|27|2|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-278|Venom|ass|30|Fade|12|0|1|8|pois|24|6|8|10|12|14|32|6|8|10|12|14||0|6
-279|Shadow Master|ass|30|Shadow Warrior|70|1|1|7||0|0|0|0|0|0|0|0|0|0|0|0||0|8
-280|Royal Strike|ass|30|Cobra Strike|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8
+6|Magic Arrow|ama|1||12|-1|0|5||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Enchants arrow/bolt with magic damage
+7|Fire Arrow|ama|1||24|1|1|5|fire|1|2|3|6|12|24|4|2|3|7|14|27|(skill('Exploding Arrow'.blvl)) * par8|12|8|Adds fire damage to arrows/bolts
+8|Inner Sight|ama|1||10|0|1|7||40|25|45|60|80|100|0|0|0|0|0|0||0|8|Illuminates nearby monsters lowering defense
+9|Critical Strike|ama|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Chance to deal double damage on attack
+10|Jab|ama|1||8|1|1|6||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Rapid triple-strike javelin attack
+11|Cold Arrow|ama|6||28|1|1|5|cold|6|4|5|8|16|42|8|4|5|9|17|44|(skill('Ice Arrow'.blvl)) * par8|12|7|Adds cold damage and slows targets
+12|Multiple Shot|ama|6|Magic Arrow|4|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Fires multiple arrows at nearby enemies
+13|Dodge|ama|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Chance to dodge melee attacks while standing
+14|Power Strike|ama|6|Jab|8|1|1|6|ltng|1|0|0|0|0|0|16|18|36|54|72|90|(skill('Lightning Strike'.blvl)+skill('Lightning Bolt'.blvl)+skill('Charged Strike'.blvl)+skill('Lightning Fury'.blvl)) * par8|10|8|Adds lightning damage to javelin attacks
+15|Poison Javelin|ama|6||16|1|1|6|pois|32|16|32|48|64|96|48|16|36|52|68|84|(skill('Plague Javelin'.blvl)) * par8|12|0|Creates a trail of poison clouds
+16|Exploding Arrow|ama|12|Fire Arrow|10|1|1|7|fire|2|5|7|9|12|20|6|5|8|11|14|23|(skill('Fire Arrow'.blvl)) * par8|12|8|Exploding fire arrow with splash damage
+17|Slow Missiles|ama|12|Inner Sight|10|0|1|7||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Slows all nearby enemy missiles
+18|Avoid|ama|12|Dodge|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Chance to dodge missiles while standing
+19|Impale|ama|12|Jab|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|High single-target javelin thrust
+20|Lightning Bolt|ama|12|Poison Javelin|24|1|1|6|ltng|1|0|0|0|0|0|40|12|18|28|48|88|(skill('Lightning Strike'.blvl)+skill('Power Strike'.blvl)+skill('Charged Strike'.blvl)+skill('Lightning Fury'.blvl)) * par8|3|8|Throws lightning bolt javelin at target
+21|Ice Arrow|ama|18|Cold Arrow|16|1|1|6|cold|6|6|12|18|26|36|10|6|13|19|27|38|(skill('Cold Arrow'.blvl))*par8|8|8|Adds cold damage and freezes targets
+22|Guided Arrow|ama|18|Cold Arrow|32|-1|1|6||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Arrow seeks nearest target automatically
+23|Penetrate|ama|18|Critical Strike|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Increases attack rating passively
+24|Charged Strike|ama|18|Power Strike|16|1|1|6|ltng|1|0|0|0|0|0|30|12|16|20|24|28|(skill('Lightning Strike'.blvl)+skill('Lightning Bolt'.blvl)+skill('Power Strike'.blvl)+skill('Lightning Fury'.blvl)) * par8|10|8|Releases charged bolts on javelin hit
+25|Plague Javelin|ama|18|Lightning Bolt|14|1|1|7|pois|10|6|12|20|40|60|16|6|12|20|40|60|(skill('Poison Javelin'.blvl))*par8|10|3|Javelin releases expanding poison clouds
+26|Strafe|ama|24|Guided Arrow|11|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Rapid arrows at all nearby enemies
+27|Immolation Arrow|ama|24|Exploding Arrow|12|1|1|7|fire|10|10|20|30|32|34|20|10|20|30|32|34|(skill('Exploding Arrow'.blvl)) * par8|10|8|Arrow leaves fire patch on impact
+28|Decoy|ama|24|Slow Missiles|76|-3|1|6||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Creates a duplicate decoy of yourself
+29|Evade|ama|24|Avoid|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Chance to dodge any attack while moving
+30|Fend|ama|24|Impale|5|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Multi-hit javelin strike on single target
+31|Freezing Arrow|ama|30|Ice Arrow|18|1|1|7|cold|40|10|15|20|22|24|50|10|15|20|22|24|(skill('Cold Arrow'.blvl))*par8|12|8|Arrow shatters into ice on impact
+32|Valkyrie|ama|30|Dopplezon|25|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||20|8|Summons a powerful Valkyrie warrior
+33|Pierce|ama|30|Penetrate|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Chance for projectiles to pierce targets
+34|Lightning Strike|ama|30|Charged Strike|9|0|1|8|ltng|1|0|0|0|0|0|25|10|15|20|25|30|(skill('Charged Strike'.blvl)+skill('Lightning Bolt'.blvl)+skill('Power Strike'.blvl)+skill('Lightning Fury'.blvl)) * par8|8|8|Lightning chains between nearby enemies
+35|Lightning Fury|ama|30|Plague Javelin|20|1|1|7|ltng|1|0|0|0|0|0|40|20|30|40|50|50|(skill('Charged Strike'.blvl)+skill('Lightning Bolt'.blvl)+skill('Power Strike'.blvl)+skill('Lightning Strike'.blvl)) * par8|1|8|Javelin releases lightning bolts on impact
+36|Fire Bolt|sor|1||5|0|1|7|fire|6|3|4|8|18|54|12|3|6|10|20|56|(skill('Fire Ball'.blvl)+skill('Meteor'.blvl))*par8|16|7|Hurls a bolt of fire at target
+37|Warmth|sor|1||0|0|0|8|fire|0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases mana regeneration
+38|Charged Bolt|sor|1||24|4|1|5|ltng|4|1|1|2|3|4|8|1|1|2|3|4|(skill('Lightning'.blvl))*par8|6|7|Releases erratic charged bolts
+39|Ice Bolt|sor|1||3|0|1|8|cold|6|2|4|6|8|10|10|3|5|7|9|11|(skill('Frost Nova'.blvl)+skill('Ice Blast'.blvl)+skill('Glacial Spike'.blvl)+skill('Blizzard'.blvl)+skill('Frozen Orb'.blvl))*par8|15|7|Hurls a bolt of ice at target
+40|Frozen Armor|sor|1||7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8|Freezes attackers who hit you in melee
+41|Inferno|sor|6||36|1|0|2|fire|32|24|26|28|32|36|64|24|27|29|33|37|(skill('Warmth'.blvl))*par8|13|2|Stream of fire in front of you
+42|Static Field|sor|6||9|0|1|8|ltng|0|0|0|0|0|0|0|0|0|0|0|0||0|8|Reduces nearby enemies to 1/3 life
+43|Telekinesis|sor|6||7|0|1|8|ltng|1|1|1|1|1|1|2|1|1|1|1|1||0|8|Telekinetic force pushes back enemies
+44|Frost Nova|sor|6||9|1|1|8|cold|4|4|6|8|10|12|8|5|7|9|11|13|(skill('Blizzard'.blvl)+skill('Frozen Orb'.blvl))*par8|10|7|Expanding ring of cold damage
+45|Ice Blast|sor|6|Ice Bolt|12|1|1|7|cold|16|14|28|42|56|70|24|15|29|43|57|71|(skill('Ice Bolt'.blvl)+skill('Blizzard'.blvl)+skill('Frozen Orb'.blvl))*par8|8|7|Hurls a large bolt of ice at target
+46|Blaze|sor|12|Inferno|22|1|1|7|fire|4|2|3|4|6|9|8|2|3|4|6|9||0|4|Leaves a trail of fire behind you
+47|Fire Ball|sor|12|Fire Bolt|10|1|1|7|fire|12|13|23|28|33|38|28|15|25|30|35|40|(skill('Fire Bolt'.blvl)+skill('Meteor'.blvl))*par8|14|7|Hurls an explosive ball of fire
+48|Nova|sor|12|Static Field|15|1|1|8|ltng|1|6|7|8|9|10|20|8|9|10|11|12||0|8|Expanding ring of lightning damage
+49|Lightning|sor|12|Charged Bolt|16|1|1|7|ltng|1|0|0|0|0|0|40|8|12|20|28|36|(skill('Charged Bolt'.blvl)+skill('Chain Lightning'.blvl)+skill('Nova'.blvl))*par8|8|8|Lightning bolt strikes target from above
+50|Shiver Armor|sor|12|Ice Blast|11|0|1|8|cold|12|4|6|8|10|12|16|5|7|9|11|13|(skill('Frozen Armor'.blvl)+skill('Chilling Armor'.blvl))*par8|9|7|Frost armor that damages melee attackers
+51|Fire Wall|sor|18|Blaze|22|1|1|8|fire|15|9|14|21|21|21|20|9|14|21|21|21||0|4|Creates a stationary wall of fire
+52|Enchant|sor|18|Warmth|25|1|1|8|fire|16|3|7|11|15|19|20|5|9|13|17|21|(skill('Warmth'.blvl))*par8|9|7|Enchants weapon with fire damage
+53|Chain Lightning|sor|18|Lightning|9|1|1|8|ltng|1|0|0|0|0|0|40|11|13|15|15|15|(skill('Charged Bolt'.blvl)+skill('Lightning'.blvl)+skill('Nova'.blvl))*par8|4|8|Lightning chains between multiple targets
+54|Teleport|sor|18|Telekinesis|24|-1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Instantly teleport to target location
+55|Glacial Spike|sor|18|Ice Blast|20|1|1|7|cold|32|14|26|28|30|32|48|15|27|29|31|33|(skill('Ice Bolt'.blvl)+skill('Ice Blast'.blvl)+skill('Frozen Orb'.blvl))*par8|5|7|Ice bolt that freezes targets on hit
+56|Meteor|sor|24|Fire Ball|34|1|1|7|fire|80|23|39|79|81|83|100|25|41|81|83|85|(skill('Fire Bolt'.blvl)+skill('Fire Ball'.blvl))*par8|5|8|Massive fire meteor falls from sky
+57|Thunder Storm|sor|24|Nova|19|0|1|8|ltng|1|10|10|11|11|11|100|10|10|11|11|11||0|8|Lightning strikes random nearby enemies
+58|Energy Shield|sor|24|Teleport|5|0|1|8||20|5|2|1|1|1|0|0|0|0|0|0||0|8|Absorbs damage at the cost of mana
+59|Blizzard|sor|24|Frost Nova|23|1|1|8|cold|45|15|30|45|55|65|75|16|31|46|56|66|(skill('Ice Bolt'.blvl)+skill('Ice Blast'.blvl)+skill('Glacial Spike'.blvl))*par8|5|8|Ice storm bombards target area
+60|Chilling Armor|sor|24|Shiver Armor|17|0|1|8|cold|8|2|4|6|8|10|12|3|5|7|9|11|(skill('Frozen Armor'.blvl)+skill('Shiver Armor'.blvl))*par8|7|7|Frost armor that fires ice bolts at attackers
+61|Fire Mastery|sor|30||0|0|0|8|fire|0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases all fire skill damage
+62|Hydra|sor|30|Enchant|40|1|1|7|fire|24|9|13|17|21|25|34|11|15|19|23|27|(skill('Fire Bolt'.blvl) + skill('Fire Ball'.blvl))*par8|3|7|Summons multi-headed fire hydras
+63|Lightning Mastery|sor|30||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases all lightning skill damage
+64|Frozen Orb|sor|30|Blizzard|50|1|1|7|cold|80|20|24|28|29|30|90|21|25|29|30|31|(skill('Ice Bolt'.blvl))*par8|2|7|Fires an orb that sprays ice bolts
+65|Cold Mastery|sor|30||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively lowers enemy cold resistance
+66|Amplify Damage|nec|1||4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: doubles physical damage taken
+67|Teeth|nec|1||6|1|1|7|mag|4|2|2|3|4|5|8|2|3|4|5|6|(skill('Bone Wall'.blvl)+skill('Bone Prison'.blvl)+skill('Bone Spear'.blvl)+skill('Bone Spirit'.blvl))*par8|15|7|Fires multiple magic teeth projectiles
+68|Bone Armor|nec|1||11|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||15|8|Bone shield absorbs physical damage
+69|Skeleton Mastery|nec|1|Raise Skeleton|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively improves skeleton stats
+70|Raise Skeleton|nec|1||6|1|1|8||0|0|1|2|3|4|0|0|0|0|0|0||0|8|Raises a skeleton warrior from a corpse
+71|Dim Vision|nec|6||9|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: blinds monsters and reduces vision
+72|Weaken|nec|6|Amplify Damage|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: reduces enemy physical damage
+73|Poison Dagger|nec|6||12|1|1|6|pois|18|10|15|20|23|26|40|10|15|20|23|26|(skill('Poison Explosion'.blvl)+skill('Poison Nova'.blvl))*par8|20|1|Melee stab that adds poison damage
+74|Corpse Explosion|nec|6|Teeth|15|1|1|8|fire|0|0|0|0|0|0|0|0|0|0|0|0||0|8|Explodes a corpse dealing area damage
+75|Clay Golem|nec|6||15|3|1|8||0|0|0|0|0|0|0|0|0|0|0|0||20|8|Summons a Clay Golem that slows enemies
+76|Iron Maiden|nec|12|Amplify Damage|5|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: reflects physical damage to attacker
+77|Terror|nec|12|Weaken|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: causes monsters to flee in terror
+78|Bone Wall|nec|12|Bone Armor|17|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||10|8|Creates a wall of bones
+79|Golem Mastery|nec|12|Clay Golem|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively improves golem stats and speed
+80|Raise Skeletal Mage|nec|12|Raise Skeleton|8|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Raises a skeletal mage from a corpse
+81|Confuse|nec|18|Dim Vision|13|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: causes monsters to attack each other
+82|Life Tap|nec|18|Iron Maiden|9|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: melee attacks steal life
+83|Poison Explosion|nec|18|Poison Dagger|8|0|1|8|pois|8|2|4|6|8|10|24|2|4|6|8|10|(skill('Poison Dagger'.blvl)+skill('Poison Nova'.blvl))*par8|15|4|Explodes a poisoned corpse with splash
+84|Bone Spear|nec|18|Corpse Explosion|28|1|1|6|mag|16|8|9|12|18|24|24|8|9|13|19|25|(skill('Bone Wall'.blvl)+skill('Bone Prison'.blvl)+skill('Teeth'.blvl)+skill('Bone Spirit'.blvl))*par8|7|8|Fires a piercing bone projectile
+85|Blood Golem|nec|18|Clay Golem|25|4|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8|Summons a Blood Golem that shares life
+86|Attract|nec|24|Confuse|17|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: forces monsters to target one enemy
+87|Decrepify|nec|24|Terror|11|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: slows and weakens all enemies
+88|Bone Prison|nec|24|Bone Wall|27|-1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||8|8|Creates a prison of bones around target
+89|Summon Resist|nec|24|Golem Mastery|44|-3|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases summon resistances
+90|Iron Golem|nec|24|BloodGolem|35|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||35|8|Creates a golem from a metal item
+91|Lower Resist|nec|30|Life Tap|22|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Curse: lowers enemy elemental resistances
+92|Poison Nova|nec|30|Poison Explosion|20|0|1|8|pois|14|4|5|8|12|14|25|4|5|8|12|14|(skill('Poison Dagger'.blvl)+skill('Poison Explosion'.blvl))*par8|10|4|Ring of poison damage around you
+93|Bone Spirit|nec|30|Bone Spear|24|1|1|7|mag|20|16|17|18|19|20|30|17|18|19|20|21|(skill('Bone Wall'.blvl)+skill('Bone Prison'.blvl)+skill('Teeth'.blvl)+skill('Bone Spear'.blvl))*par8|6|8|Homing magic bone spirit projectile
+94|Fire Golem|nec|30|IronGolem|50|10|1|8|fire|10|9|10|11|12|13|27|10|11|12|13|14||6|8|Summons a Fire Golem with fire aura
+95|Revive|nec|30|Raise Skeletal Mage|45|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Revives a dead monster to fight for you
+96|Sacrifice|pal|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||15|8|Melee attack that sacrifices life for damage
+97|Smite|pal|1||2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Shield bash that stuns and knocks back
+98|Might|pal|1||0|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases party physical damage
+99|Prayer|pal|1||16|3|1|4||2|1|1|2|2|3|0|0|0|0|0|0||0|8|Aura: slowly heals nearby party members
+100|Resist Fire|pal|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases party fire resistance
+101|Holy Bolt|pal|6||32|1|1|4|mag|8|8|10|13|16|20|16|8|11|15|18|23|(skill('Blessed Hammer'.blvl)+skill('Fist of the Heavens'.blvl))*par8|50|8|Holy bolt heals allies or damages undead
+102|Holy Fire|pal|6|Might|0|0|0|8|fire|2|1|2|3|5|7|6|1|2|3|5|7|skill('Resist Fire'.blvl)*par8+skill('Salvation'.blvl)*par7|18|7|Aura: adds fire damage to attacks
+103|Thorns|pal|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: reflects melee damage to attacker
+104|Defiance|pal|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases party defense rating
+105|Resist Cold|pal|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases party cold resistance
+106|Zeal|pal|12|Sacrifice|2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||12|8|Rapid multi-hit melee attack
+107|Charge|pal|12|Smite|9|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||20|8|Charges at enemy with shield for knockback
+108|Blessed Aim|pal|12|Might|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8|Aura: increases party attack rating
+109|Cleansing|pal|12|Prayer|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: reduces poison and curse duration
+110|Resist Lightning|pal|12||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases party lightning resistance
+111|Vengeance|pal|18|Zeal|16|1|1|6|cold|0|0|0|0|0|0|0|0|0|0|0|0||10|8|Melee attack with added elemental damage
+112|Blessed Hammer|pal|18|Holy Bolt|20|1|1|6|mag|12|8|10|12|13|14|16|8|10|12|13|14|(skill('Vigor'.blvl)+skill('Blessed Aim'.blvl))*par8|14|8|Magic hammer spirals outward from you
+113|Concentration|pal|18|Blessed Aim|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases party damage and attack
+114|Holy Freeze|pal|18|Holy Fire|0|0|0|8|cold|2|1|2|3|4|5|3|1|2|3|4|5|skill('Resist Cold'.blvl)*par8+skill('Salvation'.blvl)*par7|15|8|Aura: adds cold damage and slows enemies
+115|Vigor|pal|18|Cleansing|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases party movement and stamina
+116|Conversion|pal|24|Vengeance|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Chance to convert enemy to fight for you
+117|Holy Shield|pal|24|Charge|35|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||15|8|Increases defense and block chance with shield
+118|Holy Shock|pal|24|Holy Freeze|0|0|0|8|ltng|1|0|0|0|0|0|10|6|8|10|12|15|skill('Resist Lightning'.blvl)*par8+skill('Salvation'.blvl)*par7|12|8|Aura: adds lightning damage to attacks
+119|Sanctuary|pal|24|Thorns|1|0|1|8|mag|8|4|4|5|5|6|16|4|5|6|6|7|skill('Cleansing'.blvl)*par8|7|8|Aura: damages and knocks back undead
+120|Meditation|pal|24|Cleansing|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases party mana regeneration
+121|Fist of the Heavens|pal|30|Blessed Hammer|25|0|1|8|ltng|150|15|30|45|55|65|200|15|30|45|55|65|skill('Holy Shock'.blvl)*par8|7|8|Holy bolt plus lightning from the heavens
+122|Fanaticism|pal|30|Concentration|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases attack speed and damage
+123|Conviction|pal|30|Sanctuary|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: lowers enemy defense and resistances
+124|Redemption|pal|30|Vigor|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: absorbs corpses for life and mana
+125|Salvation|pal|30||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Aura: increases all party resistances
+126|Bash|bar|1||2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8|Strong melee attack with knockback
+127|Sword Mastery|bar|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases sword damage and AR
+128|Axe Mastery|bar|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases axe damage and AR
+129|Mace Mastery|bar|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases mace damage and AR
+130|Howl|bar|1||4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|War cry that causes monsters to flee
+131|Find Potion|bar|1||2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Search corpses for potions
+132|Leap|bar|6||2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Leap to target location over obstacles
+133|Double Swing|bar|6|Bash|8|-1|0|5||0|0|0|0|0|0|0|0|0|0|0|0||10|8|Dual-wield alternating weapon hits
+134|Pole Arm Mastery|bar|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases polearm damage and AR
+135|Throwing Mastery|bar|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases throw damage and AR
+136|Spear Mastery|bar|6||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases spear damage and AR
+137|Taunt|bar|6|Howl|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Taunt forces monster to attack you
+138|Shout|bar|6|Howl|6|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||125|8|Warcry: increases party defense rating
+139|Stun|bar|12|Bash|2|0|1|8|stun|0|0|0|0|0|0|0|0|0|0|0|0||8|8|Melee attack that stuns target briefly
+140|Double Throw|bar|12|Double Swing|1|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||8|8|Throws both weapons at target simultaneously
+141|Increased Stamina|bar|12||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases stamina and regen
+142|Find Item|bar|12|Find Potion|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Search corpses for magic items
+143|Leap Attack|bar|18|Leap|9|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||10|8|Leaps at enemy with powerful melee strike
+144|Concentrate|bar|18|Stun|2|0|1|8|mag|0|0|0|0|0|0|0|0|0|0|0|0||5|8|Focused melee strike with bonus defense
+145|Iron Skin|bar|18||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases base defense
+146|Battle Cry|bar|18|Taunt|5|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Warcry: lowers enemy damage and defense
+147|Frenzy|bar|24|Double Throw|3|0|1|7|mag|0|0|0|0|0|0|0|0|0|0|0|0||8|8|Dual-wield frenzy with increasing speed
+148|Increased Speed|bar|24|Increased Stamina|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases movement speed
+149|Battle Orders|bar|24|Shout|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||125|8|Warcry: increases party life and stamina
+150|Grim Ward|bar|24|Find Item|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Trophy from corpse that scares monsters
+151|Whirlwind|bar|30|Leap Attack|50|1|1|7||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Spin attack hitting all surrounding enemies
+152|Berserk|bar|30|Concentrate|4|0|1|8|mag|0|0|0|0|0|0|0|0|0|0|0|0||10|8|Powerful attack converts damage to magic
+153|Natural Resistance|bar|30|Iron Skin|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases all resistances
+154|War Cry|bar|30|Battle Cry|10|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||6|8|War cry that stuns and damages nearby enemies
+155|Battle Command|bar|30|Battle Orders|11|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||125|8|Warcry: party gains +1 to all skills
+221|Raven|dru|1||6|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Summons ravens to attack nearby enemies
+222|Poison Creeper|dru|1||8|0|1|8|pois|12|7|12|15|17|19|16|7|12|15|17|19||0|0|Summons a vine that poisons enemies
+223|Werewolf|dru|1||15|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Transform into a Werewolf for speed and AR
+224|Lycanthropy|dru|1|Wearwolf|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases life and duration in form
+225|Firestorm|dru|1||4|0|1|8|fire|3|3|5|7|14|21|6|3|6|8|15|23|(skill('Molten Boulder'.blvl)+skill('Eruption'.blvl))*par8|23|2|Wave of fire damage in front of you
+226|Oak Sage|dru|6||15|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||2|8|Summons spirit that increases party max life
+227|Summon Spirit Wolf|dru|6|Raven|15|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8|Summons a Spirit Wolf to fight for you
+228|Werebear|dru|6||15|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Transform into a Werebear for damage and life
+229|Molten Boulder|dru|6|Firestorm|20|1|1|7|fire|6|4|7|10|13|16|12|5|8|11|14|17|skill('Firestorm'.blvl)*par8|8|8|Rolls a flaming boulder at enemies
+230|Arctic Blast|dru|6||24|1|0|2|cold|21|16|18|20|24|29|40|16|19|21|25|31|(skill('Cyclone Armor'.blvl)+skill('Hurricane'.blvl))*par8|15|2|Stream of cold damage in front of you
+231|Carrion Vine|dru|12|Plague Poppy|10|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Summons vine that heals from corpses
+232|Feral Rage|dru|12|Wearwolf|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||3|8|Werewolf attack that steals life and speed
+233|Maul|dru|12|Wearbear|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||3|8|Werebear attack with stun and damage bonus
+234|Fissure|dru|12|Molten Boulder|15|0|1|8|fire|15|6|12|16|18|22|25|6|12|16|19|23|(skill('Firestorm'.blvl)+skill('Volcano'.blvl))*par8|12|8|Opens cracks of fire beneath enemies
+235|Cyclone Armor|dru|12|Arctic Blast|5|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||7|8|Shield that absorbs elemental damage
+236|Heart of Wolverine|dru|18|Oak Sage|20|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||2|8|Summons spirit that increases party damage
+237|Summon Dire Wolf|dru|18|Oak Sage|20|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8|Summons Dire Wolves that eat corpses
+238|Rabies|dru|18|Feral Rage|10|0|1|8|pois|6|4|5|7|11|16|14|4|5|7|11|16|(skill('Plague Poppy'.blvl))*par8|18|3|Werewolf bite that spreads poison
+239|Fire Claws|dru|18|Feral Rage|4|0|1|8|fire|15|8|12|20|24|30|20|8|12|22|26|34|(skill('Firestorm'.blvl)+skill('Molten Boulder'.blvl)+skill('Volcano'.blvl)+skill('Eruption'.blvl))*par8|22|8|Adds fire damage to shapeshifting attacks
+240|Twister|dru|18|Cyclone Armor|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||10|7|Small whirlwind that stuns enemies
+241|Solar Creeper|dru|24|Cycle of Life|14|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Summons vine that restores mana from corpses
+242|Hunger|dru|24|Fire Claws|3|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Werebear bite that steals life from target
+243|Shock Wave|dru|24|Maul|7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Werebear shockwave stun in a line
+244|Volcano|dru|24|Eruption|25|0|1|8|fire|8|2|4|6|8|11|10|2|4|6|8|13|(skill('Eruption'.blvl)+skill('Armageddon'.blvl))*par8|12|8|Erupts a volcano at target location
+245|Tornado|dru|24|Twister|10|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||9|8|Powerful tornado that damages enemies
+246|Spirit of Barbs|dru|30|Heart of Wolverine|25|1|1|8||0|0|0|0|0|0|0|0|0|0|0|0||2|8|Summons spirit that reflects damage
+247|Summon Grizzly|dru|30|Summon Fenris|40|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||5|8|Summons a powerful Grizzly Bear
+248|Fury|dru|30|Rabies|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Rapid multi-hit werewolf attack
+249|Armageddon|dru|30|Volcano|35|0|1|8|fire|25|15|20|25|31|38|75|16|22|27|34|40|(skill('Firestorm'.blvl)+skill('Molten Boulder'.blvl)+skill('Volcano'.blvl))*par8|14|8|Rains fire meteors around you
+250|Hurricane|dru|30|Tornado|30|0|1|8|cold|25|7|10|12|14|16|50|7|10|12|14|16|(skill('Twister'.blvl)+skill('Tornado'.blvl))*par8|9|8|Swirling cold storm around you
+251|Fire Blast|ass|1||24|1|1|5|fire|6|3|8|20|38|58|8|5|11|24|44|66|(skill('Shock Field'.blvl) + skill('Death Sentry'.blvl) + skill('Charged Bolt Sentry'.blvl) + skill('Lightning Sentry'.blvl) + skill('Wake of Fire Sentry'.blvl) + skill('Inferno Sentry'.blvl)) * par8|9|7|Throws a fire bolt with splash damage
+252|Claw Mastery|ass|1||0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively increases claw damage and AR
+253|Psychic Hammer|ass|1||16|1|1|6|mag|2|2|3|4|5|6|6|3|4|5|6|7||0|7|Telekinetic force that knocks back enemies
+254|Tiger Strike|ass|1||1|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Charge-up: adds lightning damage per charge
+255|Dragon Talon|ass|1||6|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Rapid kick attack hitting multiple times
+256|Shock Web|ass|6|Fire Trauma|6|0|1|8|ltng|2|0|0|0|0|0|20|6|12|20|30|42|(skill('Charged Bolt Sentry'.blvl) + skill('Lightning Sentry'.blvl) + skill('Death Sentry'.blvl)) * par8|11|7|Throws an electrified web that shocks
+257|Blade Sentinel|ass|6||7|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Spinning blade patrols back and forth
+258|Burst of Speed|ass|6|Claw Mastery|10|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Increases attack and movement speed
+259|Fists of Fire|ass|6||2|0|1|8|fire|6|5|10|20|30|40|10|5|11|22|33|44|(skill('Royal Strike'.blvl)) * par8|12|8|Charge-up: adds fire damage per charge
+260|Dragon Claw|ass|6|Dragon Talon|2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Dual-claw finishing move
+261|Charged Bolt Sentry|ass|12|Shock Field|13|0|1|8|ltng|2|0|0|0|0|0|14|6|8|12|14|16|(skill('Fire Trauma'.blvl) + skill('Lightning Sentry'.blvl) + skill('Death Sentry'.blvl)) * par8|6|7|Trap: fires charged bolts at enemies
+262|Wake of Fire|ass|12|Fire Trauma|13|0|1|8|fire|5|2|3|5|7|9|10|2|3|6|8|10|(skill('Fire Trauma'.blvl) + skill('Inferno Sentry'.blvl)) * par8|8|8|Trap: shoots waves of fire at enemies
+263|Weapon Block|ass|12|Claw Mastery|0|0|0|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Passively blocks attacks with dual claws
+264|Cloak of Shadows|ass|12|Psychic Hammer|13|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||3|8|Blinds nearby enemies reducing their AR
+265|Cobra Strike|ass|12|Tiger Strike|2|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Charge-up: steals life and mana per charge
+266|Blade Fury|ass|18|Blade Sentinel|8|1|0|5||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Throws blades rapidly at distant targets
+267|Fade|ass|18|Quickness|10|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||1|8|Increases resistances and reduces curse time
+268|Shadow Warrior|ass|18|Cloak of Shadows|54|1|1|7||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Summons a shadow clone with your skills
+269|Claws of Thunder|ass|18|Fists of Fire|4|0|1|8|ltng|1|0|0|0|0|0|80|20|40|60|80|100|(skill('Royal Strike'.blvl)) * par8|8|8|Charge-up: adds lightning damage per charge
+270|Dragon Tail|ass|18|Dragon Claw|10|0|1|8|fire|0|0|0|0|0|0|0|0|0|0|0|0||0|8|Kick that explodes corpses on death
+271|Lightning Sentry|ass|24|Charged Bolt Sentry|20|0|1|8|ltng|1|0|0|0|0|0|20|10|16|24|34|44|(skill('Shock Field'.blvl) + skill('Charged Bolt Sentry'.blvl) + skill('Death Sentry'.blvl))*par8|12|8|Trap: shoots lightning at nearby enemies
+272|Wake of Inferno|ass|24|Wake of Fire Sentry|20|0|1|8|fire|20|17|21|26|32|39|50|19|23|28|34|41|(skill('Fire Trauma'.blvl) + skill('Death Sentry'.blvl)) * par7 + skill('Wake of Fire Sentry'.blvl)*par8|7|4|Trap: shoots streams of fire at enemies
+273|Mind Blast|ass|24|Cloak of Shadows|15|0|1|8|stun|0|0|0|0|0|0|0|0|0|0|0|0||0|8|Stuns and converts enemies briefly
+274|Blades of Ice|ass|24|Claws of Thunder|3|0|1|8|cold|15|8|10|20|30|40|35|8|10|22|32|42|(skill('Royal Strike'.blvl)) * par8|8|8|Charge-up: adds cold damage per charge
+275|Dragon Flight|ass|24|Dragon Tail|15|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Teleports to target with a kick attack
+276|Death Sentry|ass|30|Lightning Sentry|20|0|1|8|ltng|1|0|0|0|0|0|50|8|14|22|28|34|(skill('Lightning Sentry'.blvl))*par8|12|8|Trap: lightning plus corpse explosion
+277|Blade Shield|ass|30|Blade Fury|27|2|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Spinning blades orbit around you
+278|Venom|ass|30|Fade|12|0|1|8|pois|24|6|8|10|12|14|32|6|8|10|12|14||0|6|Adds poison damage to all attacks
+279|Shadow Master|ass|30|Shadow Warrior|70|1|1|7||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Summons a stronger shadow with all skills
+280|Phoenix Strike|ass|30|Cobra Strike|4|0|1|8||0|0|0|0|0|0|0|0|0|0|0|0||0|8|Charge-up: cycles fire/lightning/cold charges

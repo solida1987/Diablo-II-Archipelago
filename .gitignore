@@ -28,6 +28,14 @@ Release/
 
 # Backup
 backup*/
+BACKUP*/
+
+# Local game build (not for repo)
+Game/Tools/
+Game/game/
+Game/launcher/
+old/
+Research/
 
 # Python
 __pycache__/

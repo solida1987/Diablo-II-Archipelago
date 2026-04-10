@@ -4,32 +4,20 @@ CLOSE THE GAME COMPLETELY AND RESTART IT BEFORE CREATING A NEW CHARACTER.
 DO NOT SWITCH CHARACTERS FROM THE CHARACTER SELECT SCREEN.
 THIS PREVENTS POTENTIAL SAVE DATA ISSUES UNTIL ALL BUGS ARE FULLY RESOLVED.
 
-Welcome to Diablo II Archipelago Beta 1.6.0!
+Welcome to Diablo II Archipelago Beta 1.6.3!
 
-This is the first public beta release of Diablo II Archipelago,
-a multiworld randomizer mod for Diablo II: Lord of Destruction.
+=== New in 1.6.3 ===
 
-=== What's New ===
-- New launcher with auto-update and game settings
-- Skill editor: drag and drop skills freely
-- Skill tree: spend skill points on any class skills
-- Quest book: 276+ quests across all 5 acts and 3 difficulties
-- Monster shuffle: randomized monster appearances (seed-based)
-- Boss shuffle: act bosses swap positions
-- XP multiplier: configurable experience rate
-- Expanded inventory: 10x8 inv, 10x8 cube, 10x10 stash
-- Archipelago multiworld bridge integration
-- Live game log and AP bridge log in launcher
-- Delta updates: only changed files downloaded on update
+- Skill tree tier colors now hidden by default
+  Click "Show Colors" to toggle. Your preference is saved between sessions
 
 === Known Bugs ===
-- Skill names in the editor show internal names (e.g. "Quickness"
-  instead of "Burst of Speed"). The skills work correctly.
-- Some skill icons may not match the skill name in the editor.
-- Monster traps may occasionally fail to spawn visible monsters.
-- Switching characters without restarting the game can cause
-  settings and quest progress to carry over incorrectly.
-  WORKAROUND: Always fully close and restart the game between characters.
+- Skill tooltips still have incomplete/missing information for many skills
+  (damage types, synergy details, etc.) - full tooltip overhaul planned
+- Monster traps may occasionally fail to spawn visible monsters
+- Switching characters without restarting the game can cause issues
+  WORKAROUND: Always fully close and restart the game between characters
+- Multiplayer (multiple players in same game) not yet fully supported
 
 === Report Bugs ===
 Found a bug? Please report it!
