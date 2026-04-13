@@ -30,10 +30,7 @@ Release/
 backup*/
 BACKUP*/
 
-# Local game build (not for repo)
-Game/Tools/
-Game/game/
-Game/launcher/
+# Local folders (not for repo)
 old/
 Research/
 
@@ -41,6 +38,20 @@ Research/
 __pycache__/
 *.pyc
 *.pyo
+
+# Original Blizzard files - must NOT be in repo (EULA compliance)
+# These are copied from user's own D2 install during setup
+game/D2.LNG
+game/SmackW32.dll
+game/binkw32.dll
+game/d2exp.mpq
+game/d2music.mpq
+game/d2speech.mpq
+game/d2video.mpq
+game/d2xmusic.mpq
+game/d2xtalk.mpq
+game/d2xvideo.mpq
+game/ijl11.dll
 
 # Misc
 *.log
