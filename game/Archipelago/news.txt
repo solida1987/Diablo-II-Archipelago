@@ -2,36 +2,62 @@
 IF YOU WANT TO CREATE A NEW CHARACTER AFTER PLAYING ANOTHER ONE,
 CLOSE THE GAME COMPLETELY AND RESTART IT BEFORE CREATING A NEW CHARACTER.
 DO NOT SWITCH CHARACTERS FROM THE CHARACTER SELECT SCREEN.
-THIS PREVENTS POTENTIAL SAVE DATA ISSUES UNTIL ALL BUGS ARE FULLY RESOLVED.
 
-Welcome to Diablo II Archipelago Beta 1.6.3!
+=== Beta 1.7.0 - New Features ===
 
-=== New in 1.6.3 ===
+NEW: All Skills Work on All Classes
+  Every skill from every class can now be used by any character.
+  Assassin traps, Druid shapeshifting, Amazon dodges, Paladin smite
+  all work without causing invisibility or crashes.
+  The Assassin skill filter has been removed — all 210 skills are
+  always available in the skill pool.
 
-- Skill tree tier colors now hidden by default
-  Click "Show Colors" to toggle. Your preference is saved between sessions
+NEW: No Weapon Restrictions
+  All weapon type requirements have been removed from skills.
+  Assassin martial arts (Fists of Fire, Dragon Claw, Claws of Thunder,
+  Blades of Ice) no longer require claws — works with any weapon.
+  Amazon javelin/spear skills work without spears.
+  Paladin Smite/Holy Shield work without a shield.
+  Every skill works with whatever gear you have equipped.
+
+NEW: Trap System - 4 different trap types
+  Completing filler quests can now trigger one of four random traps:
+  - Monster Ambush: 8-12 monsters spawn right next to you
+  - Decrepify Curse: Slows your movement speed by 50%
+  - Amplify Damage Curse: You take double physical damage
+  - Poison Trap: Drains your HP over time with poison ticks
+  All curse/poison traps scale with your level:
+  10 seconds per 10 levels (lvl 1-10 = 10s, 21-30 = 30s, etc.)
+
+NEW: Boss Loot Drops
+  Filler quests can now drop boss loot tables on the ground next to you.
+  Random loot from Andariel, Duriel, Mephisto, Diablo or Baal.
+  Item level scales with your character level.
+
+NEW: Dev Tools Menu (Ctrl+V)
+  Draggable debug menu with boss loot drops, monster spawning,
+  unlock all skills button, gold, stats, skill points and XP.
+
+=== Installation Change ===
+CD key verification has been removed. The launcher now asks you to
+point to your existing Diablo II installation instead. Original game
+files are copied from your own install automatically.
 
 === Known Bugs ===
-- Skill tooltips still have incomplete/missing information for many skills
-  (damage types, synergy details, etc.) - full tooltip overhaul planned
-- Monster traps may occasionally fail to spawn visible monsters
-- Switching characters without restarting the game can cause issues
-  WORKAROUND: Always fully close and restart the game between characters
-- Multiplayer (multiple players in same game) not yet fully supported
+- "An Evil Force" text on some cross-class skills
+- "Treasure Cow" tooltip on poison skills (Rabies, Poison Jav, Plague Jav)
+- Whirlwind + Bow/Crossbow causes a softlock (avoid this combo!)
+- Javelin skills animation breaks with bow equipped
+- Animation flicker on Blade Fury, Double Swing/Throw, Leap Attack
+- Druid/Assassin skill icons may be incorrect
+- Skill tooltips still missing some information (full overhaul planned)
+- Always restart game between characters (see above)
+- Multiplayer not yet fully supported
 
 === Report Bugs ===
-Found a bug? Please report it!
-Click the "Report Bug" button in the launcher to open the bug tracker.
-Include as much detail as possible:
-- What you were doing when the bug happened
-- Your character name and class
-- Whether you were in standalone or AP mode
-- Screenshots if possible
-
-Join our Discord for help and discussion!
+Click "Report Bug" in the launcher!
 
 === Tips ===
-- Press F1 to open the Skill Editor (page 1) and Quest Book (page 2)
-- Press Ctrl+O in-game for graphics settings (d2gl options)
-- Use the launcher Settings tab to configure resolution and features
-- The game runs at 1068x600 widescreen by default
+- Press F1 for Skill Editor (page 1) and Quest Book (page 2)
+- Press Ctrl+V for Dev Tools menu
+- Press Ctrl+O in-game for graphics settings
