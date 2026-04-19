@@ -271,7 +271,17 @@ class Diablo2ArchipelagoWorld(World):
             remaining -= filler_count
 
     def set_rules(self) -> None:
-        """Set the victory condition based on Goal (combined act + difficulty)."""
+        """Set the victory condition based on Goal (combined act + difficulty).
+
+        Goal encoding: goal = act_scope * 3 + difficulty
+          - act_scope: 0=Act1 only, 1=Acts1-2, 2=Acts1-3, 3=Acts1-4, 4=Full
+          - difficulty: 0=Normal, 1=Nightmare, 2=Hell
+
+        The victory location MUST carry the difficulty suffix so that
+        completing Baal on Normal does NOT satisfy a Hell goal. This
+        matches the DLL gameplay-agent fix that gates
+        g_deferredDiff[gi] == (g_apGoal % 3) before firing REWARD_GOAL.
+        """
         goal = self.options.goal.value
         goal_scope = goal // 3  # 0-4
         goal_diff = goal % 3    # 0=Normal, 1=NM, 2=Hell
@@ -292,6 +302,16 @@ class Diablo2ArchipelagoWorld(World):
             if goal_loc_name:
                 break
 
+        # Sanity check: goal location must exist in the flat location table.
+        # If it doesn't, the quest toggles or difficulty scope are
+        # inconsistent — fail loudly rather than silently succeed on any kill.
+        if goal_loc_name and goal_loc_name not in location_table:
+            raise ValueError(
+                f"Goal location '{goal_loc_name}' missing from location_table "
+                f"(goal={goal}, scope={goal_scope}, diff={goal_diff}). "
+                f"Check locations.py GOAL_QUEST_IDS vs ALL_ACT_LOCATIONS."
+            )
+
         if goal_loc_name:
             self.multiworld.completion_condition[self.player] = (
                 lambda state, loc=goal_loc_name, p=self.player: (
@@ -300,7 +320,17 @@ class Diablo2ArchipelagoWorld(World):
             )
 
     def fill_slot_data(self) -> dict[str, Any]:
-        """Data sent to the client/bridge. Bridge writes this to ap_settings.dat for the DLL."""
+        """Data sent to the client/bridge. Bridge writes this to ap_settings.dat for the DLL.
+
+        The DLL's LoadAPSettings() in d2arch_ap.c parses each `key=value`
+        line and mirrors the selected multiworld options into runtime
+        state. The following keys are REQUIRED by the DLL — removing or
+        renaming any of them silently breaks per-character sync.
+
+        Per DIAGNOSTIC_REPORT_1.7.0.md section 3.3.8, the DLL needs:
+          monster_shuffle, boss_shuffle, shop_shuffle, treasure_cows,
+          i_play_assassin — all present below.
+        """
         return {
             "game_mode": self.options.game_mode.value,
             "goal": self.options.goal.value,
@@ -320,7 +350,7 @@ class Diablo2ArchipelagoWorld(World):
             "filler_skill_pts_pct": self.options.filler_skill_pts_pct.value,
             "filler_trap_pct": self.options.filler_trap_pct.value,
             "filler_reset_pts_pct": self.options.filler_reset_pts_pct.value,
-            # Monster shuffle
+            # Monster / Boss / Shop shuffles
             "monster_shuffle": self.options.monster_shuffle.value,
             "boss_shuffle": self.options.boss_shuffle.value,
             "shop_shuffle": self.options.shop_shuffle.value,

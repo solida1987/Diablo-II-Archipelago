@@ -310,6 +310,7 @@ FILLER_ITEMS = [
     (45504, "Skill Point",          ItemClassification.filler),
     (45505, "Trap",                 ItemClassification.trap),
     (45506, "Reset Point",          ItemClassification.filler),
+    (45507, "Boss Loot Drop",       ItemClassification.filler),
 ]
 
 # Zone Key items (for Zone Explorer game mode)

@@ -357,15 +357,18 @@ for act_locs in ALL_ACT_LOCATIONS:
             loc_id = LOCATION_BASE + quest_id + DIFF_OFFSETS[diff]
             location_table[loc_name] = loc_id
 
-# Add global level milestones (not per-act)
+# Add global level milestones (not per-act).
+# Each milestone is registered under the bare name (Normal) and, where
+# appropriate, with the " (Nightmare)" / " (Hell)" suffixes — one entry per
+# difficulty. The previous version reinserted the bare (Normal) key inside
+# the NM and Hell loops, overwriting it three times and polluting the table
+# with unsuffixed aliases for NM/Hell milestones. Keep only the correct
+# suffix per difficulty.
 for quest_id, name, max_acts, level in LEVEL_MILESTONES_NORMAL:
     location_table[name] = LOCATION_BASE + quest_id
 for quest_id, name, max_acts, level in LEVEL_MILESTONES_NIGHTMARE:
-    location_table[name] = LOCATION_BASE + quest_id
     location_table[name + " (Nightmare)"] = LOCATION_BASE + quest_id + 1000
 for quest_id, name, max_acts, level in LEVEL_MILESTONES_HELL:
-    location_table[name] = LOCATION_BASE + quest_id
-    location_table[name + " (Nightmare)"] = LOCATION_BASE + quest_id + 1000
     location_table[name + " (Hell)"] = LOCATION_BASE + quest_id + 2000
 
 # Reverse lookup: ap_id -> name

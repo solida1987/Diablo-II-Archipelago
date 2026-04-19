@@ -61,15 +61,164 @@ ZONE_KEY_AREAS = {
 # Starting areas (always open, no key needed) — area IDs
 STARTING_AREAS = [1, 2, 8, 40, 75, 103, 109]  # Towns + Blood Moor + Den of Evil
 
-# Map quest ID to the area it takes place in (approximate)
-QUEST_ID_TO_AREA = {}
+# Map quest ID -> area ID. Populated at import time by
+# _build_quest_area_map(); source of truth for Zone Explorer gating.
+# Every non-level, non-hunt-fallback quest ID in locations.py must resolve
+# to an entry here — otherwise the quest lands in `open_region` and
+# bypasses the Zone Explorer access rules (the DIAGNOSTIC_REPORT_1.7.0.md
+# section 3.3.7 bug).
+QUEST_ID_TO_AREA: dict[int, int] = {}
 
-def _build_quest_area_map():
-    """Build mapping from quest IDs to area IDs based on quest definitions."""
-    # Quest ID ranges map to specific areas based on d2arch.c quest arrays
-    # This is approximate — some quests (level milestones, hunts) span multiple areas
-    # For those, we put them in the "starting" region so they're always accessible
-    pass
+
+def _build_quest_area_map() -> None:
+    """Populate QUEST_ID_TO_AREA from locations.py quest tables.
+
+    Covers every quest ID defined in ACT1..ACT5_LOCATIONS plus the global
+    level milestone tables. Quests that are inherently multi-zone (level
+    milestones, hunts whose target roams, etc.) are still registered —
+    but we map them to a meaningful "home" area (e.g. the act town) so
+    Zone Explorer mode gates them correctly under the relevant act's
+    boss-kill requirement.
+    """
+    # --- Act 1 (quest IDs 1-99) ---
+    act1 = {
+        # Story quests (QTYPE_QUESTFLAG)
+        1:  8,   # Den of Evil
+        2:  17,  # Sisters' Burial Grounds
+        3:  28,  # Tools of the Trade (Barracks)
+        4:  5,   # Search for Cain (Dark Wood)
+        5:  25,  # Forgotten Tower L5
+        6:  37,  # Sisters to the Slaughter (Andariel)
+        # SuperUnique hunts — home area (may roam)
+        7:  8,   # Corpsefire (Den of Evil)
+        8:  3,   # Bishibosh (Cold Plains)
+        9:  18,  # Bonebreaker (Crypt)
+        70: 9,   # Coldcrow (Cave L1)
+        71: 4,   # Rakanishu (Stony Field)
+        72: 5,   # Treehead WoodFist (Dark Wood)
+        73: 38,  # Griswold (Tristram)
+        74: 25,  # The Countess (Tower L5)
+        75: 34,  # Pitspawn Fouldog (Catacombs L1)
+        77: 33,  # Boneash (Cathedral)
+        80: 28,  # The Smith (Barracks)
+        # Kill quests
+        10: 2,  11: 3,  12: 4,  13: 5,  14: 6,  15: 7,  16: 8,  17: 9,  18: 10,
+        19: 17, 20: 18, 21: 19, 22: 22, 23: 23, 24: 24, 25: 25, 26: 26,
+        27: 27, 28: 28, 29: 29, 30: 30, 31: 31, 32: 32, 33: 33,
+        34: 34, 35: 35, 36: 36, 37: 38,
+        38: 13, 39: 14,
+        59: 11, 60: 12,  # Clear Hole L1/L2 (Hole is inside Stony Field/Cold Plains)
+        # Area entry quests
+        40: 2,  41: 3,  42: 4,  43: 5,  44: 6,  45: 7,  46: 8,
+        47: 38, 48: 34, 49: 21,
+        # Waypoint activations
+        50: 3,  51: 4,  52: 5,  53: 6,
+        54: 27, 55: 30, 56: 28, 57: 35,
+    }
+    QUEST_ID_TO_AREA.update(act1)
+
+    # --- Act 2 (quest IDs 100-199) ---
+    act2 = {
+        # Story
+        101: 49,  # Radament's Lair (Sewers — originally mapped, Sewers area removed from gameplay, kept for ID coverage)
+        102: 60,  # Horadric Staff
+        103: 61,  # Tainted Sun
+        104: 74,  # Arcane Sanctuary
+        105: 74,  # The Summoner
+        106: 73,  # Seven Tombs / Duriel's Lair
+        # Hunts
+        170: 49, 171: 42, 172: 61, 173: 43, 174: 52, 175: 64,
+        176: 44, 177: 44, 178: 74, 179: 46,
+        # Kill
+        110: 41, 111: 42, 112: 43, 113: 44, 114: 45,
+        117: 56, 118: 57, 119: 60,
+        120: 62, 121: 63, 122: 64,
+        123: 65, 124: 74,
+        125: 52, 126: 53, 127: 54, 128: 46, 129: 55,
+        # Area entry
+        140: 41, 141: 42, 142: 43, 143: 44, 144: 74,
+        # Waypoints
+        151: 42, 152: 57, 153: 43, 154: 44, 155: 52, 156: 74, 157: 46,
+    }
+    QUEST_ID_TO_AREA.update(act2)
+
+    # --- Act 3 (quest IDs 200-299) ---
+    act3 = {
+        # Story
+        201: 95,  # Lam Esen's Tome
+        202: 83,  # Khalim's Will
+        203: 83,  # Blade of Old Religion (Travincal)
+        204: 80,  # Golden Bird (Kurast Bazaar area)
+        205: 83,  # Blackened Temple
+        206: 102, # The Guardian (Mephisto, Durance L3)
+        # Hunts
+        271: 84, 272: 88, 273: 79, 274: 94, 275: 92,
+        276: 83, 277: 83, 278: 83, 279: 100, 280: 101, 281: 101,
+        # Kill
+        210: 76, 211: 77, 212: 78, 213: 79, 214: 80, 215: 81, 216: 83,
+        217: 84, 218: 88, 219: 89,
+        222: 100, 223: 101, 224: 82,
+        # Area entry
+        240: 76, 241: 78, 242: 80, 243: 83, 244: 100,
+        # Waypoints
+        250: 76, 251: 77, 252: 78, 253: 79, 254: 80, 255: 81, 256: 83, 257: 101,
+    }
+    QUEST_ID_TO_AREA.update(act3)
+
+    # --- Act 4 (quest IDs 300-399) ---
+    act4 = {
+        # Story
+        301: 105, # Fallen Angel (Izual in Plains of Despair)
+        302: 107, # Hell's Forge
+        303: 108, # Terror's End (Diablo)
+        # Hunts
+        370: 104, 371: 105, 372: 106, 373: 107,
+        374: 108, 375: 108, 376: 108,
+        # Kill
+        310: 104, 311: 105, 312: 106, 313: 107, 314: 108,
+        # Area entry
+        340: 104, 341: 105, 342: 106, 343: 107, 344: 108,
+        # Waypoints
+        350: 106, 351: 107,
+    }
+    QUEST_ID_TO_AREA.update(act4)
+
+    # --- Act 5 (quest IDs 400-499) ---
+    act5 = {
+        # Story
+        401: 110, # Siege on Harrogath
+        402: 112, # Rescue on Mt. Arreat (Shenk/Arreat Plateau)
+        403: 113, # Prison of Ice (Anya)
+        404: 124, # Betrayal of Harrogath (Nihlathak)
+        405: 120, # Rite of Passage (Ancients)
+        406: 132, # Eve of Destruction (Baal, Throne of Destruction)
+        # Hunts
+        470: 110, 471: 111, 472: 112, 473: 118, 474: 119,
+        475: 121, 476: 115, 477: 129,
+        # Kill
+        410: 110, 411: 111, 412: 112, 413: 113,
+        414: 118, 415: 119, 416: 117,
+        417: 122, 418: 123, 419: 124,
+        420: 128, 421: 129, 422: 130, 423: 131,
+        # Area entry
+        440: 110, 441: 111, 442: 112, 443: 113, 444: 128,
+        # Waypoints
+        450: 111, 451: 112, 452: 113,
+        454: 123, 455: 115, 456: 117, 457: 129,
+    }
+    QUEST_ID_TO_AREA.update(act5)
+
+    # --- Level milestones ---
+    # Level-up can happen in any area. Mark as "freely accessible" via
+    # starting area 1 (Rogue Camp). _get_zone_for_quest short-circuits
+    # on quest_type == "level", so this entry is informational only.
+    for qid in (78, 79, 81, 82, 83, 180, 181, 182, 183, 184,
+                282, 283, 284, 285):
+        QUEST_ID_TO_AREA.setdefault(qid, 1)
+
+
+# Build the map once at module load.
+_build_quest_area_map()
 
 
 def _quest_id_to_act(quest_id: int) -> int:
@@ -82,96 +231,26 @@ def _quest_id_to_act(quest_id: int) -> int:
 
 def _get_zone_for_quest(quest_id: int, quest_type: str) -> str | None:
     """Determine which zone key is needed for a quest.
-    Returns zone key name, or None if freely accessible."""
+
+    Returns the zone key name, or None if freely accessible. Returns None
+    for level milestones (progress can happen anywhere) and for any
+    quest whose home area falls in STARTING_AREAS.
+
+    Quests with no map entry fall through to None — historically this
+    meant "freely accessible", but with _build_quest_area_map() now
+    covering every known quest ID, that branch should not fire in
+    practice. If it does, the caller (create_regions) still gates the
+    location by act boss kill, so zone-key bypass is impossible.
+    """
     # Level milestones are always accessible (can level up anywhere)
     if quest_type == "level":
         return None
 
-    # Map quest IDs to their area based on the quest param (area ID)
-    # These mappings come from d2arch.c quest arrays
-    # Kill quests: param = area ID
-    # Area entry quests: param = area ID
-    # Waypoint quests: param = waypoint number → area ID
-    # Story/hunt quests: various
-
-    # Act 1 quest → area mappings
-    act1_quest_areas = {
-        # Story quests (QTYPE_QUESTFLAG)
-        1: 8,    # Den of Evil → area 8
-        2: 17,   # Sisters' Burial Grounds → area 17
-        3: 28,   # Tools of the Trade → area 28 (Barracks)
-        4: 5,    # Search for Cain → area 5 (Dark Wood)
-        5: 25,   # Forgotten Tower → area 25 (Tower L5)
-        6: 37,   # Sisters to the Slaughter → area 37 (Andariel)
-        # Kill quests (param = area ID directly)
-        10: 2, 11: 3, 12: 4, 13: 5, 14: 6, 15: 7, 16: 8, 17: 9, 18: 10,
-        19: 17, 20: 18, 21: 19, 22: 21, 23: 22, 24: 23, 25: 24, 26: 25,
-        27: 26, 28: 27, 29: 28, 30: 29, 31: 30, 32: 31, 33: 33,
-        34: 34, 35: 35, 36: 36, 37: 38,
-        38: 13, 39: 14, 57: 11, 58: 15,  # New quests we added
-        # Area entry quests
-        40: 2, 41: 3, 42: 4, 43: 5, 44: 6, 45: 7, 46: 8, 47: 38, 48: 34, 49: 21,
-        # Waypoint quests (mapped to area)
-        50: 3, 51: 4, 52: 5, 53: 6, 54: 27, 55: 29, 56: 32, 57: 35,
-        # SuperUnique hunts (approximate area)
-        7: 8,    # Corpsefire → Den of Evil
-        8: 3,    # Bishibosh → Cold Plains
-        9: 18,   # Bonebreaker → Crypt
-        70: 9,   # Coldcrow → Cave
-        71: 4,   # Rakanishu → Stony Field
-        72: 5,   # Treehead → Dark Wood
-        73: 38,  # Griswold → Tristram
-        74: 25,  # Countess → Tower L5
-        75: 34,  # Pitspawn → Catacombs
-        77: 33,  # Boneash → Cathedral
-        80: 28,  # The Smith → Barracks
-    }
-
-    act2_quest_areas = {
-        101: 49, 102: 60, 103: 61, 104: 74, 105: 74, 106: 73,
-        110: 41, 111: 42, 112: 43, 113: 44, 114: 45,
-        117: 56, 118: 57, 119: 60, 120: 62, 121: 63, 122: 64,
-        123: 65, 124: 74, 125: 52, 126: 53, 127: 54, 128: 46, 129: 55,
-        140: 41, 141: 42, 142: 43, 143: 44, 144: 74,
-        150: 41, 151: 42, 152: 57, 153: 43, 154: 44, 155: 52, 156: 74, 157: 46,
-        170: 49, 171: 42, 172: 61, 173: 43, 174: 52, 175: 64, 176: 44, 177: 44, 178: 74, 179: 46,
-    }
-
-    act3_quest_areas = {
-        201: 95, 202: 83, 203: 76, 204: 80, 205: 83, 206: 102,
-        210: 76, 211: 77, 212: 78, 213: 79, 214: 80, 215: 81, 216: 83,
-        217: 84, 218: 88, 219: 89, 222: 100, 223: 101, 224: 82,
-        240: 76, 241: 78, 242: 80, 243: 83, 244: 100,
-        250: 76, 251: 77, 252: 78, 253: 79, 254: 80, 255: 81, 256: 83, 257: 101,
-        271: 84, 272: 88, 273: 79, 274: 94, 275: 92,
-        276: 83, 277: 83, 278: 83, 279: 100, 280: 101, 281: 101, 290: 76,
-    }
-
-    act4_quest_areas = {
-        301: 105, 302: 107, 303: 108,
-        310: 104, 311: 105, 312: 106, 313: 107, 314: 108,
-        340: 104, 341: 105, 342: 106, 343: 107, 344: 108,
-        350: 106, 351: 107,
-        370: 104, 371: 105, 372: 106, 373: 107, 374: 108, 375: 108, 376: 108,
-    }
-
-    act5_quest_areas = {
-        401: 110, 402: 112, 404: 124, 405: 120, 406: 132,
-        410: 110, 411: 111, 412: 112, 413: 113, 414: 118, 415: 119,
-        416: 117, 417: 122, 418: 123, 419: 124, 420: 128, 421: 129, 422: 130, 423: 131,
-        440: 110, 441: 111, 443: 113, 444: 128,
-        450: 111, 451: 112, 452: 113, 454: 123, 455: 115, 456: 117, 457: 129,
-        470: 110, 471: 111, 472: 112, 473: 118, 474: 119, 475: 121, 477: 129,
-    }
-
-    # Combine all
-    all_maps = {**act1_quest_areas, **act2_quest_areas, **act3_quest_areas, **act4_quest_areas, **act5_quest_areas}
-
-    area_id = all_maps.get(quest_id)
+    area_id = QUEST_ID_TO_AREA.get(quest_id)
     if area_id is None:
         return None  # Unknown quest → freely accessible
 
-    # Check if this area is a starting area
+    # Starting areas never need a zone key
     if area_id in STARTING_AREAS:
         return None
 
