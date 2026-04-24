@@ -262,22 +262,255 @@ def _get_zone_for_quest(quest_id: int, quest_type: str) -> str | None:
     return None  # Area not gated by any key
 
 
-def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
-    """Create regions with access rules based on game mode."""
+# 1.8.0 NEW — Act region definitions (Python mirror of C g_actRegions).
+# Must stay in sync with d2arch_preloads.c. Keys: act → {region_num: [zone_ids]}.
+# Region 1 is always-open (starting sphere); gate N unlocks region N+1.
+ACT_REGIONS = {
+    1: {
+        1: [1, 2, 3, 8, 9, 13, 17, 18, 19],
+        2: [4, 5, 10, 14, 38],
+        3: [6, 7, 11, 12, 15, 16, 20, 21, 22, 23, 24, 25, 26],
+        4: [27, 28, 29, 30, 31, 32],
+        5: [33, 34, 35, 36, 37],
+    },
+    2: {
+        1: [40, 41, 47, 48, 49, 50],
+        2: [42, 51, 55, 56, 57, 59, 60],
+        3: [43, 52, 53, 54, 62, 63, 64],
+        4: [44, 45, 58, 61, 65, 74],
+        5: [46, 66, 67, 68, 69, 70, 71, 72, 73],
+    },
+    3: {
+        1: [75, 76, 77, 84, 85],
+        2: [78, 79, 86, 87, 88, 89, 90, 91],
+        3: [80, 81, 92, 93, 94, 95, 96, 97],
+        4: [82, 83, 98, 99],
+        5: [100, 101, 102],
+    },
+    4: {
+        1: [103, 104, 105],
+        2: [106, 107],
+        3: [108],
+    },
+    5: {
+        1: [109, 110, 111],
+        2: [112, 113, 114],
+        3: [115, 116, 117, 118, 119, 120],
+        4: [128, 129],
+        5: [130, 131, 132],
+    },
+}
+
+# Always-open zones (portal-only, never gate-locked)
+ALWAYS_OPEN_ZONES = [39, 121, 122, 123, 124, 125, 126, 127]
+
+
+def _zone_to_region(zone_id: int):
+    """Map a zone ID to (act, region_num), or None if always-open/unknown.
+    Towns (1, 40, 75, 103, 109) resolve to their act's region 1."""
+    if zone_id in ALWAYS_OPEN_ZONES:
+        return None
+    for act, regions in ACT_REGIONS.items():
+        for region_num, zones in regions.items():
+            if zone_id in zones:
+                return (act, region_num)
+    return None
+
+
+def _build_gate_region_tree(world, menu_region, active_locations, max_act, num_diffs):
+    """1.8.0 — Build preload-gated region tree with gate keys as access rules.
+
+    Structure per (act, difficulty):
+      "A<n>D<d>R1" -> "A<n>D<d>R2" via "Act <n> Gate 1 Key (Diff)"
+      "A<n>D<d>R2" -> "A<n>D<d>R3" via "Act <n> Gate 2 Key (Diff)"
+      ...
+      (Act 4 only has R1/R2/R3)
+
+    Act-transitions within same difficulty: A{k+1}D{d}R1 requires
+    the act-k boss-kill quest to be reachable (can_reach_location).
+    Difficulty transitions: A{*}D{d+1}R1 requires Eve of Destruction on
+    previous difficulty.
+
+    Open region hosts level-milestone-style "anywhere" locations only.
+    Quest locations are placed in their physical gated regions.
+    """
     multiworld = world.multiworld
     player = world.player
-    game_mode = world.options.game_mode.value  # 0=Skill Hunt, 1=Zone Explorer
+    diff_names = ["Normal", "Nightmare", "Hell"]
+    gates_by_act = {1: 4, 2: 4, 3: 4, 4: 2, 5: 4}
 
-    goal = world.options.goal.value
-    max_act = (goal // 3) + 1
-    diff_scope = goal % 3
+    open_region = Region("Open Areas", player, multiworld)
+    multiworld.regions.append(open_region)
+    menu_region.connect(open_region)
+
+    # Build per-act, per-diff region tree
+    regions_by_adr = {}
+    for diff in range(num_diffs):
+        diff_name = diff_names[diff]
+        for act in range(1, max_act + 1):
+            num_gates = gates_by_act[act]
+            num_regions = num_gates + 1
+            for r in range(1, num_regions + 1):
+                region = Region(f"A{act}D{diff}R{r}", player, multiworld)
+                multiworld.regions.append(region)
+                regions_by_adr[(act, diff, r)] = region
+
+            # A1D0R1 is the true starting region
+            # Other R1 regions need previous-act/diff completion
+            r1 = regions_by_adr[(act, diff, 1)]
+            if act == 1 and diff == 0:
+                # Initial starting sphere
+                menu_region.connect(r1)
+                open_region.connect(r1)  # also always reachable from open
+            elif act == 1 and diff > 0:
+                # Difficulty transition: requires Baal kill on previous diff
+                prev_diff_name = diff_names[diff - 1]
+                baal_loc = "Eve of Destruction" if diff - 1 == 0 else f"Eve of Destruction ({prev_diff_name})"
+                menu_region.connect(
+                    r1,
+                    f"Start A1D{diff}",
+                    lambda state, loc=baal_loc, p=player: state.can_reach_location(loc, p),
+                )
+            else:
+                # Act transition: requires previous act's boss kill on same diff
+                prev_act = act - 1
+                # Quest names per act boss (from ACT_BOSS_QUEST_IDS mapping)
+                prev_boss_loc_base = {
+                    1: "Sisters to the Slaughter",
+                    2: "Seven Tombs",
+                    3: "The Guardian",
+                    4: "Terror's End",
+                }.get(prev_act)
+                if prev_boss_loc_base:
+                    if diff == 0:
+                        prev_boss_loc = prev_boss_loc_base
+                    else:
+                        prev_boss_loc = f"{prev_boss_loc_base} ({diff_names[diff]})"
+                    menu_region.connect(
+                        r1,
+                        f"Enter A{act}D{diff}",
+                        lambda state, loc=prev_boss_loc, p=player: state.can_reach_location(loc, p),
+                    )
+
+            # Connect R_n -> R_n+1 via gate key (within same act/diff)
+            for gate in range(num_gates):
+                src = regions_by_adr[(act, diff, gate + 1)]
+                dst = regions_by_adr[(act, diff, gate + 2)]
+                key_name = f"Act {act} Gate {gate + 1} Key ({diff_name})"
+                src.connect(
+                    dst,
+                    f"A{act}D{diff} Gate {gate + 1}",
+                    lambda state, k=key_name, p=player: state.has(k, p),
+                )
+
+    # Place gate locations in their spawn region (pre-gate)
+    for quest_id, loc_name, quest_type, classification, loc_id, diff in active_locations:
+        if quest_type != "gate":
+            continue
+        act = (loc_id // 10) % 100
+        gate_idx = loc_id % 10
+        if (act, diff, gate_idx + 1) in regions_by_adr:
+            target = regions_by_adr[(act, diff, gate_idx + 1)]
+            loc = world.create_location(loc_name, loc_id, target)
+            target.locations.append(loc)
+
+    return open_region
+
+
+def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
+    """Create regions with access rules based on game mode toggles.
+    1.8.0: game_mode deprecated; only skill_hunting + zone_locking matter.
+    Goal is now 0/1/2 (Normal/NM/Hell); act scope always = full game. """
+    multiworld = world.multiworld
+    player = world.player
+    zone_locking = bool(world.options.zone_locking.value)
+
+    goal = world.options.goal.value   # 0-2: difficulty scope only
+    max_act = 5                        # always full game
+    num_diffs = goal + 1               # 1, 2, or 3
 
     active_locations = world.get_active_locations()
 
     menu_region = Region("Menu", player, multiworld)
     multiworld.regions.append(menu_region)
 
-    if game_mode == 1:
+    # 1.8.0 NEW: zone_locking ON — build gate region tree for GATE locations.
+    # Non-gate (quest) locations stay in open_region with per-location
+    # access rules based on their physical zone. This gives AP fill
+    # enough flexibility to place items without BK while still enforcing
+    # gate-key progression at the physical-zone level.
+    if zone_locking:
+        open_region = _build_gate_region_tree(world, menu_region, active_locations, max_act, num_diffs)
+
+        # Place each non-gate location in open_region with access rule
+        # derived from zone → (act, region_num)
+        for quest_id, loc_name, quest_type, classification, loc_id, diff in active_locations:
+            if quest_type == "gate":
+                continue  # already placed by _build_gate_region_tree
+
+            # Level milestones can happen anywhere — no access rule
+            if quest_type == "level":
+                loc = world.create_location(loc_name, loc_id, open_region)
+                open_region.locations.append(loc)
+                continue
+
+            # For quest locations: determine physical zone + set access rule
+            zone_id = QUEST_ID_TO_AREA.get(quest_id)
+            loc = world.create_location(loc_name, loc_id, open_region)
+            open_region.locations.append(loc)
+
+            if zone_id is None or zone_id in ALWAYS_OPEN_ZONES:
+                continue  # no gating for unknown/always-open zones
+
+            physical = _zone_to_region(zone_id)
+            if physical is None:
+                continue  # unmapped → no gating
+
+            act, region_num = physical
+            if act > max_act:
+                continue
+
+            # Build access rule: requires all gate keys 1..region_num-1 + prev act boss
+            required_keys = [
+                f"Act {act} Gate {g + 1} Key ({diff_name_fromdiff(diff)})"
+                for g in range(region_num - 1)
+            ]
+            # Act transition: needs prev act boss kill on same diff
+            prev_boss_loc = None
+            if act > 1:
+                prev_boss_loc_base = {
+                    1: "Sisters to the Slaughter",
+                    2: "Seven Tombs",
+                    3: "The Guardian",
+                    4: "Terror's End",
+                }.get(act - 1)
+                if prev_boss_loc_base:
+                    prev_boss_loc = prev_boss_loc_base if diff == 0 else f"{prev_boss_loc_base} ({diff_name_fromdiff(diff)})"
+            # Difficulty transition: needs prev diff Baal kill
+            prev_diff_boss = None
+            if diff > 0:
+                prev_diff_boss = "Eve of Destruction" if diff - 1 == 0 else f"Eve of Destruction ({diff_name_fromdiff(diff-1)})"
+
+            def _make_rule(keys, prev_boss, prev_diff_b, p=player):
+                def rule(state):
+                    if keys and not all(state.has(k, p) for k in keys):
+                        return False
+                    if prev_boss and not state.can_reach_location(prev_boss, p):
+                        return False
+                    if prev_diff_b and not state.can_reach_location(prev_diff_b, p):
+                        return False
+                    return True
+                return rule
+
+            loc.access_rule = _make_rule(required_keys, prev_boss_loc, prev_diff_boss)
+
+        return  # skip old region-creation path
+
+
+def diff_name_fromdiff(d):
+    return ["Normal", "Nightmare", "Hell"][d]
+
+    if zone_locking:
         # === ZONE EXPLORER: Create per-zone regions with key requirements ===
 
         # "Open" region for starting areas + level milestones
@@ -310,7 +543,7 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
                 open_region.connect(
                     to_region,
                     f"Act {from_act} -> Act {to_act}",
-                    lambda state, loc=boss_loc, p=player, ds=diff_scope: (
+                    lambda state, loc=boss_loc, p=player, ds=goal: (
                         state.can_reach_location(loc, p)
                         or (ds >= 1 and state.can_reach_location(loc + " (Nightmare)", p))
                         or (ds >= 2 and state.can_reach_location(loc + " (Hell)", p))
@@ -398,7 +631,7 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
                     act_regions[from_act].connect(
                         act_regions[to_act],
                         f"Act {from_act} -> Act {to_act}",
-                        lambda state, loc=boss_loc, p=player, ds=diff_scope: (
+                        lambda state, loc=boss_loc, p=player, ds=goal: (
                             state.can_reach_location(loc, p)
                             or (ds >= 1 and state.can_reach_location(loc + " (Nightmare)", p))
                             or (ds >= 2 and state.can_reach_location(loc + " (Hell)", p))

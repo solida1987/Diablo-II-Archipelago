@@ -8,11 +8,41 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
-=== Beta 1.7.1 - New Features ===
+=== Beta 1.8.0 - New Features ===
 
-Stability and polish release. See the patch notes for the full fix list.
+MULTI-TAB STASH
+20 storage tabs per character (10 shared + 10 AP-only). Shift+right-click
+items to auto-store or sell. Tabs persist in sidecar files; post-goal AP
+characters get access to all 20 tabs.
+
+SEMI-RANDOM ZONE LOCKING
+New gated progression mode: each act has a fixed number of boss-kill gates
+(4 for Acts 1/2/3/5, 2 for Act 4) with 3-4 randomized boss placements per
+act baked into each character at creation. 18 gates per difficulty, up to
+54 total in Full Hell mode. Kills send AP checks; gate keys unlock the
+next region. 1024+ unique act-layouts per character.
+
+SKILL LEVEL CAP RAISED 20 -> 99
+Points invested past 20 are no longer silently capped. Skills can now
+reach base level 99 with +skill gear stacking on top.
+
+SIMPLIFIED GOAL + OPTIONS
+Goal reduced from 15 options to 3: Full Normal, Full Nightmare, Full Hell.
+AP options panel cleaned up to match the in-game settings 1:1 — removed
+Game Mode (deprecated), Skill Pool Size, Starting Skills, 6 filler
+weights, 15 act-preload overrides, Story Quests toggle, Shop Shuffle,
+and I Play Assassin.
+
+DEATHLINK UPGRADES
+Incoming DeathLink traps now scale to your character level (no more
+Colenzo spawning on a level-3 Sorc). Trap notification shows who died:
+"DEATHLINK: <player> died - trap incoming!"
+
+BUG REPORT / SUPPORT
+Added Bug Form button in launcher alongside GitHub Issues link.
 
 === Tips ===
 - Press F1 for Skill Editor (page 1) and Quest Book (page 2)
+- Press F4 for Zone Map (shows gate progression per difficulty)
 - Press Ctrl+V for Dev Tools menu
 - Press Ctrl+O in-game for graphics settings

@@ -359,6 +359,39 @@ ZONE_KEY_ITEMS = [
     (46035, "Throne of Destruction Key", 5, ItemClassification.progression),
 ]
 
+# 1.8.0 NEW — Gate Keys for the gated zone-locking preload system.
+# 18 gates per difficulty × 3 difficulties = 54 items.
+# Slot layout per difficulty: 0-3=A1G1..4, 4-7=A2G1..4, 8-11=A3G1..4,
+# 12-13=A4G1..2 (Act 4 has only 2), 14-17=A5G1..4.
+# AP IDs: Normal=46101-46118, Nightmare=46121-46138, Hell=46141-46158.
+GATE_KEY_AP_BASE = {0: 46101, 1: 46121, 2: 46141}
+GATE_KEYS_PER_DIFF = 18
+
+def _gate_key_entries():
+    out = []
+    # Gates per (act, diff):
+    # Act 1,2,3,5: 4 gates each. Act 4: 2 gates.
+    gates_by_act = {1: 4, 2: 4, 3: 4, 4: 2, 5: 4}
+    slot_by_act_gate = {
+        1: lambda g: 0 + g,
+        2: lambda g: 4 + g,
+        3: lambda g: 8 + g,
+        4: lambda g: 12 + g,
+        5: lambda g: 14 + g,
+    }
+    diff_name = ["Normal", "Nightmare", "Hell"]
+    for diff in range(3):
+        base = GATE_KEY_AP_BASE[diff]
+        for act, num_gates in gates_by_act.items():
+            for g in range(num_gates):
+                slot = slot_by_act_gate[act](g)
+                ap_id = base + slot
+                name = f"Act {act} Gate {g + 1} Key ({diff_name[diff]})"
+                out.append((ap_id, name, act, ItemClassification.progression))
+    return out
+
+GATE_KEY_ITEMS = _gate_key_entries()  # 54 entries
+
 # Build the complete item table: { name: (ap_id, classification) }
 item_table: dict[str, tuple[int, ItemClassification]] = {}
 
@@ -369,6 +402,10 @@ for ap_id, name, classification in FILLER_ITEMS:
     item_table[name] = (ap_id, classification)
 
 for ap_id, name, act, classification in ZONE_KEY_ITEMS:
+    item_table[name] = (ap_id, classification)
+
+# 1.8.0 NEW — Gate Keys (54 items for preload-gated zone-locking)
+for ap_id, name, act, classification in GATE_KEY_ITEMS:
     item_table[name] = (ap_id, classification)
 
 # Reverse lookup: ap_id -> name

@@ -1,12 +1,17 @@
 {
-  "version": "Beta-1.7.1",
-  "version_display": "Beta-1.7.1",
-  "file_count": 446,
+  "version": "Beta-1.8.0",
+  "version_display": "Beta-1.8.0",
+  "file_count": 366,
   "files": [
     {
       "path": "Bnclient.dll",
       "sha256": "57f16ef1bd5af6c64a181a3b92e29297460479f2c475085fbdf1db8b38c77c55",
       "size": 131137
+    },
+    {
+      "path": "Crashdump",
+      "sha256": "9af44e3dfed40993e651d35a007e87b340ade2c1a0c876cd0abb98d1c0cc1881",
+      "size": 64
     },
     {
       "path": "D2.Detours.dll",
@@ -20,13 +25,13 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "730b80f405c3491d28484d08dc5a0ad8bea3ca28292f9d61af621674ee0aac6c",
+      "sha256": "4419ab01f9fb9a745212ff1e1aa8b41d243a8c84b6cb0b92ab0d1c4621a27878",
       "size": 121344
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "fd50c2795d7211608244046b2a17f318636c3c3c11c9cafb488ec0ae98194cc7",
-      "size": 377856
+      "sha256": "2e13d5db514fe170a8fe64678f1a7feb4a173368b615bc1a917c76648e7e4484",
+      "size": 425984
     },
     {
       "path": "D2CMP.dll",
@@ -155,18 +160,8 @@
     },
     {
       "path": "START.bat",
-      "sha256": "8058a8065c5cbde5aaa77f52878d1c33e33e2b63e40e8b132886f65c67320c8a",
+      "sha256": "30f04210c320759a5a2aedbcc5d81a089c8d823e7121febfd309de71fc5900e2",
       "size": 655
-    },
-    {
-      "path": "Screenshot001.png",
-      "sha256": "09f47ec569b1329127787eb5e46271b46b25ba35bd2d9da15711f6a0e15fa775",
-      "size": 3528517
-    },
-    {
-      "path": "Screenshot002.png",
-      "sha256": "de38554986868514a3fd1ed4b5d2e74bc754644e557b6404e1bc2ea3842ac258",
-      "size": 3578074
     },
     {
       "path": "Storm.dll",
@@ -245,13 +240,13 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "27d0b597e8889910a0f3b2f417dceee8cb8b6692c4ab1ec16196594183b2e620",
-      "size": 22596
+      "sha256": "37b871ef5eca60d602b7554f3308d4617e47d720ac7a1ffba0781becbf758e4a",
+      "size": 26167
     },
     {
       "path": "apworld/diablo2_archipelago/__init__.py",
-      "sha256": "7d91c29b40e54430d8d64c06be4f492e4820125adfe670d3e1d8f63182aa460c",
-      "size": 16825
+      "sha256": "6acda93d3d1c7f2840fcf948b98a457dc68fd136113f64749b9775a94e5177e4",
+      "size": 19230
     },
     {
       "path": "apworld/diablo2_archipelago/archipelago.json",
@@ -260,443 +255,38 @@
     },
     {
       "path": "apworld/diablo2_archipelago/items.py",
-      "sha256": "0fbfc2c25dfed31f14633a9da13bf056f2433301842143220ec7863aa2a5a0a1",
-      "size": 20491
+      "sha256": "5782994dc142589d88edf302253ab018d051c97da802549b626361d2065d024e",
+      "size": 21938
     },
     {
       "path": "apworld/diablo2_archipelago/locations.py",
-      "sha256": "c2aad784dee458f6dcc761c9bebb2d43589018b76ba551259506a01de7a0f3bd",
-      "size": 25236
+      "sha256": "307eb73ab2b69677c37f404b948b8a6abba05a68a11debd579fd1ba6ebd8d69a",
+      "size": 26589
     },
     {
       "path": "apworld/diablo2_archipelago/options.py",
-      "sha256": "86dda99bf71186307f2ebc3e031b1959f6d4c35c3e22501ded4a1b33513134f5",
-      "size": 9521
+      "sha256": "3adf144374a9d60f05224b2df3f2a327c7678117301db1f8bcc716e5189c64ab",
+      "size": 6574
     },
     {
       "path": "apworld/diablo2_archipelago/regions.py",
-      "sha256": "a7c4eaeefbbc27e64cc5a3a453fda9cb0eb12bb45fccdd895c3379a9ef3327a9",
-      "size": 16682
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/__init__.cpython-313.pyc",
-      "sha256": "2b26fc63404de3edf962c6e5e54aca51e8ff713b44afe30231ecdb08db999fbb",
-      "size": 18332
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/__init__.cpython-314.pyc",
-      "sha256": "1079a31b80aeeca6254b1510cce6f6c77259d0be6728b986625cec1ab6cac452",
-      "size": 20228
+      "sha256": "58323d1bb967c2e97c4fcb12650190495378b9d66188a4848695b0d2d16677bc",
+      "size": 26345
     },
     {
       "path": "apworld/diablo2_archipelago/__pycache__/items.cpython-313.pyc",
-      "sha256": "2ba8bfbc9050e2f6d6a48f85a1aec23d26595c52c0a8948517bcb81c18dba2a2",
-      "size": 19154
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/items.cpython-314.pyc",
-      "sha256": "e19ddb797e14f5064da6ee623032ee5348c60f45ce2ddd0c97564ebe1b73a62a",
-      "size": 18294
+      "sha256": "b0b571dbb9acbfb1548c402a8d25890ff28949cdffcc78e159d35d294fb1925e",
+      "size": 20762
     },
     {
       "path": "apworld/diablo2_archipelago/__pycache__/locations.cpython-313.pyc",
-      "sha256": "8afbd8ba56131d323ec66b080cd8c5afeaba964f0fab64efcd031c331d7330f0",
-      "size": 21621
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/locations.cpython-314.pyc",
-      "sha256": "cc4e0a55f41aab52c8a2275a9a0e2816646ec2d2bf1fe45c2ee980ed31d25880",
-      "size": 21083
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/options.cpython-314.pyc",
-      "sha256": "543b066ee523ac919d6aea05f80e04e3a4991a0871073ae26b3a36243915f356",
-      "size": 12048
+      "sha256": "b1e5cf559424dba1753ca4409df855fe1574342ecfd9a6147be1630edb4605be",
+      "size": 22652
     },
     {
       "path": "apworld/diablo2_archipelago/__pycache__/regions.cpython-313.pyc",
-      "sha256": "047145fd3d409b45cdbbbd522aec8dc8ddfa7e43c8e7917aec79b039857b3806",
-      "size": 15649
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/regions.cpython-314.pyc",
-      "sha256": "a21b19ab8121deb73d225b1cc0dd807b519078da9594367460caee9f78636521",
-      "size": 15890
-    },
-    {
-      "path": "ap_bridge_dist/ap_bridge.exe",
-      "sha256": "d7dfd5b0e1cab69b1e5fd99d99ec8b74694af2614de09594fbccd7cb2d1efdbd",
-      "size": 2871205
-    },
-    {
-      "path": "ap_bridge_dist/Archipelago/ap_bridge_log.txt",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
-    },
-    {
-      "path": "ap_bridge_dist/Archipelago/ap_status.dat",
-      "sha256": "9b2b39f1728e360b1dc1ce5f9d3f20d194ebb0da76f5d75e4a1cf3c83a4c94f3",
-      "size": 51
-    },
-    {
-      "path": "ap_bridge_dist/_internal/VCRUNTIME140.dll",
-      "sha256": "052ad6a20d375957e82aa6a3c441ea548d89be0981516ca7eb306e063d5027f4",
-      "size": 120400
-    },
-    {
-      "path": "ap_bridge_dist/_internal/VCRUNTIME140_1.dll",
-      "sha256": "6a99bc0128e0c7d6cbbf615fcc26909565e17d4ca3451b97f8987f9c6acbc6c8",
-      "size": 49776
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_asyncio.pyd",
-      "sha256": "53b36f719ee1905e56003a5d8af169fe05917787af66d00c86ceaf996a7d5caf",
-      "size": 73048
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_bz2.pyd",
-      "sha256": "df21ec68d062eb375dba4ea8332aa859d0d4b91f9eddc45e1cebfd54742044e2",
-      "size": 86872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_ctypes.pyd",
-      "sha256": "c95add0b1a541b723c9090c23abeadb8f642b31bb33f2e1ae005fbb8a331ef73",
-      "size": 134488
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_decimal.pyd",
-      "sha256": "e80e2c4533958c717f40238155bd9f4101df23f832e1dddb8be4e83f7ad3355a",
-      "size": 286040
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_hashlib.pyd",
-      "sha256": "8770291fed8af2ea8e9fd2ed695e8c56f8e26848c91d320d1a22ddf404d02116",
-      "size": 69464
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_lzma.pyd",
-      "sha256": "1ddce9934889905b482f8587656f28ae1988365a55ae86ca4438873fd0184340",
-      "size": 159576
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_multiprocessing.pyd",
-      "sha256": "f812b488ea8ae37c7da58f3068a1d08b1c66f9a7858610652bc4329843e0b876",
-      "size": 38232
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_overlapped.pyd",
-      "sha256": "3555e7a0250f379e12a7be5c736477246e411d58cea35be51226956038ad72a6",
-      "size": 57688
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_queue.pyd",
-      "sha256": "0d316914b426e71bbd263b78fe23622ac1c8e6f86bae42ef6ffbb609e6257e3a",
-      "size": 35160
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_socket.pyd",
-      "sha256": "a69f3a7e281009c86868dd56c2e933ca2634a3979fdc2a4ca751ee4ef5e6ece7",
-      "size": 86360
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_ssl.pyd",
-      "sha256": "eb860d3a4ad45e3d7975c5fdc3994798ee9b7ab685fa920c2656878b7dcd3029",
-      "size": 182104
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_uuid.pyd",
-      "sha256": "118d5c36b649da58313ea5b0617dac96d2e35fc08739efa919547e189fb4d65c",
-      "size": 27992
-    },
-    {
-      "path": "ap_bridge_dist/_internal/_wmi.pyd",
-      "sha256": "1800304e19246edfdb56a14ffabc129b6b5b73e25dbedd2302e75a9eb4d78352",
-      "size": 39768
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-console-l1-1-0.dll",
-      "sha256": "4745f2d84cd3783f43759946ed61faa99b4590b8f9d3e2ef509891ea224348ce",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-datetime-l1-1-0.dll",
-      "sha256": "33333762b0705fa862f2c69ae6700d95dd2120fdb858557f7236c8565a6f3376",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-debug-l1-1-0.dll",
-      "sha256": "bafd1ad4846317028ffb8edc6da6f05cb3905cfa6d8af8b9f9dfcd916d64f568",
-      "size": 22888
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-errorhandling-l1-1-0.dll",
-      "sha256": "e4c1d9c242c90aff70365b49addf90f7ca81a7f774fdad7513806d4746ba1240",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-fibers-l1-1-0.dll",
-      "sha256": "c43b6924586e222352bf4ef87fd5967cfc8108c44ac403c61e10bd58ac2d12d0",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-file-l1-1-0.dll",
-      "sha256": "25785794eae17261f71ff91452bd84304e47e0c8faf93acacfa7e948cdad39f8",
-      "size": 26968
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-file-l1-2-0.dll",
-      "sha256": "99388fc5699811f380183653ebb4be903634ae6a1e0858fe73d6fa8bdebf6ca3",
-      "size": 22888
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-file-l2-1-0.dll",
-      "sha256": "f957a4c261506484b53534a9be8931c02ec1a349b3f431a858f8215cecfec3f7",
-      "size": 20960
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-handle-l1-1-0.dll",
-      "sha256": "afcf3780cfb7142a00b43b753a5491354ace8c2361fbcb966792fec48d271971",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-heap-l1-1-0.dll",
-      "sha256": "698b1ca3145740f17b09d0bb834b191826d04e2b80508563c69bd5b6418bc265",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-interlocked-l1-1-0.dll",
-      "sha256": "23ca56b5511cbcb93fcba8ef2f68be8944a54f712e69e29cac6852a3452f0a92",
-      "size": 22912
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-libraryloader-l1-1-0.dll",
-      "sha256": "36645500fa7e88d5f5682f39ff8ec9eba845c376c77b87a8706a89d47ded9cf1",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-localization-l1-2-0.dll",
-      "sha256": "1671ae25449e6f8e0efba5d6e71ca189f8b6281353d3a9e3fbf75f44a681912e",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-memory-l1-1-0.dll",
-      "sha256": "2c1c0eb7d1ebc63c50c7188798229244a11ac18396afa1ace427cc5651f0156c",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-namedpipe-l1-1-0.dll",
-      "sha256": "a78ab5d0dad8486a17d2ee799b41b82e21a4ec8a0c16c28ff6272b5adc9ff267",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-processenvironment-l1-1-0.dll",
-      "sha256": "3fc9bf9f63f8be1638b06dfe477f3134cf4a4db7b399a5910b1db381ac470389",
-      "size": 22888
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-processthreads-l1-1-0.dll",
-      "sha256": "53d06d7159faacfc684401c2e7024120a6fb2e49e495d9ba306917c04e519b92",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-processthreads-l1-1-1.dll",
-      "sha256": "32dc2061365b39ee3967765ecc4fd53e62264e997962f9f6153e9fcd11e1b62c",
-      "size": 22888
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-profile-l1-1-0.dll",
-      "sha256": "4e9549166af0b097f1cd992655617420dc475491f30e9245354d7ed7023feb43",
-      "size": 22888
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-rtlsupport-l1-1-0.dll",
-      "sha256": "8e7e7681173377a989057731eaa971b947ab877bb82865585a48a2020f3e0991",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-string-l1-1-0.dll",
-      "sha256": "15793160c84c7b39dbf7b33fa6b4c0294489ff45e084725d769ee7d07794d972",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-synch-l1-1-0.dll",
-      "sha256": "11d136d4fec342089fa8e43216f1272ca87432c7658a01fb85b219c5327b74a6",
-      "size": 22912
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-synch-l1-2-0.dll",
-      "sha256": "f80455cc6bbd29c2c735d74b6740c6977c536508c3466dc2b535401e8e6142f4",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-sysinfo-l1-1-0.dll",
-      "sha256": "cfdfcda8044e4e8af1c558574c0dfb6cb8eed375848897abaffb9bbd482c7925",
-      "size": 22888
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-timezone-l1-1-0.dll",
-      "sha256": "d8414b7c1412d7192b9d3a786df3d977cb4bf817d4e1a7fc3a37764d42afa4a1",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-core-util-l1-1-0.dll",
-      "sha256": "aab3485f2ddd4911d57c26dd7b29db640dc0091f203813c48f424f01d28c3308",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-conio-l1-1-0.dll",
-      "sha256": "f4f6d6327e19515ed1725e45bcea92d451d0ec6d14f7485b72f2393f815ec21e",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-convert-l1-1-0.dll",
-      "sha256": "a6db9646bfe20b9bfa729bde2524a509c4a10f0b982927d2618673b61435cc4d",
-      "size": 26968
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-environment-l1-1-0.dll",
-      "sha256": "68c3235afacab672777da49158f3e5dabe5d30c677c2fa8ed0c2f09481a16d3e",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-filesystem-l1-1-0.dll",
-      "sha256": "0b50842eec6e4a1098627799abb4c7410836304077ff631ce661e3b5e3c10931",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-heap-l1-1-0.dll",
-      "sha256": "7e0428d958b5b1ae972cd8fb174b393cd1342998e24faf98d23bc9001b1e1796",
-      "size": 22872
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-locale-l1-1-0.dll",
-      "sha256": "359c27d9a06a97d3f58ab15bd23c8aef64273623b418a8365eab8b7d98362d62",
-      "size": 22888
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-math-l1-1-0.dll",
-      "sha256": "1017b3363f8796ce61ed6ee6e5645cb853d69a54f32683fc55c6cf0cbb9dde37",
-      "size": 31088
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-process-l1-1-0.dll",
-      "sha256": "55670f0f6bdb7fd4222c7a7dfd2e383be7a48be529b2ea501f2327cc0b098ffe",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-runtime-l1-1-0.dll",
-      "sha256": "8bdf3fe92340ba335488793b5e5d164b15ece06a6c361ccab7ac4a1bf6b06ff9",
-      "size": 27008
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-stdio-l1-1-0.dll",
-      "sha256": "e52fc89df7c449ba61f30d859efea9e8c04edf0078dde6c5e41394a7487f5404",
-      "size": 27008
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-string-l1-1-0.dll",
-      "sha256": "78477022e8f130912e2a8767be8fddb3963c429e9c67abd2f50cfdfae0ce5048",
-      "size": 26984
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-time-l1-1-0.dll",
-      "sha256": "d39c5aea2f04a6eaa7ec84ad9c9162fd64a1545bcc41121368594f8a1db07550",
-      "size": 22888
-    },
-    {
-      "path": "ap_bridge_dist/_internal/api-ms-win-crt-utility-l1-1-0.dll",
-      "sha256": "50966bb41ffc5c112bdf4e9717fbabd194f1843a84488dc229a71d3365ff45dd",
-      "size": 22896
-    },
-    {
-      "path": "ap_bridge_dist/_internal/base_library.zip",
-      "sha256": "d4bbab3591944aa8cd0e498f2b390e6dafafe97bd879879b5a41717517cc93de",
-      "size": 1402457
-    },
-    {
-      "path": "ap_bridge_dist/_internal/libcrypto-3.dll",
-      "sha256": "e03dd02fdcfb791981c9962827cfcf495f2a47a514c1526efb57f847a9df514a",
-      "size": 5229424
-    },
-    {
-      "path": "ap_bridge_dist/_internal/libffi-8.dll",
-      "sha256": "eff52743773eb550fcc6ce3efc37c85724502233b6b002a35496d828bd7b280a",
-      "size": 39696
-    },
-    {
-      "path": "ap_bridge_dist/_internal/libssl-3.dll",
-      "sha256": "1e4bc0638682bfcbb36f4465d6a2e9944d917a60f05ecc8ddf9e96847e05e13f",
-      "size": 794992
-    },
-    {
-      "path": "ap_bridge_dist/_internal/pyexpat.pyd",
-      "sha256": "c00c4177b57a4e519fdb0e14381ec03f1ef4d627ee10280382e8e06030c61958",
-      "size": 217944
-    },
-    {
-      "path": "ap_bridge_dist/_internal/python313.dll",
-      "sha256": "265a27242ee97f81eeac6a556fd7de56baff2222f2334386d8f948e359a649d8",
-      "size": 6117208
-    },
-    {
-      "path": "ap_bridge_dist/_internal/select.pyd",
-      "sha256": "7d061afc87ba79f90878af39a1ebc7b4cf238d52e5bbe16ff7e176cbba266ec0",
-      "size": 33112
-    },
-    {
-      "path": "ap_bridge_dist/_internal/ucrtbase.dll",
-      "sha256": "c04daeba7e7c4b711d33993ab4c51a2e087f98f4211aea0dcb3a216656ba0ab7",
-      "size": 1122768
-    },
-    {
-      "path": "ap_bridge_dist/_internal/unicodedata.pyd",
-      "sha256": "85ec764b02ad20bd168779f4716841d8291d3be0d3a243dcfb05abe684a517dd",
-      "size": 712024
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets/speedups.cp313-win_amd64.pyd",
-      "sha256": "dc38d5de91b62022b3bf46b909136076d227e712c2f857c6ce886df7020190da",
-      "size": 11776
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/INSTALLER",
-      "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
-      "size": 4
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/METADATA",
-      "sha256": "918b2fe38207665a087398b54267e77c9d643ce7706410016c9ef6a88b6e3030",
-      "size": 6978
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/RECORD",
-      "sha256": "756b8c362f9981669b1422a4354bd75cafedd7b342cd0c7287dec3c95c412dca",
-      "size": 7725
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/REQUESTED",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/WHEEL",
-      "sha256": "a95d0420f9638f55c2fefb926ad4568e7d369d9233dcdd6df23b19cfb1c1af65",
-      "size": 101
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/entry_points.txt",
-      "sha256": "0e7867e1d9b912c23864c02c1e574617a0b005766b1979d1edc9cadbe5d1ef36",
-      "size": 51
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/top_level.txt",
-      "sha256": "08ca5d2a49712acbd980283296dc5458e1e26d95d9d6e60856971af71b10f079",
-      "size": 11
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/licenses/LICENSE",
-      "sha256": "0f44514998aca209d3482d10204a8adf2aa4296ff157a36a5c0922f2280632d3",
-      "size": 1538
+      "sha256": "bdd0121ac1cd82a68cbf50c6148c1d5ea04579caefc46d17fca6a341bdf0d98d",
+      "size": 22505
     },
     {
       "path": "Archipelago/ArchIcons15.DC6",
@@ -739,44 +329,39 @@
       "size": 155890
     },
     {
-      "path": "Archipelago/ap_bridge_log.txt",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
+      "path": "Archipelago/ap_status.dat",
+      "sha256": "4db52876d6fda90491649f11c77879445acb117bfac6aea21c42cf750c1fd5de",
+      "size": 49
     },
     {
-      "path": "Archipelago/ap_status.dat",
-      "sha256": "9b2b39f1728e360b1dc1ce5f9d3f20d194ebb0da76f5d75e4a1cf3c83a4c94f3",
-      "size": 51
+      "path": "Archipelago/custom_bosses.dat",
+      "sha256": "b77eddd01ac2eb2b81d8125b35139afab45de67c1902abb52f74026ccbc87bc1",
+      "size": 4242
     },
     {
       "path": "Archipelago/d2arch.ini",
-      "sha256": "b2764f4fdfdd73b4dcae5170b811ecd025d99885204c20d81b8a11a27a5bed62",
-      "size": 5492
-    },
-    {
-      "path": "Archipelago/d2arch_checks_dgfhdgfh.dat",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
-    },
-    {
-      "path": "Archipelago/d2arch_slots_dgfhdgfh.dat",
-      "sha256": "7f7bfab97913c4cc08653e06e3f9b47d311a8ae25b171aba2ce84a8563dcfbac",
-      "size": 9
-    },
-    {
-      "path": "Archipelago/d2arch_state_dgfhdgfh.dat",
-      "sha256": "5ea5ef3316980b2f19acd44eb818a1ac6bbe65590c2516d57f147519b20a5a0f",
-      "size": 5138
+      "sha256": "5154c2d6d4c9b5f2afa827d91267e0059937c6474d228ba68889b0479d3aa400",
+      "size": 5796
     },
     {
       "path": "Archipelago/news.txt",
-      "sha256": "3ce0c63ef39e3d36960c3480e0e3f29ab606ec234cd2933e76b17479e6e5802a",
-      "size": 754
+      "sha256": "647ce63a1f68ae753b086c62ad55329f1de162749a98d40dcb3e26976cac9c73",
+      "size": 2099
     },
     {
       "path": "Archipelago/orig_iconcel.dat",
       "sha256": "8bbd8467a052d9b7b5b83e637843bbeb0a0a9fcd96b571c0b333d6e62c411817",
       "size": 1337
+    },
+    {
+      "path": "Archipelago/shared_stash.dat",
+      "sha256": "774a284d7a7ac3af0d7b940ff9f8eb6a3074543c4e5f23dbf3264201e243887d",
+      "size": 76744
+    },
+    {
+      "path": "Archipelago/shared_stash_ser.dat",
+      "sha256": "0496ba966fc9881b02f5d215a0d7ccfbb469d8121058414dd285ee1789628eb6",
+      "size": 16636
     },
     {
       "path": "Archipelago/skill_data.dat",
@@ -794,8 +379,13 @@
       "size": 1682
     },
     {
+      "path": "Archipelago/treasure_cows.dat",
+      "sha256": "c9af9e33542842a2a0823301d15e231bf284f28be6e848b53afaf25b1f4a7edc",
+      "size": 1930
+    },
+    {
       "path": "Archipelago/version.dat",
-      "sha256": "70d50dd3726bcf2bcc3e1f5928c9c24dec3d95670bee37092b256dc179928833",
+      "sha256": "c8baa21d619f0b6f17376a08a195bb80cad2126a6b3e45a355c38df0fe857088",
       "size": 10
     },
     {
@@ -1325,7 +915,7 @@
     },
     {
       "path": "data/global/excel/inventory.txt",
-      "sha256": "417debd2e8d3a2118e50fa66ab22a5127f3df5f48f316f797472517e2ca1c954",
+      "sha256": "b11f2c15da5edb66608b4da9f35af37b5a43082a55a9abea87266a021448a64d",
       "size": 8801
     },
     {
@@ -1340,8 +930,8 @@
     },
     {
       "path": "data/global/excel/itemscode.bin",
-      "sha256": "64348781e41da3bf9615d2e62fa68a76b2232ece3848847a18fee51fe7afcf02",
-      "size": 316
+      "sha256": "2885d882fe1a47de2f1d48002ff5f53c03bf6158970defdadd599217130e0904",
+      "size": 158
     },
     {
       "path": "data/global/excel/itemstatcost.bin",
@@ -1405,7 +995,7 @@
     },
     {
       "path": "data/global/excel/misc.bin",
-      "sha256": "852700055d23e33c61b831052a520b0fd933809be892d6a4a5d04aedce827411",
+      "sha256": "9b247daf7aac86f84952880ce83e666644d2c3d82fa629347045b91542f18b5b",
       "size": 58940
     },
     {
@@ -1525,7 +1115,7 @@
     },
     {
       "path": "data/global/excel/monstats.bin",
-      "sha256": "c903a1223fe6e058ad9b48cdd41dcfcf0e1af504811c7a2d904c4fe25fdfdfc1",
+      "sha256": "f6cef4b35146ebdd53bc18ab015856f435e04f3b917d149d97b72770390b0332",
       "size": 298500
     },
     {
@@ -1735,7 +1325,7 @@
     },
     {
       "path": "data/global/excel/superuniques.bin",
-      "sha256": "239ac86c98186a4e0a7f7ab65531658e87e2b780f36387a1a141d545f083e0e1",
+      "sha256": "57ce4e64f68ae2521719c57bf13ebbc6b11c1c24bedece1d9da358dc936c24b0",
       "size": 3436
     },
     {
@@ -1807,6 +1397,16 @@
       "path": "data/global/ui/CharSelect/settings_toggle_red.dc6",
       "sha256": "01fff3b3ddaa01f1ace7bf608d12feb60260aa376399e82e7248411146ac9d63",
       "size": 9412
+    },
+    {
+      "path": "data/global/ui/CharSelect/settings_toggle_wide.dc6",
+      "sha256": "e64de87a1c4043bc3a1b2491f18261bbb6e7ed6bea4538949d6fec9d946ae1f5",
+      "size": 17812
+    },
+    {
+      "path": "data/global/ui/CharSelect/settings_toggle_wide_red.dc6",
+      "sha256": "8dfa06a70877c0caa405a2cc7593934d0ccaccacbd20b9d1fa2e7cbf41929f4f",
+      "size": 17812
     },
     {
       "path": "data/global/ui/CharSelect/smallbutton.dc6",
@@ -2215,8 +1815,8 @@
     },
     {
       "path": "data/local/LNG/ENG/patchstring.tbl",
-      "sha256": "cef371cbba751b0ca49a48b032f1a540f434f1340e7835fdaded940d032fadd8",
-      "size": 42523
+      "sha256": "56e5c51666f9d69fb662feeefbaabf05cca89efd68853b09a6a1e4a1add34f29",
+      "size": 41321
     },
     {
       "path": "patch/D2Common.dll.disabled",

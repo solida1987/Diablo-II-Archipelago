@@ -396,3 +396,40 @@ GOAL_QUEST_IDS = {
     3: 303,  # Acts 1-4 -> Terror's End
     4: 406,  # Full Game -> Eve of Destruction (Baal)
 }
+
+
+# ============================================================
+# 1.8.0 NEW — Gate-boss kill locations (preload-gated zone-locking)
+# 54 locations: 18 gates × 3 difficulties.
+#
+# Location ID formula: 47000 + diff*1000 + act*10 + gate_idx
+# (matches the DLL formula in d2arch_gameloop.c gate-kill hook)
+#
+# Examples:
+#   47011 = Act 1 Gate 2 Normal    (diff=0, act=1, gate=1)
+#   48051 = Act 5 Gate 2 Nightmare (diff=1, act=5, gate=1)
+#   49013 = Act 1 Gate 4 Hell      (diff=2, act=1, gate=3)
+# ============================================================
+
+GATE_LOCATION_BASE = 47000
+
+def _gate_location_entries():
+    out = []
+    gates_by_act = {1: 4, 2: 4, 3: 4, 4: 2, 5: 4}
+    diff_name = ["Normal", "Nightmare", "Hell"]
+    for diff in range(3):
+        for act in range(1, 6):
+            for g in range(gates_by_act[act]):
+                loc_id = GATE_LOCATION_BASE + diff * 1000 + act * 10 + g
+                name = f"Act {act} Gate {g + 1} Cleared ({diff_name[diff]})"
+                out.append((loc_id, name, act, diff, g))
+    return out
+
+GATE_LOCATIONS = _gate_location_entries()  # 54 entries
+
+# Add gate locations to the table
+for loc_id, name, _act, _diff, _g in GATE_LOCATIONS:
+    location_table[name] = loc_id
+
+# Update reverse lookup after adding gate locations
+location_id_to_name = {v: k for k, v in location_table.items()}

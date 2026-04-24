@@ -13,10 +13,12 @@ from worlds.AutoWorld import World, WebWorld
 from .items import (
     item_table, FILLER_ITEMS, ALL_SKILL_ITEMS, ALL_SKILL_ITEMS_WITH_TRAPS,
     ITEM_BASE, CLASS_SKILLS, ASSASSIN_TRAP_SKILLS, ZONE_KEY_ITEMS,
+    GATE_KEY_ITEMS,
 )
 from .locations import (
     location_table, ALL_ACT_LOCATIONS, GOAL_QUEST_IDS, LOCATION_BASE,
     LEVEL_MILESTONES_NORMAL, LEVEL_MILESTONES_NIGHTMARE, LEVEL_MILESTONES_HELL,
+    GATE_LOCATIONS,
 )
 from .options import Diablo2ArchipelagoOptions
 from .regions import create_regions
@@ -55,8 +57,9 @@ class Diablo2ArchipelagoWorld(World):
     location_name_to_id = location_table.copy()
 
     # Quest type → option toggle mapping
+    # 1.8.0: "story" removed — D2 engine requires main-story quests.
+    # Story locations are always generated regardless of toggles.
     QUEST_TYPE_OPTIONS = {
-        "story": "quest_story",
         "hunt": "quest_hunting",
         "kill": "quest_kill_zones",
         "area": "quest_exploration",
@@ -72,14 +75,17 @@ class Diablo2ArchipelagoWorld(World):
         return Diablo2ArchipelagoLocation(self.player, name, ap_id, region)
 
     def get_active_locations(self) -> list:
-        """Get all locations that are active based on options (combined goal + quest toggles)."""
-        goal = self.options.goal.value  # 0-14, encodes act + difficulty
-        max_act = (goal // 3) + 1      # 1-5
-        num_difficulties = (goal % 3) + 1  # 1-3
-        goal_scope = goal // 3          # 0-4 (for GOAL_QUEST_IDS lookup)
+        """Get all locations that are active based on options (combined goal + quest toggles).
 
-        # Always include the goal quest regardless of toggles
-        goal_quest_id = GOAL_QUEST_IDS[goal_scope]
+        1.8.0 — Goal simplified to 3 values (0=Full Normal, 1=Full NM, 2=Full Hell).
+        Act scope is ALWAYS full game (all 5 acts); only difficulty scope varies.
+        """
+        goal = self.options.goal.value  # 0-2 (difficulty scope)
+        max_act = 5                     # always full game
+        num_difficulties = goal + 1     # 1, 2, or 3
+
+        # Goal quest is always Baal (Eve of Destruction, quest_id 406)
+        goal_quest_id = 406
 
         active = []
         for act_idx in range(min(max_act, 5)):
@@ -102,6 +108,23 @@ class Diablo2ArchipelagoWorld(World):
                         loc_name = name + diff_names[diff]
                         loc_id = LOCATION_BASE + quest_id + (diff * 1000)  # offset per difficulty
                     active.append((quest_id, loc_name, quest_type, classification, loc_id, diff))
+
+        # 1.8.0 NEW — Gate-boss kill locations (only when zone_locking is ON)
+        # 18 gates × up to 3 difficulties = 54 locations for Full Hell goal.
+        # Always included regardless of quest-type toggles (gate-kill is its
+        # own check type, not a "quest").
+        if hasattr(self.options, 'zone_locking') and self.options.zone_locking.value:
+            for loc_id, loc_name, act, diff, gate_idx in GATE_LOCATIONS:
+                if act > max_act:
+                    continue
+                if diff >= num_difficulties:
+                    continue
+                # Reuse the tuple format: (quest_id, name, quest_type, classification, loc_id, diff)
+                # quest_id not meaningful here; we use a synthetic negative marker.
+                # classification progression=true so fill treats as meaningful
+                synthetic_quest_id = -(loc_id)  # marker: negative = gate location
+                active.append((synthetic_quest_id, loc_name, "gate",
+                               ItemClassification.progression, loc_id, diff))
 
         # Add global level milestones (per difficulty, scaled to max_act)
         if hasattr(self.options, 'quest_level_milestones') and self.options.quest_level_milestones.value:
@@ -127,19 +150,41 @@ class Diablo2ArchipelagoWorld(World):
     def create_regions(self) -> None:
         create_regions(self)
 
+    def generate_early(self) -> None:
+        """1.8.0 — pick 15 preload IDs (5 acts × 3 difficulties) per slot.
+        Baked here so the same seed always produces the same layout.
+        Exposed via fill_slot_data; not user-configurable.
+        """
+        max_preloads = {1: 4, 2: 4, 3: 4, 4: 3, 5: 4}
+        self.preloads = {}
+        for act in range(1, 6):
+            for diff in range(3):
+                self.preloads[(act, diff)] = self.random.randint(0, max_preloads[act] - 1)
+
     def create_items(self) -> None:
         active_locations = self.get_active_locations()
         location_count = len(active_locations)
-        game_mode = self.options.game_mode.value  # 0=Skill Hunt, 1=Zone Explorer
+        skill_hunting = bool(self.options.skill_hunting.value)
+        zone_locking  = bool(self.options.zone_locking.value)
 
-        # --- Zone Explorer: add zone keys as progression items ---
+        # --- Zone Locking: 18 gate-keys per played difficulty ---
         zone_keys_in_pool = []
-        if game_mode == 1:
-            max_act = (self.options.goal.value // 3) + 1
-            for ap_id, name, act, classification in ZONE_KEY_ITEMS:
-                if act <= max_act:
-                    zone_keys_in_pool.append((ap_id, name, classification))
-                    self.multiworld.itempool.append(self.create_item(name))
+        if zone_locking:
+            num_difficulties = self.options.goal.value + 1  # 0-2 -> 1-3 diffs
+            for ap_id, name, act, classification in GATE_KEY_ITEMS:
+                # Determine item's difficulty from AP ID range
+                if 46101 <= ap_id <= 46118:
+                    item_diff = 0  # Normal
+                elif 46121 <= ap_id <= 46138:
+                    item_diff = 1  # Nightmare
+                elif 46141 <= ap_id <= 46158:
+                    item_diff = 2  # Hell
+                else:
+                    continue
+                if item_diff >= num_difficulties:
+                    continue  # Not played this difficulty
+                zone_keys_in_pool.append((ap_id, name, classification))
+                self.multiworld.itempool.append(self.create_item(name))
 
         # --- Build skill pool based on class filter ---
         if self.options.skill_class_filter.value == 1:  # Custom class filter
@@ -158,9 +203,9 @@ class Diablo2ArchipelagoWorld(World):
                 if enabled:
                     available_skills.extend(CLASS_SKILLS[cls_name])
 
-            # Add Assassin trap skills ONLY if "I Play Assassin" is ON
-            if self.options.i_play_assassin.value and self.options.include_assassin.value:
-                available_skills.extend(ASSASSIN_TRAP_SKILLS)
+            # 1.8.0: Assassin trap skills always excluded from pool (prevents
+            # invisible-character bug on non-Assassin classes). Matches in-game
+            # behaviour — the 'I Play Assassin' toggle was removed in 1.8.0.
 
             # If nothing selected, fall back to all skills
             if not available_skills:
@@ -168,14 +213,13 @@ class Diablo2ArchipelagoWorld(World):
 
             pool_size = len(available_skills)
         else:
-            # All classes mode — use pool size option
+            # All classes mode — full 210-skill pool (trap skills always excluded)
             available_skills = list(ALL_SKILL_ITEMS)
-            # Add trap skills if "I Play Assassin" is ON
-            if self.options.i_play_assassin.value:
-                available_skills = list(ALL_SKILL_ITEMS_WITH_TRAPS)
-            pool_size = min(self.options.skill_pool_size.value, len(available_skills))
+            pool_size = len(available_skills)
 
-        starting = self.options.starting_skills.value
+        # 1.8.0: starting_skills hardcoded to 6 (matches in-game default).
+        # Removed as user-facing option.
+        starting = 6
 
         # Cap pool so total items never exceeds location_count
         # Total items = (pool_size - starting) skills + zone_keys + filler
@@ -200,13 +244,21 @@ class Diablo2ArchipelagoWorld(World):
         ordered_pool = t1_skills + t2_skills
         ordered_pool = ordered_pool[:pool_size]
 
-        # Create skill items
-        # In Zone Explorer mode, skills are "useful" not "progression"
+        # Create skill items.
+        # 1.8.0 classification rules (per user spec 2026-04-24):
+        #   Skill Hunting ON  -> skills = USEFUL (not progression)
+        #   Zone Locking  ON  -> gate keys = PROGRESSION (already set in GATE_KEY_ITEMS)
+        #   Both OFF          -> story quests' rewards stay progression (default in items.py)
+        # So skills default to progression in items.py (tier-1), but we
+        # downgrade them to useful when skill_hunting is ON to match the spec.
         skill_items = []
         for d2_id, name, classification in ordered_pool:
             item = self.create_item(name)
-            if game_mode == 1:
+            if skill_hunting:
                 item.classification = ItemClassification.useful
+            # Note: if skill_hunting OFF, keep original tier-1/tier-2 classification
+            # (progression or useful based on items.py definitions). This lets skills
+            # still gate progression in non-skill-hunt modes where they're meaningful.
             skill_items.append(item)
 
         # Pre-place starting skills as "start inventory" so player has them immediately
@@ -228,23 +280,17 @@ class Diablo2ArchipelagoWorld(World):
             self._create_filler_items(filler_needed)
 
     def _create_filler_items(self, count: int) -> None:
-        """Create filler items with normalized percentage distribution."""
-        # Read weights from options
+        """Create filler items with normalized percentage distribution.
+        1.8.0: filler weights hardcoded to in-game defaults (options removed)."""
         weights = {
-            "Gold Bundle (Small)": self.options.filler_gold_pct.value,
-            "Gold Bundle (Medium)": self.options.filler_gold_pct.value,
-            "Gold Bundle (Large)": self.options.filler_gold_pct.value,
-            "5 Stat Points": self.options.filler_stat_pts_pct.value,
-            "Skill Point": self.options.filler_skill_pts_pct.value,
-            "Trap": self.options.filler_trap_pct.value,
-            "Reset Point": self.options.filler_reset_pts_pct.value,
+            "Gold Bundle (Small)":  10,   # gold_pct=30 split across 3 tiers
+            "Gold Bundle (Medium)": 10,
+            "Gold Bundle (Large)":  10,
+            "5 Stat Points":        15,
+            "Skill Point":          15,
+            "Trap":                 15,
+            "Reset Point":          25,
         }
-
-        # Gold gets split across 3 tiers, so divide weight by 3
-        gold_w = self.options.filler_gold_pct.value
-        weights["Gold Bundle (Small)"] = max(1, gold_w // 3)
-        weights["Gold Bundle (Medium)"] = max(1, gold_w // 3)
-        weights["Gold Bundle (Large)"] = max(1, gold_w // 3)
 
         # Normalize: if all zero, distribute evenly
         total_weight = sum(weights.values())
@@ -271,21 +317,17 @@ class Diablo2ArchipelagoWorld(World):
             remaining -= filler_count
 
     def set_rules(self) -> None:
-        """Set the victory condition based on Goal (combined act + difficulty).
+        """Set the victory condition.
 
-        Goal encoding: goal = act_scope * 3 + difficulty
-          - act_scope: 0=Act1 only, 1=Acts1-2, 2=Acts1-3, 3=Acts1-4, 4=Full
-          - difficulty: 0=Normal, 1=Nightmare, 2=Hell
+        1.8.0 — Goal simplified to 3 values:
+          0 = Full Normal    (beat Baal on Normal)
+          1 = Full Nightmare (beat Baal on Normal AND Nightmare)
+          2 = Full Hell      (beat Baal on Normal, NM, AND Hell)
 
-        The victory location MUST carry the difficulty suffix so that
-        completing Baal on Normal does NOT satisfy a Hell goal. This
-        matches the DLL gameplay-agent fix that gates
-        g_deferredDiff[gi] == (g_apGoal % 3) before firing REWARD_GOAL.
+        Victory = Eve of Destruction on the chosen difficulty.
         """
-        goal = self.options.goal.value
-        goal_scope = goal // 3  # 0-4
-        goal_diff = goal % 3    # 0=Normal, 1=NM, 2=Hell
-        goal_quest_id = GOAL_QUEST_IDS[goal_scope]
+        goal_diff = self.options.goal.value  # 0/1/2
+        goal_quest_id = 406  # Eve of Destruction (Baal)
 
         # Find the victory location name (with difficulty suffix if needed)
         goal_loc_name = None
@@ -320,46 +362,44 @@ class Diablo2ArchipelagoWorld(World):
             )
 
     def fill_slot_data(self) -> dict[str, Any]:
-        """Data sent to the client/bridge. Bridge writes this to ap_settings.dat for the DLL.
-
-        The DLL's LoadAPSettings() in d2arch_ap.c parses each `key=value`
-        line and mirrors the selected multiworld options into runtime
-        state. The following keys are REQUIRED by the DLL — removing or
-        renaming any of them silently breaks per-character sync.
-
-        Per DIAGNOSTIC_REPORT_1.7.0.md section 3.3.8, the DLL needs:
-          monster_shuffle, boss_shuffle, shop_shuffle, treasure_cows,
-          i_play_assassin — all present below.
-        """
+        """Data sent to the client/bridge. Bridge writes to ap_settings.dat.
+        1.8.0 — Simplified: only user-facing options + auto-generated preloads.
+        Internal values (skill pool=210, starting=6, filler defaults) are
+        hardcoded on the DLL side and not transmitted. """
         return {
-            "game_mode": self.options.game_mode.value,
-            "goal": self.options.goal.value,
-            "starting_skills": self.options.starting_skills.value,
-            "skill_pool_size": self.options.skill_pool_size.value,
-            "death_link": self.options.death_link.value,
+            "skill_hunting":     self.options.skill_hunting.value,
+            "zone_locking":      self.options.zone_locking.value,
+            "goal":              self.options.goal.value,  # 0=Normal, 1=NM, 2=Hell
+            "death_link":        self.options.death_link.value,
             # Quest toggles
-            "quest_story": self.options.quest_story.value,
-            "quest_hunting": self.options.quest_hunting.value,
-            "quest_kill_zones": self.options.quest_kill_zones.value,
-            "quest_exploration": self.options.quest_exploration.value,
-            "quest_waypoints": self.options.quest_waypoints.value,
+            "quest_story":            1,  # always ON — engine-required
+            "quest_hunting":          self.options.quest_hunting.value,
+            "quest_kill_zones":       self.options.quest_kill_zones.value,
+            "quest_exploration":      self.options.quest_exploration.value,
+            "quest_waypoints":        self.options.quest_waypoints.value,
             "quest_level_milestones": self.options.quest_level_milestones.value,
-            # Filler weights
-            "filler_gold_pct": self.options.filler_gold_pct.value,
-            "filler_stat_pts_pct": self.options.filler_stat_pts_pct.value,
-            "filler_skill_pts_pct": self.options.filler_skill_pts_pct.value,
-            "filler_trap_pct": self.options.filler_trap_pct.value,
-            "filler_reset_pts_pct": self.options.filler_reset_pts_pct.value,
-            # Monster / Boss / Shop shuffles
+            # XP + shuffles (shop_shuffle/i_play_assassin removed — no-op in DLL)
+            "xp_multiplier":   self.options.xp_multiplier.value,
             "monster_shuffle": self.options.monster_shuffle.value,
-            "boss_shuffle": self.options.boss_shuffle.value,
-            "shop_shuffle": self.options.shop_shuffle.value,
-            # Treasure Cows
-            "treasure_cows": self.options.treasure_cows.value,
-            # Class filter
-            "i_play_assassin": self.options.i_play_assassin.value,
+            "boss_shuffle":    self.options.boss_shuffle.value,
+            # 1.8.0 — Gate preloads (auto-generated per slot in generate_early)
+            "act1_preload_normal":    self.preloads[(1, 0)],
+            "act1_preload_nightmare": self.preloads[(1, 1)],
+            "act1_preload_hell":      self.preloads[(1, 2)],
+            "act2_preload_normal":    self.preloads[(2, 0)],
+            "act2_preload_nightmare": self.preloads[(2, 1)],
+            "act2_preload_hell":      self.preloads[(2, 2)],
+            "act3_preload_normal":    self.preloads[(3, 0)],
+            "act3_preload_nightmare": self.preloads[(3, 1)],
+            "act3_preload_hell":      self.preloads[(3, 2)],
+            "act4_preload_normal":    self.preloads[(4, 0)],
+            "act4_preload_nightmare": self.preloads[(4, 1)],
+            "act4_preload_hell":      self.preloads[(4, 2)],
+            "act5_preload_normal":    self.preloads[(5, 0)],
+            "act5_preload_nightmare": self.preloads[(5, 1)],
+            "act5_preload_hell":      self.preloads[(5, 2)],
             # Meta
-            "seed": self.multiworld.seed,
+            "seed":        self.multiworld.seed,
             "player_name": self.multiworld.get_player_name(self.player),
         }
 

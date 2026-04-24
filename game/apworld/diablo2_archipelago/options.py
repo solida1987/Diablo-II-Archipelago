@@ -1,6 +1,13 @@
 """
 Diablo II Archipelago - World Options
-All settings configurable via YAML for AP multiworld generation.
+
+1.8.0 cleanup: options list now mirrors what the in-game title-screen
+settings panel offers. Removed options that were AP-only / duplicates /
+internal balance knobs:
+  - GameMode (deprecated; replaced by SkillHunting + ZoneLocking toggles)
+  - SkillPoolSize (always 210; class filter already handles restriction)
+  - 6 Filler*Pct options (internal balance — DLL uses sensible defaults)
+  - 15 Act<N>_Preload_<Diff> options (AP generates randomly per slot)
 """
 from dataclasses import dataclass
 
@@ -8,80 +15,71 @@ from Options import Choice, Range, Toggle, DeathLink, PerGameCommonOptions
 
 
 # ============================================================
-# Goal & Scope
+# Goal & Game Mode
 # ============================================================
 
-class GameMode(Choice):
+class SkillHunting(Toggle):
     """
-    Determines the progression system.
+    Enable Skill Hunting. When ON, skills are added to the AP item pool as
+    useful items — quests unlock skills from the randomized pool.
 
-    Skill Hunt: Skills are progression items. All zones are open from the start.
-    Zone Explorer: Zone Keys are progression items. Zones must be unlocked.
-      Skills become useful items (given more frequently).
+    Can be combined with Zone Locking (both ON = hybrid mode).
     """
-    display_name = "Game Mode"
-    option_skill_hunt = 0
-    option_zone_explorer = 1
+    display_name = "Skill Hunting"
+    default = 1
+
+
+class ZoneLocking(Toggle):
+    """
+    Enable Zone Locking. When ON, the game is gated by 18 semi-random
+    boss-kill gates per difficulty (4 per act, 2 for Act 4). Each gate
+    boss drop sends a check; receiving the gate key opens the next region.
+
+    Can be combined with Skill Hunting (both ON = hybrid mode).
+    """
+    display_name = "Zone Locking"
     default = 0
 
 
 class Goal(Choice):
     """
-    Determines which act boss must be defeated and on which difficulty.
-    This controls both how many acts are playable AND how many difficulties.
+    Determines which difficulty you must complete to win.
 
-    Example: "Acts 1-2 Nightmare" means play Acts 1-2 on Normal AND Nightmare,
-    and defeat Duriel on Nightmare to win.
+    Full Normal:    beat Baal on Normal.
+    Full Nightmare: beat Baal on Normal AND Nightmare.
+    Full Hell:      beat Baal on Normal, Nightmare, AND Hell.
     """
     display_name = "Goal"
-    option_act_1_normal = 0
-    option_act_1_nightmare = 1
-    option_act_1_hell = 2
-    option_acts_1_2_normal = 3
-    option_acts_1_2_nightmare = 4
-    option_acts_1_2_hell = 5
-    option_acts_1_3_normal = 6
-    option_acts_1_3_nightmare = 7
-    option_acts_1_3_hell = 8
-    option_acts_1_4_normal = 9
-    option_acts_1_4_nightmare = 10
-    option_acts_1_4_hell = 11
-    option_full_game_normal = 12
-    option_full_game_nightmare = 13
-    option_full_game_hell = 14
-    default = 12
+    option_full_normal = 0
+    option_full_nightmare = 1
+    option_full_hell = 2
+    default = 0
 
 
 # ============================================================
 # Quest Type Toggles (which quest types generate locations)
 # ============================================================
 
-class QuestStory(Toggle):
-    """Include story quests (Den of Evil, Andariel, etc). Always recommended ON."""
-    display_name = "Story Quests"
-    default = True
-
-
 class QuestHunting(Toggle):
-    """Include Super Unique hunting quests (Kill Corpsefire, Kill Rakanishu, etc)."""
+    """Include SuperUnique hunting quests (Corpsefire, Bishibosh, etc)."""
     display_name = "Hunting Quests"
     default = True
 
 
 class QuestKillZones(Toggle):
-    """Include zone clear quests (Kill 25 monsters in Blood Moor, etc)."""
+    """Include zone-clear quests (kill X monsters in Blood Moor, etc)."""
     display_name = "Kill Zone Quests"
     default = True
 
 
 class QuestExploration(Toggle):
-    """Include area entry quests (Enter Blood Moor, Enter Tristram, etc)."""
+    """Include zone-exploration quests (enter Blood Moor, Cold Plains, etc)."""
     display_name = "Exploration Quests"
     default = True
 
 
 class QuestWaypoints(Toggle):
-    """Include waypoint activation quests."""
+    """Include waypoint-activation quests."""
     display_name = "Waypoint Quests"
     default = True
 
@@ -93,35 +91,15 @@ class QuestLevelMilestones(Toggle):
 
 
 # ============================================================
-# Skill Pool
+# Skill class filter
 # ============================================================
-
-class SkillPoolSize(Range):
-    """
-    How many skills are in the item pool as progression/useful items.
-    Only used when no specific classes are selected.
-    Lower = more filler items. Higher = more skills to find.
-    """
-    display_name = "Skill Pool Size"
-    range_start = 20
-    range_end = 210
-    default = 210
-
-
-class StartingSkills(Range):
-    """Number of random skills the player starts with already unlocked."""
-    display_name = "Starting Skills"
-    range_start = 1
-    range_end = 20
-    default = 6
-
 
 class SkillClassFilter(Choice):
     """
     Filter which class skills are included in the pool.
 
-    All Classes: All 7 classes (default, uses Skill Pool Size).
-    Custom: Only selected classes (use the class toggle options below).
+    All Classes: All 7 classes (210 total skills in pool).
+    Custom: Only selected classes via the class-toggle options below.
     """
     display_name = "Skill Class Filter"
     option_all_classes = 0
@@ -161,110 +139,41 @@ class IncludeDruid(Toggle):
 
 class IncludeAssassin(Toggle):
     """Include Assassin skills in the pool (when Class Filter = Custom).
-    NOTE: Assassin trap skills are only included if 'I Play Assassin' is also ON."""
+    Trap skills are always excluded to prevent the invisible-character bug
+    on non-Assassin classes. This matches 1.8.0 in-game behaviour."""
     display_name = "Include Assassin"
     default = True
 
-class IPlayAssassin(Toggle):
-    """Enable this if you are playing as an Assassin.
-    This unlocks Assassin trap skills (Fire Blast, Wake of Fire, etc.)
-    which only work on Assassin characters. Without this, trap skills
-    are excluded to prevent invisible character bugs."""
-    display_name = "I Play Assassin"
-    default = False
-
 
 # ============================================================
-# Filler Distribution (percentages, auto-normalized to 100%)
+# XP Multiplier
 # ============================================================
 
-class FillerGoldPct(Range):
-    """Relative weight for Gold filler items. Set to 0 to disable gold rewards."""
-    display_name = "Filler: Gold Weight"
-    range_start = 0
-    range_end = 100
-    default = 30
-
-
-class FillerStatPtsPct(Range):
-    """Relative weight for Stat Point filler items."""
-    display_name = "Filler: Stat Points Weight"
-    range_start = 0
-    range_end = 100
-    default = 15
-
-
-class FillerSkillPtsPct(Range):
-    """Relative weight for Skill Point filler items."""
-    display_name = "Filler: Skill Points Weight"
-    range_start = 0
-    range_end = 100
-    default = 15
-
-
-class FillerTrapPct(Range):
+class XPMultiplier(Range):
     """
-    Relative weight for Trap filler items.
-    Traps spawn dangerous Super Unique monsters near the player.
+    Multiply XP gains from monster kills (1 = vanilla, up to 10x).
+    Higher = faster leveling, less grind.
     """
-    display_name = "Filler: Trap Weight"
-    range_start = 0
-    range_end = 100
-    default = 15
-
-
-class FillerResetPtsPct(Range):
-    """Relative weight for Reset Point filler items (used to remove assigned skills)."""
-    display_name = "Filler: Reset Points Weight"
-    range_start = 0
-    range_end = 100
-    default = 25
+    display_name = "XP Multiplier"
+    range_start = 1
+    range_end = 10
+    default = 1
 
 
 # ============================================================
-# Starting Resources
-# ============================================================
-
-## StartingGold REMOVED — gold is earned through gameplay, not given at start
-
-
-# ============================================================
-# Monster Shuffle
+# Shuffles
 # ============================================================
 
 class MonsterShuffle(Toggle):
-    """Shuffle all monster types across all areas. Act 5 monsters can appear in Act 1 etc.
-    Stats are scaled to match area difficulty. Automatically disables Hunting Quests."""
+    """Shuffle monster types across zones. Each game gets a new monster layout."""
     display_name = "Monster Shuffle"
     default = False
 
 
 class BossShuffle(Toggle):
-    """Shuffle all SuperUnique bosses across all areas."""
+    """Shuffle SuperUnique boss placements across zones."""
     display_name = "Boss Shuffle"
     default = False
-
-
-class ShopShuffle(Toggle):
-    """Shuffle vendor inventories. Each vendor sells randomized items from all acts."""
-    display_name = "Shop Shuffle"
-    default = False
-
-
-class TreasureCows(Toggle):
-    """Enable Treasure Cows - special SuperUnique cow monsters placed across all acts.
-    Each one drops valuable loot and counts as a location check when killed.
-    28 Treasure Cows spread across Acts 1-5."""
-    display_name = "Treasure Cows"
-    default = True
-
-
-# ============================================================
-# DeathLink
-# ============================================================
-
-# Uses the built-in DeathLink from Options module
-# When ON: your death sends to others, others' deaths spawn a trap on you
 
 
 # ============================================================
@@ -273,20 +182,18 @@ class TreasureCows(Toggle):
 
 @dataclass
 class Diablo2ArchipelagoOptions(PerGameCommonOptions):
-    # Game Mode
-    game_mode: GameMode
-    # Goal (combined act + difficulty)
+    # Mode toggles
+    skill_hunting: SkillHunting
+    zone_locking: ZoneLocking
+    # Goal
     goal: Goal
-    # Quest toggles
-    quest_story: QuestStory
+    # Quest toggles (story is always ON internally — engine-required)
     quest_hunting: QuestHunting
     quest_kill_zones: QuestKillZones
     quest_exploration: QuestExploration
     quest_waypoints: QuestWaypoints
     quest_level_milestones: QuestLevelMilestones
-    # Pool
-    skill_pool_size: SkillPoolSize
-    starting_skills: StartingSkills
+    # Class filter
     skill_class_filter: SkillClassFilter
     include_amazon: IncludeAmazon
     include_sorceress: IncludeSorceress
@@ -295,17 +202,10 @@ class Diablo2ArchipelagoOptions(PerGameCommonOptions):
     include_barbarian: IncludeBarbarian
     include_druid: IncludeDruid
     include_assassin: IncludeAssassin
-    i_play_assassin: IPlayAssassin
-    # Filler distribution
-    filler_gold_pct: FillerGoldPct
-    filler_stat_pts_pct: FillerStatPtsPct
-    filler_skill_pts_pct: FillerSkillPtsPct
-    filler_trap_pct: FillerTrapPct
-    filler_reset_pts_pct: FillerResetPtsPct
-    # Monster Shuffle
+    # XP
+    xp_multiplier: XPMultiplier
+    # Shuffles (shop_shuffle removed — no logic implemented in DLL)
     monster_shuffle: MonsterShuffle
     boss_shuffle: BossShuffle
-    shop_shuffle: ShopShuffle
-    treasure_cows: TreasureCows
     # DeathLink
     death_link: DeathLink

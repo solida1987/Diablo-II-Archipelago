@@ -58,3 +58,45 @@ game/ijl11.dll
 *.tmp
 Thumbs.db
 desktop.ini
+
+# === 1.7.1 cleanup: backup file patterns ===
+*.BACKUP
+*.BACKUP_ORIGINAL
+*.BACKUP_BEFORE_*
+*.WRONG_BACKUP
+*.bak
+*.backup_before_*
+*.vanilla_backup
+*.ORIGINAL
+*_original.txt
+
+# === 1.7.1 cleanup: D2 crash/debug logs ===
+Game/d2arch_*.txt
+Game/d2log.txt
+Game/BnetLog.txt
+Game/D2[0-9][0-9][0-9][0-9][0-9][0-9][0-9].txt
+# Fallback broad pattern (D2's crash log naming convention — D2 + date+number + .txt)
+Game/D2[0-9]*.txt
+Game/Crashdump/
+Game/Crashdump
+
+# === 1.7.1 cleanup: user's local D2 MPQs must never be uploaded ===
+# Capital-G Game/ versions (repo uses capital G; .gitignore above uses lowercase for legacy rule)
+Game/d2char.mpq
+Game/d2data.mpq
+Game/d2sfx.mpq
+Game/d2music.mpq
+Game/d2speech.mpq
+Game/d2video.mpq
+Game/d2exp.mpq
+Game/d2xmusic.mpq
+Game/d2xtalk.mpq
+Game/d2xvideo.mpq
+Game/D2.LNG
+Game/SmackW32.dll
+Game/binkw32.dll
+Game/ijl11.dll
+
+# === 1.7.1 cleanup: personal planning files (kept locally) ===
+AP D2 Tracking Sheet.xlsx
+Deskort log.txt
