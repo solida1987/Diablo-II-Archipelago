@@ -1,7 +1,7 @@
 {
-  "version": "Beta-1.8.1",
-  "version_display": "Beta-1.8.1",
-  "file_count": 449,
+  "version": "Beta-1.8.2",
+  "version_display": "Beta-1.8.2",
+  "file_count": 465,
   "files": [
     {
       "path": "Bnclient.dll",
@@ -30,8 +30,8 @@
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "ff9ebdc03798a87ce74dbdc5ed1101d973cbbeee7a1383553276be609b5747d2",
-      "size": 425984
+      "sha256": "f31d8e03a8e00ecefd63619eee00dc8617806aa824bbb5a632c0639cdd846701",
+      "size": 434688
     },
     {
       "path": "D2CMP.dll",
@@ -160,7 +160,7 @@
     },
     {
       "path": "START.bat",
-      "sha256": "528171fc22c0c250704d12152ca502960b1d0dc8de476901a44a58757dc5c810",
+      "sha256": "835e64fbb1bc0390a8c532f6453d37d8e5e711ba2d905a23b912c9d85ed6a1af",
       "size": 655
     },
     {
@@ -704,29 +704,19 @@
       "size": 2453
     },
     {
-      "path": "Archipelago/ap_settings.dat",
-      "sha256": "ce5f7dc63127b2c27d089a094ca9db45f4aaebc09ed27add21c435cf1155ce13",
-      "size": 591
-    },
-    {
-      "path": "Archipelago/ap_stash_dgfdgfh.dat",
+      "path": "Archipelago/ap_stash_kkkkkkkkkkkkkkk.dat",
       "sha256": "774a284d7a7ac3af0d7b940ff9f8eb6a3074543c4e5f23dbf3264201e243887d",
       "size": 76744
     },
     {
-      "path": "Archipelago/ap_stash_ser_dgfdgfh.dat",
+      "path": "Archipelago/ap_stash_ser_kkkkkkkkkkkkkkk.dat",
       "sha256": "acae49be3f98958cbcf1bc59929f8217dc23321e13af213e791621733ee54b05",
       "size": 60
     },
     {
       "path": "Archipelago/ap_status.dat",
-      "sha256": "7244becc38d42f15856f04148108f34b8cfa0f594bbcdd77336d68bc9aeacd66",
-      "size": 52
-    },
-    {
-      "path": "Archipelago/ap_unlocks.dat",
-      "sha256": "9051908d6e90a738d447ed99b3edc6d57a837dd5c1aa3fa15740ff13c5a0dc07",
-      "size": 13
+      "sha256": "8529eeb14948a5fb5132733c8d07c97817ed80786b4d841fab967eecf2c7b0a5",
+      "size": 50
     },
     {
       "path": "Archipelago/custom_bosses.dat",
@@ -735,8 +725,13 @@
     },
     {
       "path": "Archipelago/d2arch.ini",
-      "sha256": "5154c2d6d4c9b5f2afa827d91267e0059937c6474d228ba68889b0479d3aa400",
+      "sha256": "5d6a9eb7da4d584cb349c4617be593708f378b7de17f124e9978f75a0c1735d9",
       "size": 5796
+    },
+    {
+      "path": "Archipelago/d2arch_applied_bvnbvn.dat",
+      "sha256": "82703d57bdd4c81d4eb1899dfcb3a0dcee46fcf3bed6700f3cf49af576938322",
+      "size": 21
     },
     {
       "path": "Archipelago/d2arch_bridge_locations.dat",
@@ -744,24 +739,104 @@
       "size": 4
     },
     {
-      "path": "Archipelago/d2arch_checks_dgfdgfh.dat",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
+      "path": "Archipelago/d2arch_checks_kkkkkkkkkkkkkkk.dat",
+      "sha256": "2e0b9e48bf3b1e4099e3f7e58398ce41396bbf1772f4d052bc32623f440645a3",
+      "size": 60
     },
     {
-      "path": "Archipelago/d2arch_slots_dgfdgfh.dat",
-      "sha256": "8553ae1923bf0cd3f785c0fade22dcd45cc99143b749e9c69788708f5932195f",
-      "size": 9
+      "path": "Archipelago/d2arch_fireball_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
     },
     {
-      "path": "Archipelago/d2arch_state_dgfdgfh.dat",
-      "sha256": "ad4ef3165de9fa8da56c270db290ac37161e4518c2594e0f0e7b06dd6d12ff72",
-      "size": 5758
+      "path": "Archipelago/d2arch_reinvest_kkkkkkkkkkkkkkk.dat",
+      "sha256": "f5a1c167eba8e73d1fbbf4b025ae31e8e36f126a44e5d0669c817d150c8b785f",
+      "size": 145
+    },
+    {
+      "path": "Archipelago/d2arch_skill11_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill13_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill15_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill17_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill19_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill21_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill23_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill25_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill27_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill29_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill3_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill5_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill7_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_skill9_kkkkkkkkkkkkkkk.dat",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "size": 1
+    },
+    {
+      "path": "Archipelago/d2arch_slots_kkkkkkkkkkkkkkk.dat",
+      "sha256": "58c266138582805bbee2b4d4420506c0a46375c8c420034ddcd0506f954b1785",
+      "size": 279
+    },
+    {
+      "path": "Archipelago/d2arch_state_kkkkkkkkkkkkkkk.dat",
+      "sha256": "1949909e2d55ebde39ffee1a2ef888194cb9ee7aa8f92ba46e9e0b2650273e14",
+      "size": 5945
     },
     {
       "path": "Archipelago/news.txt",
-      "sha256": "e671d59bc2ecea79b355687351676b37d309cb9368b306b147d3ea7aaf04480c",
-      "size": 2278
+      "sha256": "e24918c823b75ba9c354a14d65ed9b9e58298cde12f6cd39f2b1fd7193509ec3",
+      "size": 2377
     },
     {
       "path": "Archipelago/orig_iconcel.dat",
@@ -800,8 +875,8 @@
     },
     {
       "path": "Archipelago/version.dat",
-      "sha256": "bbddfbf99cf3af22e9f9bd0527c08a1ce91c8a29299ede5db6831ba8c31e8731",
-      "size": 11
+      "sha256": "3b48f2187748d78fe5590a72baa5403cb742c476a73536af3a45cccb5eac8f97",
+      "size": 10
     },
     {
       "path": "Archipelago/shuffle_presets/shuffle_preset_01.dat",
@@ -1345,8 +1420,8 @@
     },
     {
       "path": "data/global/excel/itemscode.bin",
-      "sha256": "2885d882fe1a47de2f1d48002ff5f53c03bf6158970defdadd599217130e0904",
-      "size": 158
+      "sha256": "c254394ae128ab8d6beff8eb4d2f0375f47984822e2c02be95df54a8cf12585d",
+      "size": 474
     },
     {
       "path": "data/global/excel/itemstatcost.bin",
@@ -1410,7 +1485,7 @@
     },
     {
       "path": "data/global/excel/misc.bin",
-      "sha256": "9b247daf7aac86f84952880ce83e666644d2c3d82fa629347045b91542f18b5b",
+      "sha256": "dca26f488b018f9cb33095c7cae198c82c9bf61a17de37afa57ae82351f50175",
       "size": 58940
     },
     {
@@ -1806,6 +1881,11 @@
     {
       "path": "data/global/ui/CharSelect/settings_toggle.dc6",
       "sha256": "3d7b69bf07aed0e0d061fd36eac7b4a2d62289623defad7f5483352008602d6e",
+      "size": 9412
+    },
+    {
+      "path": "data/global/ui/CharSelect/settings_toggle_green.dc6",
+      "sha256": "b28f30cbce3f5cb666f26c8caff28edcd3df08da025fddcd80952a6d5ad223a9",
       "size": 9412
     },
     {
