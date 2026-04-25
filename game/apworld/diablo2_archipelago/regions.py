@@ -504,44 +504,31 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
 
             loc.access_rule = _make_rule(required_keys, prev_boss_loc, prev_diff_boss)
 
-        return  # skip old region-creation path
+        return
 
+    # === SKILL HUNT (zone_locking=False): simple act regions ===
+    act_regions: dict[int, Region] = {}
+    for act_num in range(1, max_act + 1):
+        region = Region(f"Act {act_num}", player, multiworld)
+        multiworld.regions.append(region)
+        act_regions[act_num] = region
 
-def diff_name_fromdiff(d):
-    return ["Normal", "Nightmare", "Hell"][d]
+    if 1 in act_regions:
+        menu_region.connect(act_regions[1])
 
-    if zone_locking:
-        # === ZONE EXPLORER: Create per-zone regions with key requirements ===
+    boss_connections = [
+        (1, 2, "Sisters to the Slaughter"),
+        (2, 3, "Seven Tombs"),
+        (3, 4, "The Guardian"),
+        (4, 5, "Terror's End"),
+    ]
+    active_loc_names = {name for (_, name, _, _, _, _) in active_locations}
 
-        # "Open" region for starting areas + level milestones
-        open_region = Region("Open Areas", player, multiworld)
-        multiworld.regions.append(open_region)
-        menu_region.connect(open_region)
-
-        # Create act transition regions for boss kills (needed before zone keys)
-        act_boss_regions: dict[int, Region] = {}
-        for act_num in range(2, max_act + 1):
-            region = Region(f"Act {act_num} Town", player, multiworld)
-            multiworld.regions.append(region)
-            act_boss_regions[act_num] = region
-
-        # Connect act towns via boss kills
-        boss_connections = [
-            (1, 2, "Sisters to the Slaughter"),
-            (2, 3, "Seven Tombs"),
-            (3, 4, "The Guardian"),
-            (4, 5, "Terror's End"),
-        ]
-        active_loc_names = {name for (_, name, _, _, _, _) in active_locations}
-
-        for from_act, to_act, boss_loc in boss_connections:
-            if to_act not in act_boss_regions:
-                continue
-            to_region = act_boss_regions[to_act]
-
+    for from_act, to_act, boss_loc in boss_connections:
+        if from_act in act_regions and to_act in act_regions:
             if boss_loc in active_loc_names:
-                open_region.connect(
-                    to_region,
+                act_regions[from_act].connect(
+                    act_regions[to_act],
                     f"Act {from_act} -> Act {to_act}",
                     lambda state, loc=boss_loc, p=player, ds=goal: (
                         state.can_reach_location(loc, p)
@@ -550,102 +537,17 @@ def diff_name_fromdiff(d):
                     ),
                 )
             else:
-                open_region.connect(to_region, f"Act {from_act} -> Act {to_act}")
+                act_regions[from_act].connect(
+                    act_regions[to_act],
+                    f"Act {from_act} -> Act {to_act}",
+                )
 
-        # Create a region per zone key, connected from the correct act
-        # Act 1 zones connect from open_region (always accessible)
-        # Act 2+ zones connect from their act town region (requires boss kill)
-        zone_regions: dict[str, Region] = {}
-        for ap_id, key_name, act, classification in ZONE_KEY_ITEMS:
-            if act > max_act:
-                continue
-            region = Region(key_name.replace(" Key", ""), player, multiworld)
-            multiworld.regions.append(region)
-            zone_regions[key_name] = region
+    for quest_id, loc_name, quest_type, classification, loc_id, diff in active_locations:
+        act_num = _quest_id_to_act(quest_id)
+        if act_num in act_regions:
+            loc = world.create_location(loc_name, loc_id, act_regions[act_num])
+            act_regions[act_num].locations.append(loc)
 
-            # Determine parent region: Act 1 zones from open, Act 2+ from act town
-            if act == 1:
-                parent_region = open_region
-            elif act in act_boss_regions:
-                parent_region = act_boss_regions[act]
-            else:
-                parent_region = open_region  # fallback
 
-            parent_region.connect(
-                region,
-                f"Unlock {key_name}",
-                lambda state, k=key_name, p=player: state.has(k, p),
-            )
-
-        # Collect all boss quest IDs (these must NOT be behind zone keys)
-        boss_quest_ids = set()
-        for act_id, qid in ACT_BOSS_QUEST_IDS.items():
-            boss_quest_ids.add(qid)
-
-        # Place locations into correct regions
-        for quest_id, loc_name, quest_type, classification, loc_id, diff in active_locations:
-            zone_key = _get_zone_for_quest(quest_id, quest_type)
-            act_num = _quest_id_to_act(quest_id)
-
-            # Boss kill locations MUST be in their act's zone region (not behind zone keys)
-            # This prevents circular dependencies: boss kill gates next act,
-            # but boss kill can't be behind a zone key that requires the next act
-            base_quest_id = quest_id if diff == 0 else quest_id  # same for all difficulties
-            if base_quest_id in boss_quest_ids:
-                if act_num > 1 and act_num in act_boss_regions:
-                    target_region = act_boss_regions[act_num]
-                else:
-                    target_region = open_region
-            elif zone_key and zone_key in zone_regions:
-                target_region = zone_regions[zone_key]
-            elif act_num > 1 and act_num in act_boss_regions:
-                target_region = act_boss_regions[act_num]
-            else:
-                target_region = open_region
-
-            loc = world.create_location(loc_name, loc_id, target_region)
-            target_region.locations.append(loc)
-
-    else:
-        # === SKILL HUNT: Simple act regions (original behavior) ===
-        act_regions: dict[int, Region] = {}
-        for act_num in range(1, max_act + 1):
-            region = Region(f"Act {act_num}", player, multiworld)
-            multiworld.regions.append(region)
-            act_regions[act_num] = region
-
-        if 1 in act_regions:
-            menu_region.connect(act_regions[1])
-
-        boss_connections = [
-            (1, 2, "Sisters to the Slaughter"),
-            (2, 3, "Seven Tombs"),
-            (3, 4, "The Guardian"),
-            (4, 5, "Terror's End"),
-        ]
-        active_loc_names = {name for (_, name, _, _, _, _) in active_locations}
-
-        for from_act, to_act, boss_loc in boss_connections:
-            if from_act in act_regions and to_act in act_regions:
-                if boss_loc in active_loc_names:
-                    act_regions[from_act].connect(
-                        act_regions[to_act],
-                        f"Act {from_act} -> Act {to_act}",
-                        lambda state, loc=boss_loc, p=player, ds=goal: (
-                            state.can_reach_location(loc, p)
-                            or (ds >= 1 and state.can_reach_location(loc + " (Nightmare)", p))
-                            or (ds >= 2 and state.can_reach_location(loc + " (Hell)", p))
-                        ),
-                    )
-                else:
-                    act_regions[from_act].connect(
-                        act_regions[to_act],
-                        f"Act {from_act} -> Act {to_act}",
-                    )
-
-        # Place locations into act regions
-        for quest_id, loc_name, quest_type, classification, loc_id, diff in active_locations:
-            act_num = _quest_id_to_act(quest_id)
-            if act_num in act_regions:
-                loc = world.create_location(loc_name, loc_id, act_regions[act_num])
-                act_regions[act_num].locations.append(loc)
+def diff_name_fromdiff(d):
+    return ["Normal", "Nightmare", "Hell"][d]

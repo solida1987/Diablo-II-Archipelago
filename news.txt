@@ -8,6 +8,11 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.8.1 - New Features ===
+
+(No new features — 1.8.1 is a bug-fix release. See patch notes for fixes.
+ Features below were introduced in 1.8.0 and are still available.)
+
 === Beta 1.8.0 - New Features ===
 
 MULTI-TAB STASH

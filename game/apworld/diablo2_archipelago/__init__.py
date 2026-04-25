@@ -350,7 +350,7 @@ class Diablo2ArchipelagoWorld(World):
         if goal_loc_name and goal_loc_name not in location_table:
             raise ValueError(
                 f"Goal location '{goal_loc_name}' missing from location_table "
-                f"(goal={goal}, scope={goal_scope}, diff={goal_diff}). "
+                f"(goal_diff={goal_diff}, quest_id={goal_quest_id}). "
                 f"Check locations.py GOAL_QUEST_IDS vs ALL_ACT_LOCATIONS."
             )
 
