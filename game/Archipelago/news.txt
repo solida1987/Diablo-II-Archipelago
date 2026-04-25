@@ -8,9 +8,28 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
-=== Beta 1.8.2 - New Features ===
+=== Beta 1.8.3 - New Features ===
 
 (In development. Features will be listed here when finalized.)
+
+=== Beta 1.8.2 - New Features ===
+
+ZONE LOCKING REWORK
+F4 tracker fully redesigned with status badges, boss + zone names per
+gate, region-tree view and current-target highlight. Gate-boss kill
+state is now persistent across reloads, standalone mode plays end-to-
+end without an AP server, and offline characters get per-character
+random gate layouts (no more identical Corpsefire / Radament patterns
+across difficulties).
+
+CONNECT BUTTON GREEN ON AP AUTH
+Title-screen Connect button turns green the moment the AP server
+authenticates so it is visually obvious you are running on server
+slot_data.
+
+"SOMETHING UNUSUAL" RED BANNER
+Big red centered text when the mod spawns something extra in your
+current area (Treasure Cow today; future variants later).
 
 === Beta 1.8.1 - New Features ===
 

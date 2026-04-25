@@ -1,6 +1,6 @@
 {
-  "version": "Beta-1.8.2",
-  "version_display": "Beta-1.8.2",
+  "version": "Beta-1.8.3",
+  "version_display": "Beta-1.8.3",
   "file_count": 465,
   "files": [
     {
@@ -30,8 +30,8 @@
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "f31d8e03a8e00ecefd63619eee00dc8617806aa824bbb5a632c0639cdd846701",
-      "size": 434688
+      "sha256": "1dcb18c25e6e780f6fcfb83dfee8ee3ea4f268b23429258e91ab23d92da2d5b7",
+      "size": 435712
     },
     {
       "path": "D2CMP.dll",
@@ -160,7 +160,7 @@
     },
     {
       "path": "START.bat",
-      "sha256": "835e64fbb1bc0390a8c532f6453d37d8e5e711ba2d905a23b912c9d85ed6a1af",
+      "sha256": "4fa1bca5edd7041e2b188e850a58d8c1531452b8c9651a511b78ef6211b7c798",
       "size": 655
     },
     {
@@ -835,8 +835,8 @@
     },
     {
       "path": "Archipelago/news.txt",
-      "sha256": "e24918c823b75ba9c354a14d65ed9b9e58298cde12f6cd39f2b1fd7193509ec3",
-      "size": 2377
+      "sha256": "2d1f56322dc3d86abc174df6c56b65e244f22a630a8b38c152121bddcc7f5088",
+      "size": 3131
     },
     {
       "path": "Archipelago/orig_iconcel.dat",
@@ -875,7 +875,7 @@
     },
     {
       "path": "Archipelago/version.dat",
-      "sha256": "3b48f2187748d78fe5590a72baa5403cb742c476a73536af3a45cccb5eac8f97",
+      "sha256": "0b77b13664a7f38e2dd6cc49147186c5b1b28c496ee4672f411991001a8927b7",
       "size": 10
     },
     {

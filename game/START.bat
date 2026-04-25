@@ -1,9 +1,9 @@
 @echo off
 cd /d "%~dp0"
-title Diablo II Archipelago - Beta 1.8.2
+title Diablo II Archipelago - Beta 1.8.3
 color 0A
 echo ============================================
-echo   Diablo II Archipelago - Beta 1.8.2
+echo   Diablo II Archipelago - Beta 1.8.3
 echo ============================================
 echo.
 
