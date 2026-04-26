@@ -1,17 +1,12 @@
 {
   "version": "Beta-1.8.4",
   "version_display": "Beta-1.8.4",
-  "file_count": 462,
+  "file_count": 439,
   "files": [
     {
       "path": "Bnclient.dll",
       "sha256": "57f16ef1bd5af6c64a181a3b92e29297460479f2c475085fbdf1db8b38c77c55",
       "size": 131137
-    },
-    {
-      "path": "Crashdump",
-      "sha256": "9e227315c8d9b833d3b26ce0efd662253e02b31205541697fea5081d2139b21d",
-      "size": 208
     },
     {
       "path": "D2.Detours.dll",
@@ -30,7 +25,7 @@
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "d304a178d03b32e609d2a5fb4170051730fbec83eecaede4e38b716177e0ce4a",
+      "sha256": "89847473da54bd6531ded5d612f22fa958cff6c2544122df2c6255d09bcb393f",
       "size": 437248
     },
     {
@@ -160,13 +155,8 @@
     },
     {
       "path": "START.bat",
-      "sha256": "a0cada1c43f438ef55b19034637e998379233d8f0d0fb8d2bfc1a2d139fb97c0",
+      "sha256": "1693ad679baa9ddff0504b393aef2e2af4e29a0f7b1e610d528d2fa356354ade",
       "size": 655
-    },
-    {
-      "path": "START_WITH_LOGGING.bat",
-      "sha256": "ea8f78c93bfede80e1bb9cc1a267f4dbde5c1ff463f2e616206af3eda3d2b26c",
-      "size": 2029
     },
     {
       "path": "Storm.dll",
@@ -297,11 +287,6 @@
       "path": "ap_bridge_dist/ap_bridge.exe",
       "sha256": "078040f16fe85cbe5b82735a791cab05b6c2b1e996e2c67fea1903c9a00c33fb",
       "size": 2874178
-    },
-    {
-      "path": "ap_bridge_dist/Archipelago/ap_status.dat",
-      "sha256": "9b2b39f1728e360b1dc1ce5f9d3f20d194ebb0da76f5d75e4a1cf3c83a4c94f3",
-      "size": 51
     },
     {
       "path": "ap_bridge_dist/_internal/VCRUNTIME140.dll",
@@ -704,36 +689,6 @@
       "size": 155890
     },
     {
-      "path": "Archipelago/ap_command.dat",
-      "sha256": "c30a9cf7cdafe8faedc9a57cdecdf36f2b0942252ca0d864d1b48dff983d3c8f",
-      "size": 92
-    },
-    {
-      "path": "Archipelago/ap_location_owners.dat",
-      "sha256": "a5eb91efd92e0f9e9029ec3d03d834c6a2bd18b68b748a5fac168b3a986a859e",
-      "size": 12274
-    },
-    {
-      "path": "Archipelago/ap_settings.dat",
-      "sha256": "a71f6eb0896eb29d7fb62076be230ca3ae96119fc8e1153854a1112b2efc4b53",
-      "size": 596
-    },
-    {
-      "path": "Archipelago/ap_stash_ddde.dat",
-      "sha256": "774a284d7a7ac3af0d7b940ff9f8eb6a3074543c4e5f23dbf3264201e243887d",
-      "size": 76744
-    },
-    {
-      "path": "Archipelago/ap_stash_ser_ddde.dat",
-      "sha256": "acae49be3f98958cbcf1bc59929f8217dc23321e13af213e791621733ee54b05",
-      "size": 60
-    },
-    {
-      "path": "Archipelago/ap_status.dat",
-      "sha256": "b09da8956cd14498582d49eb9084b1abceac7c252ca18f479d3ea290b37cf667",
-      "size": 53
-    },
-    {
       "path": "Archipelago/custom_bosses.dat",
       "sha256": "b77eddd01ac2eb2b81d8125b35139afab45de67c1902abb52f74026ccbc87bc1",
       "size": 4242
@@ -744,79 +699,9 @@
       "size": 5821
     },
     {
-      "path": "Archipelago/d2arch_ap_ddde.dat",
-      "sha256": "7043cb4bea1e69a1028f5ee663436d7ca33246a30b86589f1716bea98a4b7005",
-      "size": 72
-    },
-    {
-      "path": "Archipelago/d2arch_applied_bbb.dat",
-      "sha256": "36ff55b1301bfa25b690a47312587e58d9cd12533a22bc4bdd2d2e23e158645c",
-      "size": 84
-    },
-    {
-      "path": "Archipelago/d2arch_applied_bvnbvn.dat",
-      "sha256": "82703d57bdd4c81d4eb1899dfcb3a0dcee46fcf3bed6700f3cf49af576938322",
-      "size": 21
-    },
-    {
-      "path": "Archipelago/d2arch_applied_ddde.dat",
-      "sha256": "4e6d7ddc808c18e6ac82a4ccedbf4ae723460e249d1f61bdb1818911e3951992",
-      "size": 126
-    },
-    {
-      "path": "Archipelago/d2arch_applied_ff.dat",
-      "sha256": "1ea06f070709067f1a294aac768e5635f9dcac9886b2ad370115c409f2fd43c3",
-      "size": 189
-    },
-    {
-      "path": "Archipelago/d2arch_applied_test-d.dat",
-      "sha256": "bc5f7e9523f9ef5b646729ee072ad5ae102aa5464c7d417b027cb66ad22041a4",
-      "size": 42
-    },
-    {
-      "path": "Archipelago/d2arch_bridge_locations_.dat",
-      "sha256": "a7b653fe6dcfcafbc12245cecbd5647cf653d0023db369756dd88c45042f78ca",
-      "size": 14
-    },
-    {
-      "path": "Archipelago/d2arch_bridge_locations_ddde.dat",
-      "sha256": "85ea1c2f0e59c696dadc9d12461da5a3b68b215fc422ef8362e05c9a014c8928",
-      "size": 7
-    },
-    {
-      "path": "Archipelago/d2arch_bridge_locations_ff.dat",
-      "sha256": "a7b653fe6dcfcafbc12245cecbd5647cf653d0023db369756dd88c45042f78ca",
-      "size": 14
-    },
-    {
-      "path": "Archipelago/d2arch_bridge_locations_ghjghj.dat",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
-    },
-    {
-      "path": "Archipelago/d2arch_bridge_locations_test-d.dat",
-      "sha256": "5573f0d4c039c6c2be366c4a1fb9490a8d6d00b367622754c87583898629eae2",
-      "size": 14
-    },
-    {
-      "path": "Archipelago/d2arch_checks_ddde.dat",
-      "sha256": "215c746033d235f81615d328e557780fefe001069a2d2a5b892f2eb09af47e02",
-      "size": 20
-    },
-    {
-      "path": "Archipelago/d2arch_slots_ddde.dat",
-      "sha256": "d5d3d06f84479d69dd98be19daed3c8291e1e774bd217da0771d6fe1e751443e",
-      "size": 9
-    },
-    {
-      "path": "Archipelago/d2arch_state_ddde.dat",
-      "sha256": "ccebd3c4143bc1fb31ed9b865844559b714905b891df2591ba41735638739a55",
-      "size": 5813
-    },
-    {
       "path": "Archipelago/news.txt",
-      "sha256": "d794f515db1ec02c7677c0b085d00a772c01d9b7c4edd1c1e29c4b69403c00e1",
-      "size": 4254
+      "sha256": "6075a3a7b6e534636c406eeb6be478b247b4deee2631cef51260df67512b4337",
+      "size": 4458
     },
     {
       "path": "Archipelago/orig_iconcel.dat",
@@ -855,7 +740,7 @@
     },
     {
       "path": "Archipelago/version.dat",
-      "sha256": "d6e031a277e140d81c956e7cb2166f2e3a3fb7f3a2fc4a7062a8f0783d55de76",
+      "sha256": "899196729bea4419ad2fe50077468eb50fa5c705da01d4cf5eb501e32a91d93b",
       "size": 10
     },
     {
@@ -2295,7 +2180,7 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "d304a178d03b32e609d2a5fb4170051730fbec83eecaede4e38b716177e0ce4a",
+      "sha256": "89847473da54bd6531ded5d612f22fa958cff6c2544122df2c6255d09bcb393f",
       "size": 437248
     },
     {
