@@ -8,9 +8,34 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.8.4 - New Features ===
+
+TRAPS TOGGLE
+New "Traps" button on the title screen lets you opt out of trap fillers
+entirely. When OFF, the filler pool redistributes that weight to gold,
+stat points, skill points, reset points and boss-loot drops — pool
+stays balanced.
+
+SENDER + RECIPIENT ATTRIBUTION ON BANNERS
+Multiworld banners now show who is involved in each transfer:
+ - Incoming skills: "AP: Frozen Orb unlocked! (from test-d2-p2)" when
+   another player found it for you.
+ - Outgoing checks: "Den of Evil  ->  test-d2-p1" when the location
+   belongs to someone else, or "Check: <quest>" for your own finds.
+The Item Log on the right side of the AP panel matches the banner.
+
+CRASH-FREE INJECTION
+The DLL is loaded twice in the same process by the launcher path
+(once directly, once through D2.Detours). Hook installation is now
+guarded by named kernel mutexes and prologue checks, so the second
+DLL image cannot smash the first one's trampolines and crash the
+title screen.
+
 === Beta 1.8.3 - New Features ===
 
-(In development. Features will be listed here when finalized.)
+(Hot-fix release for 1.8.2 issues — no new features. Connect-button stuck
+ on Disconnected, mid-game upgrade gate-key reconcile, AP gate-key replay
+ on reconnect. See patch notes for details.)
 
 === Beta 1.8.2 - New Features ===
 
