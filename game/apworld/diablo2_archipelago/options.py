@@ -177,6 +177,24 @@ class BossShuffle(Toggle):
 
 
 # ============================================================
+# Filler Options
+# ============================================================
+
+class TrapsEnabled(Toggle):
+    """
+    Enable trap fillers in the item pool. When OFF, traps are removed
+    entirely — that share of the filler pool is redistributed proportionally
+    to the other filler types (gold, stat points, skill points, reset
+    points, boss-loot drops) so the pool stays balanced.
+
+    Default ON to preserve existing trap-bearing seeds. Turn OFF if you
+    don't want DeathLink-style monster-spawn traps in your run.
+    """
+    display_name = "Traps Enabled"
+    default = True
+
+
+# ============================================================
 # Combined Options Dataclass
 # ============================================================
 
@@ -207,5 +225,7 @@ class Diablo2ArchipelagoOptions(PerGameCommonOptions):
     # Shuffles (shop_shuffle removed — no logic implemented in DLL)
     monster_shuffle: MonsterShuffle
     boss_shuffle: BossShuffle
+    # 1.8.4: filler toggles
+    traps_enabled: TrapsEnabled
     # DeathLink
     death_link: DeathLink

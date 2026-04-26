@@ -235,13 +235,13 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "0a282dc0acf838f8b71eb0bc6a76deeaba6fb6aee9fe7381cf7a85ac386e2c5e",
-      "size": 25482
+      "sha256": "daeab3e73d98447c9f27719683b617d5d8e5ec0ca9531c61856e4332e9f7e23e",
+      "size": 25684
     },
     {
       "path": "apworld/diablo2_archipelago/__init__.py",
-      "sha256": "7f00182410bfa5710b5883db2b30cdf76490506f8d66f45f7cb0eb33aa1f3202",
-      "size": 19228
+      "sha256": "2584fce6467a9b5675a3491f7a0c8ca6c87906b4a30f8403c98a1c46f3453344",
+      "size": 19431
     },
     {
       "path": "apworld/diablo2_archipelago/archipelago.json",
@@ -260,8 +260,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago/options.py",
-      "sha256": "3adf144374a9d60f05224b2df3f2a327c7678117301db1f8bcc716e5189c64ab",
-      "size": 6574
+      "sha256": "f9afeca6dbe7048d0aa7f7e2e6d6a32ae782930f993daafd920b7524db92f061",
+      "size": 7291
     },
     {
       "path": "apworld/diablo2_archipelago/regions.py",

@@ -382,6 +382,9 @@ class Diablo2ArchipelagoWorld(World):
             "xp_multiplier":   self.options.xp_multiplier.value,
             "monster_shuffle": self.options.monster_shuffle.value,
             "boss_shuffle":    self.options.boss_shuffle.value,
+            # 1.8.4: filler toggles — bridge writes to ap_settings.dat,
+            # DLL forces g_fillerTrapPct=0 when traps_enabled=0
+            "traps_enabled":   self.options.traps_enabled.value,
             # 1.8.0 — Gate preloads (auto-generated per slot in generate_early)
             "act1_preload_normal":    self.preloads[(1, 0)],
             "act1_preload_nightmare": self.preloads[(1, 1)],
