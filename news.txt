@@ -8,6 +8,33 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.8.5 - New Features ===
+
+INSTANT CONNECT-BUTTON FEEDBACK
+Pressing Connect on the title screen now flips the button green the
+moment the AP server authenticates, instead of waiting until you've
+gone in-game and back out. All other settings buttons (Goal, XP,
+Class filters, Quest toggles, Shuffle, Traps, Skill Hunting, Zone
+Locking) now also auto-update to show the AP server's actual values
+the instant the connection comes up — and stay locked until you
+disconnect, so you can see at a glance what the server has
+configured before clicking Single Player.
+
+DEDICATED TREASURE-COW LOG
+Every cow-spawn decision is recorded to Game/Archipelago/treasure_cow.log
+with a wall-clock timestamp. Includes a 10-second heartbeat so you
+can verify the spawn function is being called at all, plus per-decision
+lines for every roll, skip-reason and spawn outcome. Helpful when
+diagnosing "why didn't a cow show up here?" Same lines also mirror to
+d2arch.log with a [TC] prefix.
+
+AP GATE-KEY LOCATION HINTS (FOUNDATION)
+The bridge now records the multiworld placement of every gate key
+into ap_item_locations.dat. The DLL loads this file as the
+foundation for an upcoming F4-tracker overlay that shows where each
+gate key is hiding. Cross-world placements still need the !hint
+mechanism — that completes in a follow-up.
+
 === Beta 1.8.4 - New Features ===
 
 TRAPS TOGGLE

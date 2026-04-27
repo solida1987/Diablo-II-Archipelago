@@ -1,7 +1,7 @@
 {
-  "version": "Beta-1.8.4",
-  "version_display": "Beta-1.8.4",
-  "file_count": 439,
+  "version": "Beta-1.8.5",
+  "version_display": "Beta-1.8.5",
+  "file_count": 441,
   "files": [
     {
       "path": "Bnclient.dll",
@@ -20,13 +20,13 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "de1a336dbcef1aa01b15943b1e643af78f499c7757310cf9b704098d86773116",
+      "sha256": "74b094ceb5e43a5f06af8769cc57869928db366cd6311d5ed729b658e7188c61",
       "size": 121344
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "89847473da54bd6531ded5d612f22fa958cff6c2544122df2c6255d09bcb393f",
-      "size": 437248
+      "sha256": "d51122a16f22c512b9b32300918cbe7ec4311bd23421f7cc4961a86131d216d1",
+      "size": 445952
     },
     {
       "path": "D2CMP.dll",
@@ -235,8 +235,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "daeab3e73d98447c9f27719683b617d5d8e5ec0ca9531c61856e4332e9f7e23e",
-      "size": 25684
+      "sha256": "76861ec1f291a4b1d74b04009b7d057114818bb867ba445cfff3abd46ae15c06",
+      "size": 27123
     },
     {
       "path": "apworld/diablo2_archipelago/__init__.py",
@@ -255,8 +255,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago/locations.py",
-      "sha256": "307eb73ab2b69677c37f404b948b8a6abba05a68a11debd579fd1ba6ebd8d69a",
-      "size": 26589
+      "sha256": "ab25cb1e3528dd6a60d3f954fe8f5a09ef86e65d4c9c0e2af245f86908f4f02f",
+      "size": 27478
     },
     {
       "path": "apworld/diablo2_archipelago/options.py",
@@ -265,8 +265,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago/regions.py",
-      "sha256": "3e359ed3a576fcbb9f6b31d89b05e005c091c9aa551b9123076b7172437b9e9e",
-      "size": 21828
+      "sha256": "a2c61d2a621d166b4c397386904454a2e4186ec32e753affd7bdc706667e7e2e",
+      "size": 25080
     },
     {
       "path": "apworld/diablo2_archipelago/__pycache__/items.cpython-313.pyc",
@@ -285,8 +285,8 @@
     },
     {
       "path": "ap_bridge_dist/ap_bridge.exe",
-      "sha256": "078040f16fe85cbe5b82735a791cab05b6c2b1e996e2c67fea1903c9a00c33fb",
-      "size": 2874178
+      "sha256": "15173b0ade52f6fe3915ac6c299989e931f1a66758e516eed1854de40cc1c053",
+      "size": 3096403
     },
     {
       "path": "ap_bridge_dist/_internal/VCRUNTIME140.dll",
@@ -300,68 +300,73 @@
     },
     {
       "path": "ap_bridge_dist/_internal/_asyncio.pyd",
-      "sha256": "53b36f719ee1905e56003a5d8af169fe05917787af66d00c86ceaf996a7d5caf",
-      "size": 73048
+      "sha256": "48fdd95938c43b8b3e1f6312de651a53d459e8e2c754fbbdf48e99f5caa1f55b",
+      "size": 78168
     },
     {
       "path": "ap_bridge_dist/_internal/_bz2.pyd",
-      "sha256": "df21ec68d062eb375dba4ea8332aa859d0d4b91f9eddc45e1cebfd54742044e2",
-      "size": 86872
+      "sha256": "a4be36fffeefa8b24c1234d548da8f05558aba53c2ea7d1d2614776eaad8fbf4",
+      "size": 87384
     },
     {
       "path": "ap_bridge_dist/_internal/_ctypes.pyd",
-      "sha256": "c95add0b1a541b723c9090c23abeadb8f642b31bb33f2e1ae005fbb8a331ef73",
-      "size": 134488
+      "sha256": "f8a9f7831e81b2bfba12456e589f8198114f24986bd527ac231a844565afcddb",
+      "size": 142680
     },
     {
       "path": "ap_bridge_dist/_internal/_decimal.pyd",
-      "sha256": "e80e2c4533958c717f40238155bd9f4101df23f832e1dddb8be4e83f7ad3355a",
-      "size": 286040
+      "sha256": "04738ee6b96bcc6351446b011b523d831aa88ec3f11d4b64c33414c965b56b80",
+      "size": 290648
     },
     {
       "path": "ap_bridge_dist/_internal/_hashlib.pyd",
-      "sha256": "8770291fed8af2ea8e9fd2ed695e8c56f8e26848c91d320d1a22ddf404d02116",
+      "sha256": "d4524b261f09806a828c62fc97e8517328b23d65ab87d20706a4bafd86bbf345",
       "size": 69464
     },
     {
       "path": "ap_bridge_dist/_internal/_lzma.pyd",
-      "sha256": "1ddce9934889905b482f8587656f28ae1988365a55ae86ca4438873fd0184340",
-      "size": 159576
+      "sha256": "f7ad11fbbb7aeaf7b6566a532a3243e3ae5f92bac480dbe5c2ef300fe2c1dabe",
+      "size": 161112
     },
     {
       "path": "ap_bridge_dist/_internal/_multiprocessing.pyd",
-      "sha256": "f812b488ea8ae37c7da58f3068a1d08b1c66f9a7858610652bc4329843e0b876",
-      "size": 38232
+      "sha256": "84a2e86428dde756e6f3e56369daf558180a30f1f7d4781cce295304e19b6fb8",
+      "size": 38744
     },
     {
       "path": "ap_bridge_dist/_internal/_overlapped.pyd",
-      "sha256": "3555e7a0250f379e12a7be5c736477246e411d58cea35be51226956038ad72a6",
-      "size": 57688
+      "sha256": "80a2f8feda9255ef611af0a28fd4df311e3cd59c3dc4eaba9a2e97bd42ddbf54",
+      "size": 58200
     },
     {
       "path": "ap_bridge_dist/_internal/_queue.pyd",
-      "sha256": "0d316914b426e71bbd263b78fe23622ac1c8e6f86bae42ef6ffbb609e6257e3a",
-      "size": 35160
+      "sha256": "cb529f77bc4665dfa3b66fae3d00ab84de1e9618d0cb94900efbf28527623c0f",
+      "size": 36696
     },
     {
       "path": "ap_bridge_dist/_internal/_socket.pyd",
-      "sha256": "a69f3a7e281009c86868dd56c2e933ca2634a3979fdc2a4ca751ee4ef5e6ece7",
-      "size": 86360
+      "sha256": "ff3e97cd11bdc68798e5b3dcd5295d1efba179b7344142d50d066bbf1c2d79cd",
+      "size": 87384
     },
     {
       "path": "ap_bridge_dist/_internal/_ssl.pyd",
-      "sha256": "eb860d3a4ad45e3d7975c5fdc3994798ee9b7ab685fa920c2656878b7dcd3029",
-      "size": 182104
+      "sha256": "43e60bbdff2fe41701f39fa25ea6a8251a2b7623ff18f980a209a451eb5e648f",
+      "size": 184664
     },
     {
       "path": "ap_bridge_dist/_internal/_uuid.pyd",
-      "sha256": "118d5c36b649da58313ea5b0617dac96d2e35fc08739efa919547e189fb4d65c",
-      "size": 27992
+      "sha256": "fc7406772b43caa3b6f41c690753792188b1c14c36a723d49e9276b7457696ce",
+      "size": 28504
     },
     {
       "path": "ap_bridge_dist/_internal/_wmi.pyd",
-      "sha256": "1800304e19246edfdb56a14ffabc129b6b5b73e25dbedd2302e75a9eb4d78352",
-      "size": 39768
+      "sha256": "5a7f3444f1c2f85fb5573bc330c1aea2c583912bb6f948ff81f8fd89a30e67be",
+      "size": 40280
+    },
+    {
+      "path": "ap_bridge_dist/_internal/_zstd.pyd",
+      "sha256": "536a3b521a3c42d2827ece0ccfbe40b83a2fd96a0f5496cd60b943b10e1266d4",
+      "size": 503640
     },
     {
       "path": "ap_bridge_dist/_internal/api-ms-win-core-console-l1-1-0.dll",
@@ -560,8 +565,8 @@
     },
     {
       "path": "ap_bridge_dist/_internal/base_library.zip",
-      "sha256": "46bd50c4a5e6add25734b334bccd7236f3cedc3ad1726ea73861eeebd6e26b31",
-      "size": 1402457
+      "sha256": "c2c1961ea077f511adfb288aa87e30ac8abcfac5d67032eeda4e505990f90818",
+      "size": 1388164
     },
     {
       "path": "ap_bridge_dist/_internal/libcrypto-3.dll",
@@ -580,18 +585,18 @@
     },
     {
       "path": "ap_bridge_dist/_internal/pyexpat.pyd",
-      "sha256": "c00c4177b57a4e519fdb0e14381ec03f1ef4d627ee10280382e8e06030c61958",
-      "size": 217944
+      "sha256": "b6d5142424d161039c25bea00e6acd8f7b1a5331d3994d9f3c28bd083ede159f",
+      "size": 218968
     },
     {
-      "path": "ap_bridge_dist/_internal/python313.dll",
-      "sha256": "265a27242ee97f81eeac6a556fd7de56baff2222f2334386d8f948e359a649d8",
-      "size": 6117208
+      "path": "ap_bridge_dist/_internal/python314.dll",
+      "sha256": "1ac15e2224581fc678bbd17728b9aa538d47b891b72c76499ef07e54cd74f151",
+      "size": 6753112
     },
     {
       "path": "ap_bridge_dist/_internal/select.pyd",
-      "sha256": "7d061afc87ba79f90878af39a1ebc7b4cf238d52e5bbe16ff7e176cbba266ec0",
-      "size": 33112
+      "sha256": "05734bd352ce60c944d474aa62468cc5eebf400097f1d9d0c453d37aed26fcca",
+      "size": 33624
     },
     {
       "path": "ap_bridge_dist/_internal/ucrtbase.dll",
@@ -600,12 +605,12 @@
     },
     {
       "path": "ap_bridge_dist/_internal/unicodedata.pyd",
-      "sha256": "85ec764b02ad20bd168779f4716841d8291d3be0d3a243dcfb05abe684a517dd",
-      "size": 712024
+      "sha256": "4445b894f836e89a8b9fdcc88b5e59fbc76aca805baaf40aeb69e869978d4e6d",
+      "size": 758104
     },
     {
-      "path": "ap_bridge_dist/_internal/websockets/speedups.cp313-win_amd64.pyd",
-      "sha256": "dc38d5de91b62022b3bf46b909136076d227e712c2f857c6ce886df7020190da",
+      "path": "ap_bridge_dist/_internal/websockets/speedups.cp314-win_amd64.pyd",
+      "sha256": "97297d94ac8affd34831ef5cc4fd9abaebc4388097251a2a8e6b336f9158572e",
       "size": 11776
     },
     {
@@ -620,7 +625,7 @@
     },
     {
       "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/RECORD",
-      "sha256": "756b8c362f9981669b1422a4354bd75cafedd7b342cd0c7287dec3c95c412dca",
+      "sha256": "00d83c5eb3be6a189620d77d9b78ee31a8893f9e8d9697c89dcc419a4db31582",
       "size": 7725
     },
     {
@@ -630,7 +635,7 @@
     },
     {
       "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/WHEEL",
-      "sha256": "a95d0420f9638f55c2fefb926ad4568e7d369d9233dcdd6df23b19cfb1c1af65",
+      "sha256": "ee4e96732e7cf222587b995fe4ad3de4d2e0faea014e713e4fc78727dd86e3fe",
       "size": 101
     },
     {
@@ -695,13 +700,18 @@
     },
     {
       "path": "Archipelago/d2arch.ini",
-      "sha256": "64f0784179784be957404ef62a4965f004d1479545fe21eb16eea6ecc7985c9e",
-      "size": 5821
+      "sha256": "e71898b500d29cbee0daa049b6180171c887db57850c28d1597eaf3660905be3",
+      "size": 5822
+    },
+    {
+      "path": "Archipelago/d2arch_ap_.dat",
+      "sha256": "3caea67e09116adc579ad60c5b6ad3d028df810b0de26ee20c4918704ed99bc9",
+      "size": 73
     },
     {
       "path": "Archipelago/news.txt",
-      "sha256": "6075a3a7b6e534636c406eeb6be478b247b4deee2631cef51260df67512b4337",
-      "size": 4458
+      "sha256": "eb1013ad9af95bcd87722612d374bbbb5333a021a64789706e4c9763c1583868",
+      "size": 5703
     },
     {
       "path": "Archipelago/orig_iconcel.dat",
@@ -735,8 +745,8 @@
     },
     {
       "path": "Archipelago/treasure_cows.dat",
-      "sha256": "c9af9e33542842a2a0823301d15e231bf284f28be6e848b53afaf25b1f4a7edc",
-      "size": 1930
+      "sha256": "5ef68a2417fa72ce73ae8660e42646d174b2301f9239f1944ad38635574190be",
+      "size": 2066
     },
     {
       "path": "Archipelago/version.dat",
@@ -2180,8 +2190,8 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "89847473da54bd6531ded5d612f22fa958cff6c2544122df2c6255d09bcb393f",
-      "size": 437248
+      "sha256": "d51122a16f22c512b9b32300918cbe7ec4311bd23421f7cc4961a86131d216d1",
+      "size": 445952
     },
     {
       "path": "patch/D2Common.dll.disabled",

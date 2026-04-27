@@ -10,6 +10,7 @@ from BaseClasses import Region
 
 from .locations import (
     ALL_ACT_LOCATIONS, LOCATION_BASE, ACT_BOSS_QUEST_IDS,
+    QUEST_ID_TO_LEVEL,
 )
 from .items import ZONE_KEY_ITEMS
 
@@ -448,10 +449,31 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
             if quest_type == "gate":
                 continue  # already placed by _build_gate_region_tree
 
-            # Level milestones can happen anywhere — no access rule
+            # 1.8.5 fix (R9) — Level milestones now have access rules so
+            # AP fill cannot place early-act progression behind high-level
+            # checks. Without this, a player with zone_locking on could
+            # have "Act 1 Gate 2 Key (Normal)" placed at "Reach Level 30
+            # (Normal)" — making Act 1 R3+ unreachable until they ground
+            # to L30 in R1+R2 only. The level → act-boss-prerequisite
+            # mapping below ensures level milestones always live in a
+            # later sphere than the early-act gate keys they could
+            # otherwise block.
+            #
+            # Mapping (Normal scope; NM/Hell scaled by diff offset):
+            #   L 5/10/15 → no rule (achievable in R1)
+            #   L 20      → require Andariel killed at this diff (Act 2+)
+            #   L 30      → require Mephisto killed at this diff (Act 4+)
+            #   L 35..55  → require previous-diff Baal kill (NM access)
+            #   L 60..75  → require NM Baal kill (Hell access)
             if quest_type == "level":
                 loc = world.create_location(loc_name, loc_id, open_region)
                 open_region.locations.append(loc)
+                level_val = QUEST_ID_TO_LEVEL.get(quest_id, 0)
+                prereq_loc = _level_milestone_prereq(level_val, diff)
+                if prereq_loc:
+                    def _make_level_rule(prl, p=player):
+                        return lambda state: state.can_reach_location(prl, p)
+                    loc.access_rule = _make_level_rule(prereq_loc)
                 continue
 
             # For quest locations: determine physical zone + set access rule
@@ -551,3 +573,47 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
 
 def diff_name_fromdiff(d):
     return ["Normal", "Nightmare", "Hell"][d]
+
+
+def _level_milestone_prereq(level: int, diff: int):
+    """1.8.5 fix (R9) — Map a level-milestone (level, difficulty) to the
+    name of an act-boss location that the player must be able to reach
+    before the milestone is considered satisfiable.
+
+    Returns the location name (str) or None when no prerequisite is
+    needed (low-level milestones in the starting region).
+
+    The intent is purely to push level milestones into spheres LATER
+    than the act gate-keys that could otherwise be blocked by them.
+    Without this, AP fill places progression items at level-milestone
+    locations because they have no access rules — leaving the player
+    to grind to that level inside the starting region with no other
+    sources of items, which is exactly the soft-lock that R9 reported.
+
+    Diff parameter follows the apworld convention (0=Normal, 1=NM,
+    2=Hell). Boss location names get the difficulty suffix appended.
+    """
+    if level <= 15:
+        return None  # Achievable in Act 1 starting region; no rule.
+
+    def at_diff(name: str, d: int) -> str:
+        return name if d == 0 else f"{name} ({diff_name_fromdiff(d)})"
+
+    # Within current difficulty: gate level milestones behind act bosses.
+    if 16 <= level <= 25:
+        # Levels 20: must be in Act 2 → Andariel kill at this diff.
+        return at_diff("Sisters to the Slaughter", diff)
+    if 26 <= level <= 34:
+        # Level 30: must be deep into the run → Mephisto at this diff.
+        return at_diff("The Guardian", diff)
+
+    # Level 35+ implies Nightmare or Hell access. Require previous-diff
+    # Baal kill so the milestone lives in the appropriate difficulty.
+    if 35 <= level <= 55:
+        # NM tier — require Normal Baal.
+        return "Eve of Destruction"
+    if level >= 60:
+        # Hell tier — require NM Baal.
+        return "Eve of Destruction (Nightmare)"
+
+    return None

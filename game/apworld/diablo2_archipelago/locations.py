@@ -334,6 +334,22 @@ LEVEL_MILESTONES_HELL = [
     (285, "Reach Level 75",  4, 75),
 ]
 
+# 1.8.5 fix (R9) — Quest-id → level value lookup, used by regions.py to
+# attach access rules to level-milestone locations. Without an access
+# rule, AP's fill algorithm could place an Act 1 progression item like
+# "Act 1 Gate 2 Key (Normal)" at the "Reach Level 30 (Normal)" location —
+# making the gate unreachable until the player grinds to L30 with only
+# the starting region available. The fix gates each level milestone
+# behind a kill of an act boss, ensuring level milestones live in
+# spheres later than the early-act progression they could otherwise
+# block. See regions.py for the rule application.
+QUEST_ID_TO_LEVEL: dict[int, int] = {}
+for _milestones in (LEVEL_MILESTONES_NORMAL,
+                    LEVEL_MILESTONES_NIGHTMARE,
+                    LEVEL_MILESTONES_HELL):
+    for _qid, _name, _max_acts, _level in _milestones:
+        QUEST_ID_TO_LEVEL[_qid] = _level
+
 ALL_ACT_LOCATIONS = [
     ACT1_LOCATIONS,
     ACT2_LOCATIONS,
