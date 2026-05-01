@@ -24,6 +24,12 @@ not Resurrected). Windows 10/11 with the .NET 8 Runtime.
 
 ## New features
 
+- **Holy Bolt buffed.** The Paladin's Holy Bolt now damages demons in
+  addition to undead, AND pierces through enemies (no longer dies on
+  the first hit). The skill still passes through allies and heals
+  them. Affects player casts as well as the Holy Bolt proc on the
+  Principle runeword and the Holy Bolt aura on the Rift runeword.
+
 - **Dev menu — new Loot tab.** Press Ctrl+V → click the new **Loot**
   tab (rightmost) for individual-item spawn buttons grouped under five
   sub-tabs:
