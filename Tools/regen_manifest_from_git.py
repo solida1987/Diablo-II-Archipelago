@@ -111,6 +111,14 @@ def should_skip_path(rel_path):
     # Hidden tmp files (.ap_tmp_*)
     if base_l.startswith(".ap_tmp_"):
         return "tmp"
+    # 1.9.1 — the manifest cannot list itself. Its size depends on the
+    # entries inside, so any self-entry creates a fixed-point problem the
+    # launcher's size-only verifier cannot resolve. Excluding it means
+    # the launcher's verifier ignores it (it always exists locally because
+    # the launcher itself wrote it), and the launcher uses the release
+    # asset as the canonical copy.
+    if rp_l == "game_manifest.json":
+        return "self-reference"
     return None
 
 
