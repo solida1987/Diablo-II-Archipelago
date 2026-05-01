@@ -810,8 +810,8 @@
     },
     {
       "path": "data/global/excel/armor.txt",
-      "sha256": "6ce5a09e8c6bc07dddea916412f18e57af860f7c870e3ef9e3003ea8beeaaf99",
-      "size": 76166
+      "sha256": "d8a4827d52807652f8de33d1b9b335ab8bdd40d1b60b5cbabce24ff9987b30fa",
+      "size": 76370
     },
     {
       "path": "data/global/excel/armtype.bin",
@@ -845,8 +845,8 @@
     },
     {
       "path": "data/global/excel/books.txt",
-      "sha256": "f3cba2d3e4906024b0652aa0bc9591d34abdc8bbd8d0964ae575d3a209be567e",
-      "size": 311
+      "sha256": "60e2527c2b30487ff68fcaaad163831abc6f6ef5e4ec6d42478ff5f30c2eeec5",
+      "size": 315
     },
     {
       "path": "data/global/excel/charstats.bin",
@@ -855,8 +855,8 @@
     },
     {
       "path": "data/global/excel/charstats.txt",
-      "sha256": "210a6f1371a475442a6f9b27a2d03b2bebc2e3e93c1e586583c112596301a8b3",
-      "size": 3351
+      "sha256": "bfd28714a573384da0575c6525b3733c82e3bf97f47d0f3e1b8552d137bff51f",
+      "size": 3360
     },
     {
       "path": "data/global/excel/chartemplate.bin",
@@ -875,8 +875,8 @@
     },
     {
       "path": "data/global/excel/compcode.txt",
-      "sha256": "51076017de38e853b0b5f137192d10afc9eb59db89dfffe0751af043ef6f7755",
-      "size": 1746
+      "sha256": "a26b8437a13e5777801d8794ed49d103cdd5d274afbd013f09a107ca11ba2a4b",
+      "size": 1862
     },
     {
       "path": "data/global/excel/composit.bin",
@@ -890,13 +890,13 @@
     },
     {
       "path": "data/global/excel/cubemain.txt",
-      "sha256": "63e22003610609ebfcd1189b064192ca16a90afb0cab3ef5ed4a1ab065fb570b",
-      "size": 32843
+      "sha256": "39ac48d0f0743bdf86e88f59bf1de6e88479cc89d751e70288f559a20f195388",
+      "size": 33012
     },
     {
       "path": "data/global/excel/cubemod.txt",
-      "sha256": "5170d307cd48b6e59b37d5de43b585d13cf03c1f8aef01d6a05d59273bb32e94",
-      "size": 162
+      "sha256": "9829829bfcf62f8660a4e6c187156a50e4a87da2f61ffe890b273d600d415dad",
+      "size": 176
     },
     {
       "path": "data/global/excel/difficultylevels.bin",
@@ -905,8 +905,8 @@
     },
     {
       "path": "data/global/excel/difficultylevels.txt",
-      "sha256": "aaa1a5d93df8c62707cf05308d82418ae7058ac1ac15ac768331f2abe440ff88",
-      "size": 582
+      "sha256": "6929153657001e19f2ea0e04d839a5f2534d00b91460d76006d9c51784d76fa3",
+      "size": 586
     },
     {
       "path": "data/global/excel/elemtypes.bin",
@@ -915,8 +915,8 @@
     },
     {
       "path": "data/global/excel/ElemTypes.txt",
-      "sha256": "b21ceb2ecd75483264773e079f7888c1d9c69416f6fe8de11df1746856829bc9",
-      "size": 181
+      "sha256": "91addf64ff87abb19dcceba77f6da6ed84e9e4194d30eeb1d69d36edd55cdc15",
+      "size": 195
     },
     {
       "path": "data/global/excel/events.bin",
@@ -925,8 +925,8 @@
     },
     {
       "path": "data/global/excel/events.txt",
-      "sha256": "aa0f8c19a43b8cdb00a712434791ca086d6827018cdc5b7d2f80319a52a1e146",
-      "size": 406
+      "sha256": "c438f847029dfc5d80e2184bb96684bf226bcc5a42ef86904eff7f6265a7572c",
+      "size": 420
     },
     {
       "path": "data/global/excel/experience.bin",
@@ -935,8 +935,8 @@
     },
     {
       "path": "data/global/excel/experience.txt",
-      "sha256": "5a9748320bd4796d5b660f9ad4fc33e20a73966ba1d02512e58b94e6ece98983",
-      "size": 7014
+      "sha256": "a6f0f717bfdf4ab36ac2b55d5aa67b9a6e04d32c650facffbfcb00ed7e505c6d",
+      "size": 7116
     },
     {
       "path": "data/global/excel/gamble.bin",
@@ -950,8 +950,8 @@
     },
     {
       "path": "data/global/excel/gems.txt",
-      "sha256": "52ea3e27a905f0bb2dc2bf0d60835e6f980f16e797c91e85aeccee561e219145",
-      "size": 7723
+      "sha256": "157925b4d12502eed32139ca7a246b6f1f7bfca3ea2291239def4bbf8a222bf0",
+      "size": 7793
     },
     {
       "path": "data/global/excel/hiredesc.bin",
@@ -965,8 +965,8 @@
     },
     {
       "path": "data/global/excel/hireling.txt",
-      "sha256": "ca71456a7202e34f27698f7ac7d932d8fffdba250c06db7b354f29807ae15a72",
-      "size": 26294
+      "sha256": "c743a6489456bd2c29143ae55312fda8fb6acb226d55a637c2c8f54a555afa78",
+      "size": 26415
     },
     {
       "path": "data/global/excel/hitclass.bin",
@@ -975,8 +975,8 @@
     },
     {
       "path": "data/global/excel/HorCubeEx.txt",
-      "sha256": "69af77ce8a27cb46596b54a7fc373253ab8a5fced5bf3c8fcaa25a5084c517fb",
-      "size": 7515
+      "sha256": "af87502e786041291f2d9c011017347bca5fac55e90b6d29f446ee86900d3b00",
+      "size": 7580
     },
     {
       "path": "data/global/excel/inventory.bin",
@@ -985,8 +985,8 @@
     },
     {
       "path": "data/global/excel/inventory.txt",
-      "sha256": "97326443c5bc98b08f529625971738a57b3a0627e6a56217e817efe891b6bc32",
-      "size": 8767
+      "sha256": "b11f2c15da5edb66608b4da9f35af37b5a43082a55a9abea87266a021448a64d",
+      "size": 8801
     },
     {
       "path": "data/global/excel/itemratio.bin",
@@ -995,8 +995,8 @@
     },
     {
       "path": "data/global/excel/itemratio.txt",
-      "sha256": "965793f982fed16f768ff117059dc460f24e5bc7290e309951b0a8dc9b4534de",
-      "size": 655
+      "sha256": "f8ebb2128c09311d2f17f9f3ea9e1933441f3322ab2c4c203eb9858a00af90ff",
+      "size": 662
     },
     {
       "path": "data/global/excel/itemscode.bin",
@@ -1010,8 +1010,8 @@
     },
     {
       "path": "data/global/excel/ItemStatCost.txt",
-      "sha256": "4d743b7f3e260a6647f259de25a931fd2554d52315d316eac467f110ee096c27",
-      "size": 39749
+      "sha256": "ee7fa82b48e0c4f27a566334b2da13cf1c83f5c4c0439552084a231cb5938375",
+      "size": 40109
     },
     {
       "path": "data/global/excel/itemtypes.bin",
@@ -1020,8 +1020,8 @@
     },
     {
       "path": "data/global/excel/ItemTypes.txt",
-      "sha256": "04dc469680ff78c33cef55a852b3bad8b4c63d5f776fd5fbcfaae276e8d95f02",
-      "size": 8670
+      "sha256": "d399dc5d0f3a3e1a4f1eb611dabef8311b7025392c416f58dc26baff93af3550",
+      "size": 8775
     },
     {
       "path": "data/global/excel/leveldefs.bin",
@@ -1035,8 +1035,8 @@
     },
     {
       "path": "data/global/excel/Levels.txt",
-      "sha256": "ed8a9c2f18d16b19ef49f80819ca4c25c77bcdfd681c93b742b9073388f92093",
-      "size": 64709
+      "sha256": "24d072c76fddc8b3a656a5bd287b1730f73d93caa705032d3c564221a1683bdd",
+      "size": 64844
     },
     {
       "path": "data/global/excel/lowqualityitems.bin",
@@ -1050,8 +1050,8 @@
     },
     {
       "path": "data/global/excel/LvlMaze.txt",
-      "sha256": "c014c7474da8bcce8494b69190b57f0774eb7c1473e3240d729c07db1c4744a6",
-      "size": 3283
+      "sha256": "4a8e96540b10af6a3fcb12f5711df4d2806d8b1bcfc5b1da1a000d9d3af32bf5",
+      "size": 3364
     },
     {
       "path": "data/global/excel/lvlprest.bin",
@@ -1060,8 +1060,8 @@
     },
     {
       "path": "data/global/excel/LvlPrest.txt",
-      "sha256": "1d1b9a92b5dce790c53fb5786b65c4595e205c0857d6637312ccad376fbf69a1",
-      "size": 133737
+      "sha256": "6f7ada2e30627673d5b80e0ef0b3809a220cf2f44b4e8b189150e516dbee0ded",
+      "size": 134829
     },
     {
       "path": "data/global/excel/lvlsub.bin",
@@ -1070,8 +1070,8 @@
     },
     {
       "path": "data/global/excel/LvlSub.txt",
-      "sha256": "96a016818433989fb341e71b5f927055205af1b02fb9cce7253bba63cc908095",
-      "size": 3430
+      "sha256": "d3dc9dc70066f819ff9e0c1b433b327952789ed7ad3e5eadccf7160280ddc64f",
+      "size": 3466
     },
     {
       "path": "data/global/excel/lvltypes.bin",
@@ -1080,8 +1080,8 @@
     },
     {
       "path": "data/global/excel/LvlTypes.txt",
-      "sha256": "fd7fa26728a6387fc6e5192cddd313c35c2d23fd26c244c7e923389cc0c5291d",
-      "size": 10681
+      "sha256": "4d8a6cc08afd6c66a493b677b1601182695a437dcc0ab5fedecc379537e5c84c",
+      "size": 10719
     },
     {
       "path": "data/global/excel/lvlwarp.bin",
@@ -1095,8 +1095,8 @@
     },
     {
       "path": "data/global/excel/MagicPrefix.txt",
-      "sha256": "db5ec15867c933b636ab622885ca392caca8d3346d327bc01dbee287bb42e2c4",
-      "size": 56917
+      "sha256": "f58b05c7b5db4464cbce1087b73a6f99592be56ea955fe60dd901fcddb56c561",
+      "size": 57588
     },
     {
       "path": "data/global/excel/magicsuffix.bin",
@@ -1105,8 +1105,8 @@
     },
     {
       "path": "data/global/excel/MagicSuffix.txt",
-      "sha256": "fe708fad529499efee05843647c53d949e059dab018bb96165ff9a780bfc3bda",
-      "size": 65114
+      "sha256": "47d4399809c3f123f338deebb139139b0f775f47c435e286954457b0cd47de21",
+      "size": 65863
     },
     {
       "path": "data/global/excel/misc.bin",
@@ -1115,8 +1115,8 @@
     },
     {
       "path": "data/global/excel/misc.txt",
-      "sha256": "799a43aca634c2eb6f33e0dcda103ea9edf6cf4105b40a41210cb98fc3d7892e",
-      "size": 55686
+      "sha256": "afeb3dbc210f40b0167c2c1c9299d5752e5da937787cb083a0d2880777098b32",
+      "size": 55839
     },
     {
       "path": "data/global/excel/misscalc.bin",
@@ -1125,8 +1125,8 @@
     },
     {
       "path": "data/global/excel/misscalc.txt",
-      "sha256": "e91919d263bf8c5cca629204b4ceeac3c979d25142572387c323e83ef981f7b7",
-      "size": 1099
+      "sha256": "3aaaea44299543cc09ca5b23835fbb46182ce6365757d8ff838513e28f1422b0",
+      "size": 1143
     },
     {
       "path": "data/global/excel/misscode.bin",
@@ -1140,8 +1140,8 @@
     },
     {
       "path": "data/global/excel/Missiles.txt",
-      "sha256": "b5ace0c023b1acc4a829cc789e37a2658705fb02e7afabbe08ecaa35101fe3af",
-      "size": 192286
+      "sha256": "f903fd04f61aa676585d54bc2f98c3e5a42328188318ce15b9671e85609ec0ae",
+      "size": 192971
     },
     {
       "path": "data/global/excel/monai.bin",
@@ -1150,8 +1150,8 @@
     },
     {
       "path": "data/global/excel/monai.txt",
-      "sha256": "73abdbf4dbaf2659290e70884ce665a0a7e8ac2cf209ba0f2c155b8bef77778d",
-      "size": 7385
+      "sha256": "a3380b971addd780bdf9afcddac6a5bb0807f7352a8c681e4219043b76970235",
+      "size": 7530
     },
     {
       "path": "data/global/excel/monequip.bin",
@@ -1160,8 +1160,8 @@
     },
     {
       "path": "data/global/excel/monequip.txt",
-      "sha256": "51815212a54ada8cc1bf030cdcdeca5021a4b8cb027d5e25b1414bde7e74f002",
-      "size": 1717
+      "sha256": "0254d070195e61ada97cec052ae14aaf10597bb1c5fc4da7eddde5cd05a7e17f",
+      "size": 1763
     },
     {
       "path": "data/global/excel/monitempercent.bin",
@@ -1175,8 +1175,8 @@
     },
     {
       "path": "data/global/excel/monlvl.txt",
-      "sha256": "7624abe33673f8bf4f243de141fb387a1d78f1192466ace49ac8b3c175fa4df8",
-      "size": 14595
+      "sha256": "bda243efe1d1e9591f75b8cf97ac73f78ff691362381f35cc000233eb46c092a",
+      "size": 14707
     },
     {
       "path": "data/global/excel/monmode.bin",
@@ -1185,8 +1185,8 @@
     },
     {
       "path": "data/global/excel/MonMode.txt",
-      "sha256": "7305927dbae0377357ab106ea6fbae4267796513dbf02908eb5dc2689a63f827",
-      "size": 221
+      "sha256": "2663c45b5ca74916db0114335babe7fc6dd9d357322892df501f7850e4385b52",
+      "size": 238
     },
     {
       "path": "data/global/excel/monplace.bin",
@@ -1195,8 +1195,8 @@
     },
     {
       "path": "data/global/excel/monplace.txt",
-      "sha256": "2451e8580477da926e39592250245d803935aaa1da2dd69080b0bcfd31e901e9",
-      "size": 620
+      "sha256": "1bc9f2d3acf57b65eb7036641c54e7424e5f235bfcd79a71a4ec040b46bc0b75",
+      "size": 658
     },
     {
       "path": "data/global/excel/monpreset.bin",
@@ -1205,8 +1205,8 @@
     },
     {
       "path": "data/global/excel/monpreset.txt",
-      "sha256": "681089df6f113f177644d3d09c3bf9c300614a7b6989909afc22ed6e21f65655",
-      "size": 3364
+      "sha256": "c71ac39afa5e2046510d4f44d8f809828104aa7d20ae7e5dd11f9385eab87bce",
+      "size": 3594
     },
     {
       "path": "data/global/excel/monprop.bin",
@@ -1215,8 +1215,8 @@
     },
     {
       "path": "data/global/excel/monprop.txt",
-      "sha256": "07ce4ef5f9e9262c8fbf75ee79a2f9cbedef0f9735bfaaeb04e2c66c913da1f5",
-      "size": 2440
+      "sha256": "2e7b22f19aa571f1ee3cca8426e219d146471b0b13a25c5fb70a452c2c8c9f4d",
+      "size": 2454
     },
     {
       "path": "data/global/excel/monseq.bin",
@@ -1225,8 +1225,8 @@
     },
     {
       "path": "data/global/excel/monseq.txt",
-      "sha256": "8778d39ccc2db432603b9f8f204d3a03371fc10aaef908bbd66ee7821b4a6722",
-      "size": 26750
+      "sha256": "5a042af5d3411ed337c71b014125ceae608a7b8f76c7ab437539553e14bc6992",
+      "size": 27761
     },
     {
       "path": "data/global/excel/monsounds.bin",
@@ -1235,8 +1235,8 @@
     },
     {
       "path": "data/global/excel/monsounds.txt",
-      "sha256": "b1bc5315c5d3ab2ed87f99a0ddc3f5971aa2f32a9a2481c61ec96ad663d2d1f5",
-      "size": 22785
+      "sha256": "d0da7ef1c3b34d575c27f4a56a3755fd2a4038afce632257220625644e858880",
+      "size": 22927
     },
     {
       "path": "data/global/excel/monstats.bin",
@@ -1245,8 +1245,8 @@
     },
     {
       "path": "data/global/excel/monstats.txt",
-      "sha256": "da3782bb5342c90e1f0534e4fa100fe652891a54d2bb248bd9d27c644414b390",
-      "size": 416927
+      "sha256": "2c82a69709d10dc01169fc493ac6957ff22d405f040f623a48c9a6ec8605f3b1",
+      "size": 417639
     },
     {
       "path": "data/global/excel/monstats2.bin",
@@ -1255,8 +1255,8 @@
     },
     {
       "path": "data/global/excel/monstats2.txt",
-      "sha256": "0f02327535c4c76f5a429c759a6d3a2687fd09b56f540be057f57d9899e46753",
-      "size": 136788
+      "sha256": "47e76c82c0d9b955766e087adcb5192d01cb69b5400378346f2b871d89fd1175",
+      "size": 137394
     },
     {
       "path": "data/global/excel/montype.bin",
@@ -1265,8 +1265,8 @@
     },
     {
       "path": "data/global/excel/MonType.txt",
-      "sha256": "8ec62472c23bfc8b723054a1f8f73e47b20f371d86a60853e8af1d738688940b",
-      "size": 1303
+      "sha256": "755edd9bbe12e8427373d1725e0bcea62f31fca0a75871936057cca432960faa",
+      "size": 1363
     },
     {
       "path": "data/global/excel/monumod.bin",
@@ -1275,8 +1275,8 @@
     },
     {
       "path": "data/global/excel/monumod.txt",
-      "sha256": "94a595466ecd636ea9493e734d692fa718088ddee3af2d66671d42753fd7fbdf",
-      "size": 2448
+      "sha256": "d515513e953c4db98b39f1af9cb6d58c972630a0f9a765d1381411128b9cdf0c",
+      "size": 2492
     },
     {
       "path": "data/global/excel/npc.bin",
@@ -1285,8 +1285,8 @@
     },
     {
       "path": "data/global/excel/npc.txt",
-      "sha256": "c79f0ee1a9972bcf8c6cc3bb073155e3ccb3198a1cd144d1d21b59428c0b44a3",
-      "size": 1349
+      "sha256": "912becf632e93306b00e2d1feaa879be8611b4cc6cec8fdad91594482e7e0afd",
+      "size": 1367
     },
     {
       "path": "data/global/excel/objects.bin",
@@ -1295,8 +1295,8 @@
     },
     {
       "path": "data/global/excel/objects.txt",
-      "sha256": "13cdf31607e4bd346956cdc8e11f4c4cd3dbe00f16c88f081a882a57eaa7e54c",
-      "size": 211397
+      "sha256": "213fa9d26f10508ee225edd09d1cc57125195a7ae978567e7f68a36bf47b990c",
+      "size": 211972
     },
     {
       "path": "data/global/excel/objgroup.bin",
@@ -1320,8 +1320,8 @@
     },
     {
       "path": "data/global/excel/Overlay.txt",
-      "sha256": "aeba849b369c03857f95692933afb917783dd9d331c8b62b892cd9654a9c907f",
-      "size": 27293
+      "sha256": "a37e80510e8921d4b06c9e0559a56096586d86ba295345f6bd55b4c2254b036f",
+      "size": 27588
     },
     {
       "path": "data/global/excel/pettype.bin",
@@ -1330,8 +1330,8 @@
     },
     {
       "path": "data/global/excel/pettype.txt",
-      "sha256": "4ce6ffd68c0db2be0b394f1c8c025aa929b6d4ceb14333a03c3426a43da89b42",
-      "size": 1267
+      "sha256": "144f83f31fac99e371544f3b60c16eb95fb27cd86282c28df45f035314a6699b",
+      "size": 1288
     },
     {
       "path": "data/global/excel/playerclass.bin",
@@ -1345,8 +1345,8 @@
     },
     {
       "path": "data/global/excel/PlrMode.txt",
-      "sha256": "a8a7f499b9c01ddf1aea40b8d006de0d923640a277a44d28a1fc87c53faecec0",
-      "size": 281
+      "sha256": "23106da08603bc215624e2837f3990b5ed4b5521bbe8b4a80b0ea6b6502fb8e3",
+      "size": 302
     },
     {
       "path": "data/global/excel/plrtype.bin",
@@ -1360,8 +1360,8 @@
     },
     {
       "path": "data/global/excel/Properties.txt",
-      "sha256": "98d8a8ee93ab326e12d415412641e643b8c15cc68238f27532a856bd3c25fbe5",
-      "size": 26472
+      "sha256": "257bc45defb825cc43feb01ef2110df1cb5ba5cf4cd6318993a0bc133c10ebd6",
+      "size": 26741
     },
     {
       "path": "data/global/excel/qualityitems.bin",
@@ -1385,8 +1385,8 @@
     },
     {
       "path": "data/global/excel/Runes.txt",
-      "sha256": "94a642dd71d92c08c7d6917dd9d13996e6480982cd681523efdecd132918cc2e",
-      "size": 20815
+      "sha256": "5d0d9a5c77a614c90c1678eab7a8fd30f9e95724439098eb40e466c50efa20c0",
+      "size": 20991
     },
     {
       "path": "data/global/excel/setitems.bin",
@@ -1395,8 +1395,8 @@
     },
     {
       "path": "data/global/excel/SetItems.txt",
-      "sha256": "20ff016375f41d11b8a228bce9445e6faacbc5f19d2c9812a984bde313467122",
-      "size": 26805
+      "sha256": "5696730cf84564f1cb815fb362fba13f23e22f5176e854730733519048f711be",
+      "size": 26934
     },
     {
       "path": "data/global/excel/sets.bin",
@@ -1405,8 +1405,8 @@
     },
     {
       "path": "data/global/excel/sets.txt",
-      "sha256": "816057c1bbad6fd5635565c8bffabe563583527605e7b782bf8c05836e22cbc2",
-      "size": 6287
+      "sha256": "e6694bc603f1f29efdfa981c3f747708e11bb0410786fa8bf5ab634f60f6b822",
+      "size": 6321
     },
     {
       "path": "data/global/excel/shrines.bin",
@@ -1415,8 +1415,8 @@
     },
     {
       "path": "data/global/excel/shrines.txt",
-      "sha256": "cfce481b4ece35a6ad3457a56664fc0afee75c5106d6122241a9585c43d94c83",
-      "size": 2238
+      "sha256": "1dae6107c983c5e03079ac6916cf77a3d828df4b2a0517818504dcf20a68fb6d",
+      "size": 2262
     },
     {
       "path": "data/global/excel/skillcalc.bin",
@@ -1425,8 +1425,8 @@
     },
     {
       "path": "data/global/excel/skillcalc.txt",
-      "sha256": "942137f2f4582c35953c568340996a618292cb56f309dba41176ffa73431a6d7",
-      "size": 1943
+      "sha256": "eb19168fd90095e39cd18515f7331011d4fd8df034c4efbe8c10b38eb930e032",
+      "size": 2017
     },
     {
       "path": "data/global/excel/skilldesc.bin",
@@ -1435,8 +1435,8 @@
     },
     {
       "path": "data/global/excel/skilldesc.txt",
-      "sha256": "96edc768bdd7837a314127de4f305b3d9c6f3386391802e1a5251ff7981c7595",
-      "size": 64645
+      "sha256": "ecc3730f788449f73e74c672e1523db4c3ad31349bc8e1fe7d55a04cd9a500fd",
+      "size": 64867
     },
     {
       "path": "data/global/excel/skilldesccode.bin",
@@ -1450,8 +1450,8 @@
     },
     {
       "path": "data/global/excel/skills.txt",
-      "sha256": "e994519936fa10ce7b6e493350e8214418f3bb24bfc6eca794995f8091ea2add",
-      "size": 172419
+      "sha256": "3e2e1072b0afda8f41ba864c61511749d7bc45b93bbcfc14c025bdc6b864d285",
+      "size": 172777
     },
     {
       "path": "data/global/excel/skillscode.bin",
@@ -1460,8 +1460,8 @@
     },
     {
       "path": "data/global/excel/SoundEnviron.txt",
-      "sha256": "7fb7160c6ecb43105cbd3b96fe04ad76c4e5fa80a173ef6d83a3f69bf0ff771e",
-      "size": 5690
+      "sha256": "d69131977215f8d3ac91326ffa708fad24eeddb61efae3965cf4b4d9d41de90c",
+      "size": 5741
     },
     {
       "path": "data/global/excel/sounds.bin",
@@ -1470,8 +1470,8 @@
     },
     {
       "path": "data/global/excel/Sounds.txt",
-      "sha256": "dd43ee24b1a480c61decacad3b8fdfaa4e4c9112af7a52a89fca45ffed159ac9",
-      "size": 500604
+      "sha256": "6ab753bceb4a314d8e755eabcd4d3f084da76a5564f5ba6734dffd4cc9eedc58",
+      "size": 505304
     },
     {
       "path": "data/global/excel/states.bin",
@@ -1480,8 +1480,8 @@
     },
     {
       "path": "data/global/excel/states.txt",
-      "sha256": "5b1e30692706ea73d34cffbeec62372bc75eb9526010646b1abaa5a21c4d7f93",
-      "size": 20625
+      "sha256": "fd33b3f4d097c6ef89594384926e331fbfccb8f7d81a2f66c200b6bed94a7b5a",
+      "size": 20810
     },
     {
       "path": "data/global/excel/storepage.bin",
@@ -1495,13 +1495,13 @@
     },
     {
       "path": "data/global/excel/SuperUniques.txt",
-      "sha256": "57cd3149c91aabc8e3398a68726e3dc4ea2c5f8a7a394b1d8c93064ddb4dc5c0",
-      "size": 8003
+      "sha256": "a2f954f2ca3e27353d8895650263928845cf8e9378e41fd4005a1a6b3f27320a",
+      "size": 8071
     },
     {
       "path": "data/global/excel/TreasureClass.txt",
-      "sha256": "855765cda6323a3e38301b33d73a9a921370b548dcedb46b45b6c308d343bfbb",
-      "size": 68914
+      "sha256": "a109de6a1e0ec75565b4485b054101df480fb96d6c266d6e4d62df4f27fcbbbe",
+      "size": 69635
     },
     {
       "path": "data/global/excel/treasureclassex.bin",
@@ -1510,8 +1510,8 @@
     },
     {
       "path": "data/global/excel/TreasureClassEx.txt",
-      "sha256": "b104ad80b392328a8f15020c09a4eb957a4a43e3d23c0293d40a601875ce2773",
-      "size": 87007
+      "sha256": "4c76ede33a8b3a5ad3eba95afd083f3bb93f7ed830828882034aac422c760f95",
+      "size": 87854
     },
     {
       "path": "data/global/excel/uniqueappellation.bin",
@@ -1520,8 +1520,8 @@
     },
     {
       "path": "data/global/excel/UniqueAppellation.txt",
-      "sha256": "85aad83b707351d4d5eeaf8252c9e0fb7f0eeb948b8f75ab81a8e09f36af6ae0",
-      "size": 268
+      "sha256": "fbb5661f61f578219cd6b72b6709a319c0ee906fb9b1fb44f018ab17c3aa4c1a",
+      "size": 294
     },
     {
       "path": "data/global/excel/uniqueitems.bin",
@@ -1530,13 +1530,13 @@
     },
     {
       "path": "data/global/excel/UniqueItems.txt",
-      "sha256": "c8643edb73fc7d425815e21346874299b146f7d06722b9a0831ccafada292659",
-      "size": 73136
+      "sha256": "0fc16b02cf10f2833730c86d570ee9c68c1ea1883476f24b41de1ea774189ef7",
+      "size": 73539
     },
     {
       "path": "data/global/excel/UniqueItems2.txt",
-      "sha256": "c140dcc8f0fcc45c5ca344120b0bc2f083ecdff923a2e345a23d8b3196197f74",
-      "size": 42446
+      "sha256": "a7e118d895f11784fa58f96580f8bee6a8aabf5faf3dc8caf39220fb5bf1af40",
+      "size": 42820
     },
     {
       "path": "data/global/excel/uniqueprefix.bin",
@@ -1545,8 +1545,8 @@
     },
     {
       "path": "data/global/excel/UniquePrefix.txt",
-      "sha256": "426c5a1007cbc6623e451939fc3422f5a049fd38934e76e40b8b840d92094ae6",
-      "size": 338
+      "sha256": "564ce70637b464c3cfe735c898310208b062751f80c5952afb78bbfb48f45369",
+      "size": 392
     },
     {
       "path": "data/global/excel/uniquesuffix.bin",
@@ -1555,8 +1555,8 @@
     },
     {
       "path": "data/global/excel/UniqueSuffix.txt",
-      "sha256": "b44e0a3e3661583f5c66282c75c3e0ec8aa128e25097b807e3a366b19ae6ecf3",
-      "size": 457
+      "sha256": "5c9597373fd8c3621c94afc95aa80487c59c81349c663635a2cae2f156e862f7",
+      "size": 527
     },
     {
       "path": "data/global/excel/uniquetitle.bin",
@@ -1565,8 +1565,8 @@
     },
     {
       "path": "data/global/excel/UniqueTitle.txt",
-      "sha256": "a850e4c83a0ab25d07de264e15d6730181d6ab8fc5206e2258be0ba3e63d1f11",
-      "size": 233
+      "sha256": "3ecf4e1b3fdbd905e3057407fac1b82ff6faf30425cfc2ed64e0cd79a6acde8e",
+      "size": 250
     },
     {
       "path": "data/global/excel/weapons.bin",
@@ -1575,8 +1575,8 @@
     },
     {
       "path": "data/global/excel/weapons.txt",
-      "sha256": "706f39eafa8393e428b049ef7f629eb59096435f62f849b6ab2b144b704ccd4b",
-      "size": 117721
+      "sha256": "05a938e3fc0b8974bc722bfa8974f44e45e99d19c6877613ff731104b12b3536",
+      "size": 118029
     },
     {
       "path": "data/global/items/invbrnz.dc6",
