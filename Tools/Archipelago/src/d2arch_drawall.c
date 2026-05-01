@@ -467,6 +467,13 @@ static void DrawSkillTooltip(int skillId, int mx, int my) {
     }
 }
 
+/* 1.9.1 — wheel-delta accumulator for the Ctrl+V dev menu's Loot tab
+ * scrollable lists. WndProc (d2arch_main.c WM_MOUSEWHEEL) accumulates
+ * raw delta here when g_cheatMenuOpen is true; the renderer drains it
+ * each frame. Defined here (drawall.c is the LAST .c included by the
+ * unity TU) so a single definition exists. */
+int g_cheatMenuWheelDelta = 0;
+
 static void DrawAll(void) {
     /* Auto-hide D2Debugger window on first frame (it starts visible).
      * We keep trying until we find it, since it may take a few frames to appear. */
@@ -2044,11 +2051,21 @@ static void DrawAll(void) {
 
     /* === CHEAT MENU (Ctrl+V) — draggable, TABBED, character-frozen === */
     if (g_cheatMenuOpen && fnRect && fnText && fnFont) {
+        /* 1.9.1 — accumulator for mouse-wheel deltas while the menu is
+         * open. WndProc (d2arch_main.c WM_MOUSEWHEEL) writes here; the
+         * Loot tab's scrollable Sets/Uniques lists drain it each frame. */
+        extern int g_cheatMenuWheelDelta;
         static int s_cheatX = -1, s_cheatY = -1;
         static BOOL s_cheatDrag = FALSE;
         static int s_cheatDragOX = 0, s_cheatDragOY = 0;
-        static int s_activeTab = 0;  /* 0=Char 1=Combat 2=Items 3=Pand 4=Teleport 5=Portals */
+        static int s_activeTab = 0;  /* 0=Char 1=Combat 2=Items 3=Pand 4=Teleport 5=Portals 6=Loot */
         static int s_tpSubTab = 0;   /* Teleport sub-tab: 0=Act1 1=Act2 2=Act3 3=Act4 4=Act5 5=Secrets */
+        /* 1.9.1 — Loot tab sub-tab: 0=Sets 1=Uniques 2=Runes 3=Gems 4=Misc.
+         * Sets + Uniques pages are scrollable lists (127 / ~385 entries);
+         * the rest are fixed grids that fit without scroll. */
+        static int s_lootSubTab = 0;
+        static int s_lootScrollSet = 0;     /* pixel offset into the Sets list */
+        static int s_lootScrollUnique = 0;  /* pixel offset into the Uniques list */
 
         #define MK_HDR  1   /* full-width section header */
         #define MK_BTN  2   /* clickable button */
@@ -2261,6 +2278,156 @@ static void DrawAll(void) {
             { MK_BTN, L"Close",                   999, NULL },
         };
 
+        /* 1.9.1 — Loot tab — fixed grid arrays for sub-tabs 2/3/4 (Runes,
+         * Gems, Misc). Sets + Uniques are dynamic scrollable lists rendered
+         * directly without going through the static MENU table. */
+
+        /* TAB_LOOT_RUNES — every rune r01..r33 individually.
+         * Codes verified against Misc.txt (3-letter "rune name" pairs)
+         * and the existing g_cheatItemCmd RUNES_ALL list at d2arch_gameloop.c:1312. */
+        static const struct CheatCell TAB_LOOT_RUNES[] = {
+            { MK_HDR, L"LOW RUNES (El..Thul)",       0, NULL },
+            { MK_BTN, L"r01 El",        1001, "Rune: El"   },
+            { MK_BTN, L"r02 Eld",       1002, "Rune: Eld"  },
+            { MK_BTN, L"r03 Tir",       1003, "Rune: Tir"  },
+            { MK_BTN, L"r04 Nef",       1004, "Rune: Nef"  },
+            { MK_BTN, L"r05 Eth",       1005, "Rune: Eth"  },
+            { MK_BTN, L"r06 Ith",       1006, "Rune: Ith"  },
+            { MK_BTN, L"r07 Tal",       1007, "Rune: Tal"  },
+            { MK_BTN, L"r08 Ral",       1008, "Rune: Ral"  },
+            { MK_BTN, L"r09 Ort",       1009, "Rune: Ort"  },
+            { MK_BTN, L"r10 Thul",      1010, "Rune: Thul" },
+            { MK_HDR, L"MID RUNES (Amn..Lem)",       0, NULL },
+            { MK_BTN, L"r11 Amn",       1011, "Rune: Amn"   },
+            { MK_BTN, L"r12 Sol",       1012, "Rune: Sol"   },
+            { MK_BTN, L"r13 Shael",     1013, "Rune: Shael" },
+            { MK_BTN, L"r14 Dol",       1014, "Rune: Dol"   },
+            { MK_BTN, L"r15 Hel",       1015, "Rune: Hel"   },
+            { MK_BTN, L"r16 Io",        1016, "Rune: Io"    },
+            { MK_BTN, L"r17 Lum",       1017, "Rune: Lum"   },
+            { MK_BTN, L"r18 Ko",        1018, "Rune: Ko"    },
+            { MK_BTN, L"r19 Fal",       1019, "Rune: Fal"   },
+            { MK_BTN, L"r20 Lem",       1020, "Rune: Lem"   },
+            { MK_HDR, L"HIGH RUNES (Pul..Ber)",       0, NULL },
+            { MK_BTN, L"r21 Pul",       1021, "Rune: Pul" },
+            { MK_BTN, L"r22 Um",        1022, "Rune: Um"  },
+            { MK_BTN, L"r23 Mal",       1023, "Rune: Mal" },
+            { MK_BTN, L"r24 Ist",       1024, "Rune: Ist" },
+            { MK_BTN, L"r25 Gul",       1025, "Rune: Gul" },
+            { MK_BTN, L"r26 Vex",       1026, "Rune: Vex" },
+            { MK_BTN, L"r27 Ohm",       1027, "Rune: Ohm" },
+            { MK_BTN, L"r28 Lo",        1028, "Rune: Lo"  },
+            { MK_BTN, L"r29 Sur",       1029, "Rune: Sur" },
+            { MK_BTN, L"r30 Ber",       1030, "Rune: Ber" },
+            { MK_HDR, L"TOP RUNES (Jah/Cham/Zod)",       0, NULL },
+            { MK_BTN, L"r31 Jah",       1031, "Rune: Jah"  },
+            { MK_BTN, L"r32 Cham",      1032, "Rune: Cham" },
+            { MK_BTN, L"r33 Zod",       1033, "Rune: Zod"  },
+            { MK_BTN, L"Close",          999, NULL },
+        };
+
+        /* TAB_LOOT_GEMS — 7 colors × 5 grades = 35 buttons.
+         * Order verified against Misc.txt + GEMS_ALL list at d2arch_gameloop.c:1338-1347.
+         * NOTE — irregular codes preserved from data:
+         *   Amethyst flawless = gzv (NOT glv — verified by cubemain output)
+         *   Skull = skc/skf/sku/skl/skz (no g-prefix). */
+        static const struct CheatCell TAB_LOOT_GEMS[] = {
+            { MK_HDR, L"AMETHYST",                   0, NULL },
+            { MK_BTN, L"Chipped",        1101, "Gem: Chipped Amethyst"   },
+            { MK_BTN, L"Flawed",         1102, "Gem: Flawed Amethyst"    },
+            { MK_BTN, L"Normal",         1103, "Gem: Amethyst"           },
+            { MK_BTN, L"Flawless",       1104, "Gem: Flawless Amethyst (gzv)" },
+            { MK_BTN, L"Perfect",        1105, "Gem: Perfect Amethyst"   },
+            { MK_HDR, L"TOPAZ",                      0, NULL },
+            { MK_BTN, L"Chipped",        1106, "Gem: Chipped Topaz"   },
+            { MK_BTN, L"Flawed",         1107, "Gem: Flawed Topaz"    },
+            { MK_BTN, L"Normal",         1108, "Gem: Topaz"           },
+            { MK_BTN, L"Flawless",       1109, "Gem: Flawless Topaz"  },
+            { MK_BTN, L"Perfect",        1110, "Gem: Perfect Topaz"   },
+            { MK_HDR, L"SAPPHIRE",                   0, NULL },
+            { MK_BTN, L"Chipped",        1111, "Gem: Chipped Sapphire"   },
+            { MK_BTN, L"Flawed",         1112, "Gem: Flawed Sapphire"    },
+            { MK_BTN, L"Normal",         1113, "Gem: Sapphire"           },
+            { MK_BTN, L"Flawless",       1114, "Gem: Flawless Sapphire"  },
+            { MK_BTN, L"Perfect",        1115, "Gem: Perfect Sapphire"   },
+            { MK_HDR, L"EMERALD",                    0, NULL },
+            { MK_BTN, L"Chipped",        1116, "Gem: Chipped Emerald"   },
+            { MK_BTN, L"Flawed",         1117, "Gem: Flawed Emerald"    },
+            { MK_BTN, L"Normal",         1118, "Gem: Emerald"           },
+            { MK_BTN, L"Flawless",       1119, "Gem: Flawless Emerald"  },
+            { MK_BTN, L"Perfect",        1120, "Gem: Perfect Emerald"   },
+            { MK_HDR, L"RUBY",                       0, NULL },
+            { MK_BTN, L"Chipped",        1121, "Gem: Chipped Ruby"   },
+            { MK_BTN, L"Flawed",         1122, "Gem: Flawed Ruby"    },
+            { MK_BTN, L"Normal",         1123, "Gem: Ruby"           },
+            { MK_BTN, L"Flawless",       1124, "Gem: Flawless Ruby"  },
+            { MK_BTN, L"Perfect",        1125, "Gem: Perfect Ruby"   },
+            { MK_HDR, L"DIAMOND",                    0, NULL },
+            { MK_BTN, L"Chipped",        1126, "Gem: Chipped Diamond"   },
+            { MK_BTN, L"Flawed",         1127, "Gem: Flawed Diamond"    },
+            { MK_BTN, L"Normal",         1128, "Gem: Diamond"           },
+            { MK_BTN, L"Flawless",       1129, "Gem: Flawless Diamond"  },
+            { MK_BTN, L"Perfect",        1130, "Gem: Perfect Diamond"   },
+            { MK_HDR, L"SKULL",                      0, NULL },
+            { MK_BTN, L"Chipped",        1131, "Gem: Chipped Skull (skc)"   },
+            { MK_BTN, L"Flawed",         1132, "Gem: Flawed Skull (skf)"    },
+            { MK_BTN, L"Normal",         1133, "Gem: Skull (sku)"           },
+            { MK_BTN, L"Flawless",       1134, "Gem: Flawless Skull (skl)"  },
+            { MK_BTN, L"Perfect",        1135, "Gem: Perfect Skull (skz)"   },
+            { MK_BTN, L"Close",           999, NULL },
+        };
+
+        /* TAB_LOOT_MISC — every reward / quest item the mod awards.
+         * Codes traced from DEBUG_MENU_ITEM_CATALOG_2026-05-01.md sections 5a-5k.
+         * Hellfire Torch (cm2 unique) is forced ilvl=99, quality=7 by the
+         * dispatch handler so it rolls as the unique torch instead of a
+         * normal Charm Medium. */
+        static const struct CheatCell TAB_LOOT_MISC[] = {
+            { MK_HDR, L"PANDEMONIUM EVENT",          0, NULL },
+            { MK_BTN, L"Key of Terror",      1201, "pk1 — Key of Terror" },
+            { MK_BTN, L"Key of Hate",        1202, "pk2 — Key of Hate" },
+            { MK_BTN, L"Key of Destruction", 1203, "pk3 — Key of Destruction" },
+            { MK_BTN, L"Mephisto's Brain",   1204, "mbr — Mephisto's Brain" },
+            { MK_BTN, L"Diablo's Horn",      1205, "dhn — Diablo's Horn" },
+            { MK_BTN, L"Baal's Eye",         1206, "bey — Baal's Eye" },
+            { MK_BTN, L"Twisted Essence",    1207, "tes — Twisted Essence (Suff)" },
+            { MK_BTN, L"Charged Essence",    1208, "ceh — Charged Essence (Hate)" },
+            { MK_BTN, L"Burning Essence",    1209, "bet — Burning Essence (Terror)" },
+            { MK_BTN, L"Festering Essence",  1210, "fed — Festering Essence (Dest)" },
+            { MK_BTN, L"Hellfire Torch",     1211, "cm2 unique — Hellfire Torch" },
+            { MK_BTN, L"Token of Absolution",1212, "toa — Token of Absolution" },
+            { MK_HDR, L"CHARMS",                     0, NULL },
+            { MK_BTN, L"Charm Small (cm1)",  1220, "cm1 — Charm Small (Anni base)" },
+            { MK_BTN, L"Charm Medium (cm2)", 1221, "cm2 — Charm Medium" },
+            { MK_BTN, L"Charm Large (cm3)",  1222, "cm3 — Charm Large (Gheed base)" },
+            { MK_HDR, L"TOMES + SCROLLS + KEY",      0, NULL },
+            { MK_BTN, L"Tome of TP",         1230, "tbk — Tome of Town Portal" },
+            { MK_BTN, L"Tome of ID",         1231, "ibk — Tome of Identify" },
+            { MK_BTN, L"TP Scroll",          1232, "tsc — Town Portal Scroll" },
+            { MK_BTN, L"ID Scroll",          1233, "isc — Identify Scroll" },
+            { MK_BTN, L"Skeleton Key",       1234, "key — Skeleton Key" },
+            { MK_BTN, L"Horadric Cube",      1235, "box — Horadric Cube" },
+            { MK_HDR, L"POTIONS — HEALING",          0, NULL },
+            { MK_BTN, L"hp1 Lesser",         1240, "hp1 — Lesser Healing" },
+            { MK_BTN, L"hp2 Light",          1241, "hp2 — Light Healing" },
+            { MK_BTN, L"hp3 Healing",        1242, "hp3 — Healing" },
+            { MK_BTN, L"hp4 Strong",         1243, "hp4 — Strong Healing" },
+            { MK_BTN, L"hp5 Greater",        1244, "hp5 — Greater Healing" },
+            { MK_HDR, L"POTIONS — MANA",             0, NULL },
+            { MK_BTN, L"mp1 Lesser",         1245, "mp1 — Lesser Mana" },
+            { MK_BTN, L"mp2 Light",          1246, "mp2 — Light Mana" },
+            { MK_BTN, L"mp3 Mana",           1247, "mp3 — Mana" },
+            { MK_BTN, L"mp4 Strong",         1248, "mp4 — Strong Mana" },
+            { MK_BTN, L"mp5 Greater",        1249, "mp5 — Greater Mana" },
+            { MK_HDR, L"POTIONS — REJUV / SPECIALTY",0, NULL },
+            { MK_BTN, L"Rejuv (small)",      1250, "rvs — Rejuvenation" },
+            { MK_BTN, L"Rejuv (full)",       1251, "rvl — Full Rejuvenation" },
+            { MK_BTN, L"Stamina",            1252, "vps — Stamina Potion" },
+            { MK_BTN, L"Antidote",           1253, "yps — Antidote Potion" },
+            { MK_BTN, L"Thawing",            1254, "wms — Thawing Potion" },
+            { MK_BTN, L"Close",               999, NULL },
+        };
+
         /* Pick active tab's array */
         const struct CheatCell* MENU = TAB_CHARACTER;
         int tabSize = (int)(sizeof(TAB_CHARACTER) / sizeof(TAB_CHARACTER[0]));
@@ -2281,6 +2448,30 @@ static void DrawAll(void) {
             case 5: MENU = TAB_PORTALS;
                     tabSize = (int)(sizeof(TAB_PORTALS)/sizeof(TAB_PORTALS[0]));
                     tabName = L"Portals"; break;
+            case 6:
+                /* 1.9.1 — Loot tab. Sets + Uniques (sub 0/1) are
+                 * scrollable lists rendered separately; sub 2/3/4 use
+                 * the static grid arrays declared above. The MENU /
+                 * tabSize fallthrough below renders the grid for those
+                 * sub-tabs the same way every other tab does. */
+                switch (s_lootSubTab) {
+                    case 2: MENU = TAB_LOOT_RUNES;
+                            tabSize = (int)(sizeof(TAB_LOOT_RUNES)/sizeof(TAB_LOOT_RUNES[0]));
+                            break;
+                    case 3: MENU = TAB_LOOT_GEMS;
+                            tabSize = (int)(sizeof(TAB_LOOT_GEMS)/sizeof(TAB_LOOT_GEMS[0]));
+                            break;
+                    case 4: MENU = TAB_LOOT_MISC;
+                            tabSize = (int)(sizeof(TAB_LOOT_MISC)/sizeof(TAB_LOOT_MISC[0]));
+                            break;
+                    default:
+                        /* Sets / Uniques — empty stub; the scrollable
+                         * list draws its own content below. */
+                        MENU = NULL;
+                        tabSize = 0;
+                        break;
+                }
+                tabName = L"Loot"; break;
             case 4:
                 /* Pick teleport sub-tab */
                 switch (s_tpSubTab) {
@@ -2322,24 +2513,37 @@ static void DrawAll(void) {
         const int HDR_H   = 22;
         const int FOOT_H  = 12;
 
+        /* 1.9.1 — Loot tab Sets/Uniques use a fixed-height scrollable
+         * list area instead of the cell-walk grid. We pick a comfortable
+         * 380px tall content area so ~17 list rows are visible at once. */
+        const int LOOT_LIST_H = 380;
+        const int LOOT_ROW_H  = 22;
+        BOOL isLootScrollList =
+            (s_activeTab == 6 && (s_lootSubTab == 0 || s_lootSubTab == 1));
+
         /* Walk cells once to compute total height */
         /* Reserve space for tab strip (22 tab + 4 top + 4 bottom = 30).
-         * Plus extra 26 for sub-tab strip when Teleport tab active. */
+         * Plus extra 26 for sub-tab strip when Teleport or Loot tab active. */
         int yWalk = TITLE_H + 30 + PAD;
-        if (s_activeTab == 4) yWalk += 26;
+        if (s_activeTab == 4 || s_activeTab == 6) yWalk += 26;
         int colCur = 0;
-        for (int i = 0; i < numCells; i++) {
-            int k = MENU[i].kind;
-            if (k == MK_HDR) {
-                if (colCur != 0) { yWalk += CELL_H + CELL_GAP; colCur = 0; }
-                yWalk += HDR_H + CELL_GAP;
-            } else {
-                if (colCur == 0 && i > 0) yWalk += 0;
-                colCur++;
-                if (colCur >= COLS) { yWalk += CELL_H + CELL_GAP; colCur = 0; }
+        if (isLootScrollList) {
+            /* Fixed scrollable list height + close-button row. */
+            yWalk += LOOT_LIST_H + CELL_GAP + CELL_H + CELL_GAP;
+        } else {
+            for (int i = 0; i < numCells; i++) {
+                int k = MENU[i].kind;
+                if (k == MK_HDR) {
+                    if (colCur != 0) { yWalk += CELL_H + CELL_GAP; colCur = 0; }
+                    yWalk += HDR_H + CELL_GAP;
+                } else {
+                    if (colCur == 0 && i > 0) yWalk += 0;
+                    colCur++;
+                    if (colCur >= COLS) { yWalk += CELL_H + CELL_GAP; colCur = 0; }
+                }
             }
+            if (colCur != 0) yWalk += CELL_H + CELL_GAP;
         }
-        if (colCur != 0) yWalk += CELL_H + CELL_GAP;
         yWalk += FOOT_H;
 
         int cw = PAD * 2 + CELL_W * COLS + CELL_GAP * (COLS - 1);
@@ -2380,15 +2584,16 @@ static void DrawAll(void) {
         fnFont(0);
         fnText(L"Dev Tools  (Ctrl+V)", cx+cw/2, cy+22, 4, 1);
 
-        /* Tab strip — 5 tabs across top, ~95px each */
+        /* Tab strip — 7 tabs across top (1.9.1 added Loot for the
+         * per-item spawn pages: Sets / Uniques / Runes / Gems / Misc) */
         {
-            const wchar_t* tabLabels[6] = {
-                L"Char", L"Combat", L"Items", L"Pand", L"Teleport", L"Portals"
+            const wchar_t* tabLabels[7] = {
+                L"Char", L"Combat", L"Items", L"Pand", L"Teleport", L"Portals", L"Loot"
             };
             const int TAB_H = 22;
-            const int tabW = (cw - PAD * 2) / 6;
+            const int tabW = (cw - PAD * 2) / 7;
             int tabY = cy + TITLE_H + 4;
-            for (int t = 0; t < 6; t++) {
+            for (int t = 0; t < 7; t++) {
                 int tx = cx + PAD + t * tabW;
                 BOOL isActive = (t == s_activeTab);
                 BOOL hov = InRect(cmx, cmy, tx, tabY, tabW - 2, TAB_H);
@@ -2413,18 +2618,36 @@ static void DrawAll(void) {
         }
         const int TAB_STRIP_H = 22 + 8;  /* 22 tab + 4 top pad + 4 bottom pad */
 
-        /* Sub-tab strip — only when Teleport tab is active. */
+        /* Sub-tab strip — only when Teleport (4) or Loot (6) tab is active.
+         * Both reuse the same paint routine; the labels and selected-state
+         * variable are picked from the active top tab. */
         int subTabExtraY = 0;
-        if (s_activeTab == 4) {
-            const wchar_t* subLabels[6] = {
-                L"Act 1", L"Act 2", L"Act 3", L"Act 4", L"Act 5", L"Secret"
-            };
+        if (s_activeTab == 4 || s_activeTab == 6) {
+            const wchar_t* subLabels[6];
+            int subCount;
+            int* selectedSub;
+            if (s_activeTab == 4) {
+                static const wchar_t* TP_LABELS[6] = {
+                    L"Act 1", L"Act 2", L"Act 3", L"Act 4", L"Act 5", L"Secret"
+                };
+                for (int i = 0; i < 6; i++) subLabels[i] = TP_LABELS[i];
+                subCount = 6;
+                selectedSub = &s_tpSubTab;
+            } else {
+                /* Loot tab — 5 sub-tabs */
+                static const wchar_t* LOOT_LABELS[5] = {
+                    L"Sets", L"Uniques", L"Runes", L"Gems", L"Misc"
+                };
+                for (int i = 0; i < 5; i++) subLabels[i] = LOOT_LABELS[i];
+                subCount = 5;
+                selectedSub = &s_lootSubTab;
+            }
             const int SUB_TAB_H = 20;
-            const int subTabW = (cw - PAD * 2) / 6;
+            const int subTabW = (cw - PAD * 2) / subCount;
             int subY = cy + TITLE_H + TAB_STRIP_H;
-            for (int t = 0; t < 6; t++) {
+            for (int t = 0; t < subCount; t++) {
                 int tx = cx + PAD + t * subTabW;
-                BOOL isActive = (t == s_tpSubTab);
+                BOOL isActive = (t == *selectedSub);
                 BOOL hov = InRect(cmx, cmy, tx, subY, subTabW - 2, SUB_TAB_H);
                 int fillCol = isActive ? 4 : (hov ? 5 : 0);
                 int textCol = isActive ? 0 : (hov ? 0 : 5);
@@ -2439,8 +2662,9 @@ static void DrawAll(void) {
                     static DWORD _stc = 0; DWORD _stn = GetTickCount();
                     if (_stn - _stc > 250) {
                         _stc = _stn;
-                        s_tpSubTab = t;
-                        Log("CHEAT MENU: switched to teleport sub-tab %d (%ls)\n",
+                        *selectedSub = t;
+                        Log("CHEAT MENU: switched to %s sub-tab %d (%ls)\n",
+                            (s_activeTab == 4) ? "teleport" : "loot",
                             t, subLabels[t]);
                     }
                 }
@@ -2451,6 +2675,177 @@ static void DrawAll(void) {
         /* Walk cells and draw */
         int yCur = cy + TITLE_H + TAB_STRIP_H + subTabExtraY;
         colCur = 0;
+
+        /* 1.9.1 — Loot Sets / Uniques: render a vertical scrollable list
+         * instead of the cell grid. Each row is one button (one item).
+         * Mouse wheel in the list area scrolls; click triggers the spawn.
+         *
+         * Sets index is the catalog idx 0..126 (Coll_GetSetPieceCode +
+         * Quests_SetPieceName); Uniques is 0..g_uniqueCatalogCount-1.
+         * Both route through Quests_QueueSpecificDrop in the gameloop —
+         * exact same path AP rewards take, so this doubles as an
+         * AP-delivery test bench. */
+        if (isLootScrollList) {
+            int isSets = (s_lootSubTab == 0);
+            int* scroll = isSets ? &s_lootScrollSet : &s_lootScrollUnique;
+            int totalCount;
+            if (isSets) {
+                totalCount = COLL_NUM_SET_PIECES;  /* 127 */
+            } else {
+                if (!g_uniqueCatalogLoaded) Quests_LoadUniqueCatalog();
+                totalCount = g_uniqueCatalogCount;
+            }
+
+            int listX = cx + PAD;
+            int listW = cw - PAD * 2 - 14;   /* leave 14 px on right for scrollbar */
+            int listY = yCur;
+            int listH = LOOT_LIST_H;
+            int rowH  = LOOT_ROW_H;
+
+            int totalH = totalCount * rowH;
+            int maxScroll = totalH - listH;
+            if (maxScroll < 0) maxScroll = 0;
+
+            /* Mouse wheel scroll — WndProc accumulates raw delta into
+             * g_cheatMenuWheelDelta when the menu is open; we drain it
+             * each frame and translate to row scroll. WHEEL_DELTA=120
+             * per notch, scroll 3 rows per notch. Only consumed when
+             * the cursor is over the list area. */
+            if (InRect(cmx, cmy, listX, listY, listW + 14, listH)) {
+                if (g_cheatMenuWheelDelta != 0) {
+                    *scroll -= (g_cheatMenuWheelDelta / 120) * (rowH * 3);
+                    g_cheatMenuWheelDelta = 0;
+                }
+            }
+            if (*scroll < 0) *scroll = 0;
+            if (*scroll > maxScroll) *scroll = maxScroll;
+
+            /* Background */
+            fnRect(listX, listY, listX + listW + 14, listY + listH, 0, 1);
+            fnRect(listX, listY, listX + listW + 14, listY + 1, 7, 1);
+            fnRect(listX, listY + listH - 1, listX + listW + 14, listY + listH, 7, 1);
+            fnRect(listX, listY, listX + 1, listY + listH, 7, 1);
+            fnRect(listX + listW + 13, listY, listX + listW + 14, listY + listH, 7, 1);
+
+            /* Row rendering — only draw rows in the visible window */
+            int firstRow = (*scroll) / rowH;
+            int lastRow  = (*scroll + listH) / rowH + 1;
+            if (firstRow < 0) firstRow = 0;
+            if (lastRow > totalCount) lastRow = totalCount;
+
+            for (int r = firstRow; r < lastRow; r++) {
+                int rowY = listY + (r * rowH) - (*scroll);
+                if (rowY + rowH < listY || rowY > listY + listH) continue;
+
+                /* Clip rows that overlap the list edges. */
+                int drawTop    = (rowY < listY)         ? listY         : rowY;
+                int drawBottom = (rowY + rowH > listY + listH) ? listY + listH : rowY + rowH;
+                if (drawBottom <= drawTop) continue;
+
+                BOOL hov = InRect(cmx, cmy, listX + 2, rowY, listW - 4, rowH)
+                         && (rowY >= listY) && (rowY + rowH <= listY + listH);
+                int fillCol = hov ? 4 : 0;
+                int textCol = hov ? 0 : 7;
+
+                fnRect(listX + 2, drawTop, listX + listW - 2, drawBottom, fillCol, 1);
+
+                /* Build label: "[idx] name (extra)" */
+                wchar_t wlabel[96];
+                char buf[128];
+                if (isSets) {
+                    const char* code = Coll_GetSetPieceCode(r);
+                    const char* name = Quests_SetPieceName(r);
+                    _snprintf(buf, sizeof(buf), "[%3d] %s  (%s)",
+                              r, name ? name : "?", code ? code : "??");
+                } else {
+                    const char* name = Quests_UniqueName(r);
+                    const char* code = (r >= 0 && r < g_uniqueCatalogCount)
+                                       ? g_uniqueCatalog[r].baseCode : "??";
+                    int reqLvl = (r >= 0 && r < g_uniqueCatalogCount)
+                                 ? g_uniqueCatalog[r].reqLvl : 0;
+                    _snprintf(buf, sizeof(buf), "[%3d] %s  (%s, req %d)",
+                              r, name ? name : "?", code, reqLvl);
+                }
+                buf[sizeof(buf) - 1] = 0;
+                /* Truncate to fit ~52 chars */
+                if (strlen(buf) > 52) { buf[49] = '.'; buf[50] = '.'; buf[51] = '.'; buf[52] = 0; }
+                MultiByteToWideChar(CP_ACP, 0, buf, -1, wlabel, 96);
+
+                fnFont(6);
+                fnText(wlabel, listX + 6, rowY + 16, textCol, 0);
+
+                if (hov && !s_cheatDrag && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+                    static DWORD _lc = 0; DWORD _ln = GetTickCount();
+                    if (_ln - _lc > 300) {
+                        _lc = _ln;
+                        if (isSets) {
+                            g_cheatSpecificSetIdx = r;
+                            ShowNotify(Quests_SetPieceName(r));
+                            Log("CHEAT LOOT: queued SET idx=%d\n", r);
+                        } else {
+                            g_cheatSpecificUniqueIdx = r;
+                            ShowNotify(Quests_UniqueName(r));
+                            Log("CHEAT LOOT: queued UNIQUE idx=%d\n", r);
+                        }
+                    }
+                }
+            }
+
+            /* Scrollbar — track + thumb on the right edge */
+            int sbX  = listX + listW;
+            int sbX2 = sbX + 12;
+            if (totalH > listH) {
+                fnRect(sbX, listY, sbX2, listY + listH, 0, 1);
+                int thumbH = (listH * listH) / totalH;
+                if (thumbH < 16) thumbH = 16;
+                int thumbY = listY;
+                if (maxScroll > 0)
+                    thumbY = listY + ((*scroll) * (listH - thumbH)) / maxScroll;
+                fnRect(sbX + 1, thumbY, sbX2 - 1, thumbY + thumbH, 7, 1);
+
+                /* Click-to-scroll: clicking the track snaps thumb to mouse Y */
+                if (InRect(cmx, cmy, sbX, listY, 14, listH)
+                    && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+                    int relY = cmy - listY - thumbH / 2;
+                    if (listH - thumbH > 0) {
+                        *scroll = (relY * maxScroll) / (listH - thumbH);
+                        if (*scroll < 0) *scroll = 0;
+                        if (*scroll > maxScroll) *scroll = maxScroll;
+                    }
+                }
+            }
+
+            /* Footer counter */
+            wchar_t winfo[64];
+            swprintf(winfo, 64, L"%d / %d  —  scroll wheel or drag thumb",
+                     totalCount, totalCount);
+            fnFont(6);
+            fnText(winfo, listX + listW / 2, listY + listH + 12, 5, 1);
+
+            yCur += listH + CELL_GAP + 12;
+
+            /* Close button row */
+            int bx = cx + (cw - CELL_W) / 2;
+            int by = yCur;
+            int bw = CELL_W, bh = CELL_H;
+            BOOL hovC = InRect(cmx, cmy, bx, by, bw, bh);
+            int fillCol = hovC ? 4 : 5;
+            int textCol = hovC ? 0 : 1;
+            fnRect(bx, by, bx + bw, by + bh, fillCol, 1);
+            fnRect(bx, by, bx + bw, by + 1, 7, 1);
+            fnRect(bx, by + bh - 1, bx + bw, by + bh, 7, 1);
+            fnRect(bx, by, bx + 1, by + bh, 7, 1);
+            fnRect(bx + bw - 1, by, bx + bw, by + bh, 7, 1);
+            fnFont(6);
+            fnText(L"Close", bx + bw / 2, by + 18, textCol, 1);
+            if (hovC && !s_cheatDrag && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+                static DWORD _cc = 0; DWORD _cn = GetTickCount();
+                if (_cn - _cc > 300) { _cc = _cn; g_cheatMenuOpen = FALSE; }
+            }
+
+            goto cheat_menu_done;
+        }
+
         for (int i = 0; i < numCells; i++) {
             const struct CheatCell* mc = &MENU[i];
 
@@ -2572,6 +2967,100 @@ static void DrawAll(void) {
                                     c, destArea, objId);
                             }
                         }
+                        /* 1.9.1 — Loot tab: Runes / Gems / Misc grid buttons.
+                         * Each button maps to a single 3-char item code.
+                         * The dispatch sets g_cheatSingleItemCode + qual + lvl;
+                         * the gameloop tick consumes them once and resets. */
+                        else if (c >= 1001 && c <= 1033) {
+                            /* Runes r01..r33 */
+                            int n = c - 1000;
+                            char tmp[8];
+                            _snprintf(tmp, sizeof(tmp), "r%02d", n);
+                            strncpy((char*)g_cheatSingleItemCode, tmp, 7);
+                            g_cheatSingleItemQuality = 2;
+                            g_cheatSingleItemLvl     = 50;
+                            Log("CHEAT LOOT: rune %s queued\n", tmp);
+                        }
+                        else if (c >= 1101 && c <= 1135) {
+                            /* Gems — 35 entries in fixed order matching
+                             * TAB_LOOT_GEMS above (Amethyst..Skull, Chipped..Perfect).
+                             * Order verified against d2arch_gameloop.c GEMS_ALL. */
+                            static const char* GEM_CODES[35] = {
+                                "gcv","gfv","gsv","gzv","gpv",  /* Amethyst (note gzv flawless) */
+                                "gcy","gfy","gsy","gly","gpy",  /* Topaz */
+                                "gcb","gfb","gsb","glb","gpb",  /* Sapphire */
+                                "gcg","gfg","gsg","glg","gpg",  /* Emerald */
+                                "gcr","gfr","gsr","glr","gpr",  /* Ruby */
+                                "gcw","gfw","gsw","glw","gpw",  /* Diamond */
+                                "skc","skf","sku","skl","skz",  /* Skull (no g-prefix) */
+                            };
+                            int idx = c - 1101;
+                            strncpy((char*)g_cheatSingleItemCode, GEM_CODES[idx], 7);
+                            g_cheatSingleItemQuality = 2;
+                            g_cheatSingleItemLvl     = 50;
+                            Log("CHEAT LOOT: gem %s queued\n", GEM_CODES[idx]);
+                        }
+                        else if (c >= 1201 && c <= 1254) {
+                            /* Misc — Pandemonium + charms + tomes + scrolls + key + cube + pots.
+                             * Codes traced from DEBUG_MENU_ITEM_CATALOG_2026-05-01.md
+                             * sections 5a-5k. Order matches TAB_LOOT_MISC labels above. */
+                            const char* code = NULL;
+                            BYTE qual = 2;
+                            int  lvl  = 50;
+                            switch (c) {
+                                /* Pandemonium event */
+                                case 1201: code = "pk1"; break;
+                                case 1202: code = "pk2"; break;
+                                case 1203: code = "pk3"; break;
+                                case 1204: code = "mbr"; break;
+                                case 1205: code = "dhn"; break;
+                                case 1206: code = "bey"; break;
+                                case 1207: code = "tes"; break;
+                                case 1208: code = "ceh"; break;
+                                case 1209: code = "bet"; break;
+                                case 1210: code = "fed"; break;
+                                /* Hellfire Torch — unique cm2 (lvl 99 quality 7) */
+                                case 1211: code = "cm2"; qual = 7; lvl = 99; break;
+                                case 1212: code = "toa"; break;
+                                /* Charms (magic quality 4) */
+                                case 1220: code = "cm1"; qual = 4; break;
+                                case 1221: code = "cm2"; qual = 4; break;
+                                case 1222: code = "cm3"; qual = 4; break;
+                                /* Tomes / scrolls / key / cube */
+                                case 1230: code = "tbk"; break;
+                                case 1231: code = "ibk"; break;
+                                case 1232: code = "tsc"; break;
+                                case 1233: code = "isc"; break;
+                                case 1234: code = "key"; break;
+                                case 1235: code = "box"; break;
+                                /* Healing pots */
+                                case 1240: code = "hp1"; break;
+                                case 1241: code = "hp2"; break;
+                                case 1242: code = "hp3"; break;
+                                case 1243: code = "hp4"; break;
+                                case 1244: code = "hp5"; break;
+                                /* Mana pots */
+                                case 1245: code = "mp1"; break;
+                                case 1246: code = "mp2"; break;
+                                case 1247: code = "mp3"; break;
+                                case 1248: code = "mp4"; break;
+                                case 1249: code = "mp5"; break;
+                                /* Rejuv + specialty */
+                                case 1250: code = "rvs"; break;
+                                case 1251: code = "rvl"; break;
+                                case 1252: code = "vps"; break;
+                                case 1253: code = "yps"; break;
+                                case 1254: code = "wms"; break;
+                                default: break;
+                            }
+                            if (code) {
+                                strncpy((char*)g_cheatSingleItemCode, code, 7);
+                                g_cheatSingleItemQuality = qual;
+                                g_cheatSingleItemLvl     = lvl;
+                                Log("CHEAT LOOT: misc %s qual=%d lvl=%d queued\n",
+                                    code, qual, lvl);
+                            }
+                        }
                         else if (c == 999) { g_cheatMenuOpen = FALSE; }
                         if (mc->notify) ShowNotify(mc->notify);
                     }
@@ -2581,6 +3070,9 @@ static void DrawAll(void) {
             colCur++;
             if (colCur >= COLS) { colCur = 0; yCur += CELL_H + CELL_GAP; }
         }
+
+cheat_menu_done:
+        ;  /* fallthrough target for the Loot scrollable-list early-out */
 
         #undef MK_HDR
         #undef MK_BTN

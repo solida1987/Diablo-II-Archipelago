@@ -262,6 +262,14 @@ static LRESULT CALLBACK HookWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             if (g_questLogScroll < 0) g_questLogScroll = 0;
             return 0;
         }
+        /* 1.9.1 — Loot tab in the Ctrl+V dev menu uses scrollable lists
+         * (Sets, Uniques). Accumulate raw delta into a global counter
+         * the menu's render loop drains each frame. */
+        if (g_cheatMenuOpen) {
+            extern int g_cheatMenuWheelDelta;
+            g_cheatMenuWheelDelta += delta;
+            return 0;
+        }
     }
 
     /* Title screen button cleanup timer */

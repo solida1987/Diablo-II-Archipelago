@@ -89,6 +89,23 @@ static volatile int g_pendingPortalObjId = 60;/* Object class for the portal:
  *  13=Recipe pots (vps+wms)
  */
 
+/* 1.9.1 — Individual-item dispatch for the Loot tab in the Ctrl+V menu.
+ * Each "spawn one specific item" button on the new debug pages writes to
+ * exactly ONE of these slots; the gameloop tick reads, fires, resets.
+ *
+ * Set / unique pieces route through Quests_QueueSpecificDrop (same path
+ * the AP server uses) so clicking the menu mirrors a real AP delivery.
+ *
+ * Single-item spawns (runes / gems / charms / pots / Pandemonium items)
+ * call QUESTS_CreateItem directly with the supplied 3-char code, level,
+ * and quality. Format mirrors the existing g_cheatItemCmd switch in
+ * d2arch_gameloop.c so behaviour is identical to the legacy batch path. */
+static volatile int  g_cheatSpecificSetIdx    = -1;  /* 0..126, -1 = idle */
+static volatile int  g_cheatSpecificUniqueIdx = -1;  /* 0..g_uniqueCatalogCount-1, -1 = idle */
+static volatile char g_cheatSingleItemCode[8] = "";  /* 3-char code + nul, "" = idle */
+static volatile BYTE g_cheatSingleItemQuality = 2;   /* 2=normal, 4=magic, 5=set, 7=unique */
+static volatile int  g_cheatSingleItemLvl     = 50;  /* spawn level (use 99 for cm2 unique torch) */
+
 /* Boss loot table TC IDs.
  * 1.7.1: resolved dynamically at boot via ResolveBossLootTCs() by matching the
  * TC name in sgptDataTables->pTreasureClassExTxt. If the name lookup fails
@@ -719,6 +736,39 @@ static const char* Quests_UniqueName(int idx) {
     return g_uniqueCatalog[idx].name;
 }
 
+/* 1.9.1 — split a tab-separated line into fields, PRESERVING empty
+ * columns between consecutive tabs. strtok merges them into a single
+ * delimiter which silently shifts every column right of the first
+ * empty cell — that bug had Quests_LoadUniqueCatalog reading "cost mult"
+ * (numeric) into baseCode for every unique whose row had an empty
+ * `ladder` column (most of UniqueItems.txt). Symptom: AP-delivered and
+ * cheat-menu-spawned uniques tried to spawn item code "5   " (FAIL).
+ *
+ * Trims trailing CR / LF on the last field. fields[] receives pointers
+ * into `s`; `s` is mutated in place. Returns the field count. */
+static int Quests_SplitTSV(char* s, char* fields[], int maxFields) {
+    int n = 0;
+    char* p = s;
+    if (!p) return 0;
+    fields[n++] = p;
+    while (*p && n < maxFields) {
+        if (*p == '\t') {
+            *p = 0;
+            fields[n++] = p + 1;
+        }
+        p++;
+    }
+    /* Strip trailing CR / LF on the final field */
+    if (n > 0) {
+        char* last = fields[n - 1];
+        char* end  = last + strlen(last);
+        while (end > last && (end[-1] == '\r' || end[-1] == '\n')) {
+            *(--end) = 0;
+        }
+    }
+    return n;
+}
+
 static void Quests_LoadUniqueCatalog(void) {
     if (g_uniqueCatalogLoaded) return;
     g_uniqueCatalogLoaded = TRUE;
@@ -746,15 +796,15 @@ static void Quests_LoadUniqueCatalog(void) {
     if (!fgets(header, sizeof(header), f)) { fclose(f); return; }
     int colName = -1, colCode = -1, colLvl = -1, colEnabled = -1;
     {
-        char* tok = strtok(header, "\t\r\n");
-        int idx = 0;
-        while (tok) {
+        char* hdrFields[300] = {0};
+        int   hdrCount = Quests_SplitTSV(header, hdrFields, 300);
+        for (int idx = 0; idx < hdrCount; idx++) {
+            const char* tok = hdrFields[idx];
+            if (!tok) continue;
             if (_stricmp(tok, "index") == 0)         colName    = idx;
             else if (_stricmp(tok, "code") == 0)     colCode    = idx;
             else if (_stricmp(tok, "lvl") == 0)      colLvl     = idx;
             else if (_stricmp(tok, "enabled") == 0)  colEnabled = idx;
-            tok = strtok(NULL, "\t\r\n");
-            idx++;
         }
     }
     if (colName < 0 || colCode < 0) {
@@ -767,12 +817,8 @@ static void Quests_LoadUniqueCatalog(void) {
     int rowIdx = 0;
     char line[8192];
     while (fgets(line, sizeof(line), f) && g_uniqueCatalogCount < UNIQUE_CAT_MAX) {
-        /* Make a copy because strtok mutates */
-        char copy[8192]; strncpy(copy, line, sizeof(copy)); copy[sizeof(copy)-1] = 0;
-        char* fields[200] = {0};
-        int   fieldCount = 0;
-        char* tok = strtok(copy, "\t\r\n");
-        while (tok && fieldCount < 200) { fields[fieldCount++] = tok; tok = strtok(NULL, "\t\r\n"); }
+        char* fields[300] = {0};
+        int   fieldCount = Quests_SplitTSV(line, fields, 300);
 
         const char* name    = (colName     < fieldCount) ? fields[colName]    : NULL;
         const char* code    = (colCode     < fieldCount) ? fields[colCode]    : NULL;

@@ -1455,6 +1455,64 @@ static void ProcessPendingGameTick(void) {
                 g_cheatItemCmd = 0;
             }
 
+            /* 1.9.1 — Individual-item dispatch from the new Loot tab in
+             * the Ctrl+V dev menu. Three independent slots:
+             *   g_cheatSpecificSetIdx    -> Quests_QueueSpecificDrop SET
+             *   g_cheatSpecificUniqueIdx -> Quests_QueueSpecificDrop UNIQUE
+             *   g_cheatSingleItemCode    -> direct QUESTS_CreateItem
+             *
+             * Routing through Quests_QueueSpecificDrop for set/unique pieces
+             * mirrors the AP delivery path exactly so the menu doubles as
+             * an end-to-end test that AP rewards arrive correctly. */
+            if (g_cheatSpecificSetIdx >= 0 && g_cachedPGame) {
+                int idx = g_cheatSpecificSetIdx;
+                Quests_QueueSpecificDrop(REWARD_DROP_SET, idx, "cheat menu");
+                Log("CHEAT LOOT: queued SET idx=%d (%s)\n",
+                    idx, Quests_SetPieceName(idx));
+                g_cheatSpecificSetIdx = -1;
+            }
+            if (g_cheatSpecificUniqueIdx >= 0 && g_cachedPGame) {
+                int idx = g_cheatSpecificUniqueIdx;
+                Quests_QueueSpecificDrop(REWARD_DROP_UNIQUE, idx, "cheat menu");
+                Log("CHEAT LOOT: queued UNIQUE idx=%d (%s)\n",
+                    idx, Quests_UniqueName(idx));
+                g_cheatSpecificUniqueIdx = -1;
+            }
+            if (g_cheatSingleItemCode[0] && g_cachedPGame && hD2Game) {
+                typedef void* (__fastcall *QUESTS_CreateItem_t)(
+                    void* pGame, void* pPlayer,
+                    DWORD dwCode, int nLevel, BYTE nQuality, int bDroppable);
+                QUESTS_CreateItem_t fnCI =
+                    (QUESTS_CreateItem_t)((DWORD)hD2Game + 0x65DF0);
+                char c0 = g_cheatSingleItemCode[0];
+                char c1 = g_cheatSingleItemCode[1];
+                char c2 = g_cheatSingleItemCode[2];
+                BYTE qual = g_cheatSingleItemQuality;
+                int  lvl  = g_cheatSingleItemLvl;
+                DWORD code_null  = ((DWORD)(BYTE)c0)
+                                 | ((DWORD)(BYTE)c1 << 8)
+                                 | ((DWORD)(BYTE)c2 << 16);
+                DWORD code_space = code_null | ((DWORD)0x20 << 24);
+                void* pItem = NULL;
+                __try {
+                    /* Inventory delivery (bDroppable=0) so charm/set/
+                     * unique items land in the backpack the same way
+                     * AP rewards do. Falls back to ground-drop only if
+                     * the inventory is full. */
+                    pItem = fnCI((void*)g_cachedPGame, pCurseTarget,
+                                 code_space, lvl, qual, 0);
+                    if (!pItem) {
+                        pItem = fnCI((void*)g_cachedPGame, pCurseTarget,
+                                     code_null, lvl, qual, 0);
+                    }
+                } __except(EXCEPTION_EXECUTE_HANDLER) {
+                    Log("CHEAT LOOT: %c%c%c EXCEPTION\n", c0, c1, c2);
+                }
+                Log("CHEAT LOOT: spawned single %c%c%c lvl=%d qual=%d -> %s\n",
+                    c0, c1, c2, lvl, qual, pItem ? "OK" : "NULL");
+                g_cheatSingleItemCode[0] = 0;
+            }
+
             /* 1.9.0: Pandemonium uber boss spawn dispatch.
              *
              * Strategy: spawn the VANILLA boss via fnSpawnMonster (works

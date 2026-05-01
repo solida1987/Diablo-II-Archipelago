@@ -24,13 +24,39 @@ not Resurrected). Windows 10/11 with the .NET 8 Runtime.
 
 ## New features
 
-(none yet)
+- **Dev menu — new Loot tab.** Press Ctrl+V → click the new **Loot**
+  tab (rightmost) for individual-item spawn buttons grouped under five
+  sub-tabs:
+  - **Sets** — scrollable list of all 127 set pieces, click one to
+    spawn that specific piece
+  - **Uniques** — scrollable list of every enabled unique (~357),
+    click one to spawn it
+  - **Runes** — 33 individual rune buttons (r01 El through r33 Zod)
+  - **Gems** — 35 individual gem buttons (7 colors × 5 grades)
+  - **Misc** — every Pandemonium key/organ/essence, Hellfire Torch,
+    Token of Absolution, all 3 charm sizes, tomes, scrolls, the cube,
+    every healing/mana/rejuv/specialty potion
+  
+  Sets and Uniques pages support mouse-wheel scrolling and a draggable
+  scrollbar on the right. Set + unique buttons route through the same
+  delivery code path the Archipelago server uses for received items,
+  so the menu doubles as an end-to-end test bench for AP loot.
 
 ---
 
 ## Bug fixes
 
-(none yet)
+- **AP-delivered random uniques now spawn the correct item.** A parser
+  bug in the unique catalog loader was silently using the wrong column
+  on every row that had an empty cell to its left (most of
+  UniqueItems.txt — `ladder` is empty for nearly every row). The base
+  code field ended up holding the numeric `cost mult` value instead
+  of the 3-letter item code, so every "Drop: random unique" reward
+  failed to spawn (logged as `code=0x20202035 FAILED (inv full?)`).
+  Fixed the loader to preserve empty TSV fields. Affects:
+  - AP server "Drop: Random Unique" deliveries (item id 45521)
+  - Bonus check unique rewards (shrines, urns, barrels, chests)
+  - Quest reward unique drops
 
 ---
 
