@@ -426,9 +426,14 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
     player = world.player
     zone_locking = bool(world.options.zone_locking.value)
 
-    goal = world.options.goal.value   # 0-2: difficulty scope only
-    max_act = 5                        # always full game
-    num_diffs = goal + 1               # 1, 2, or 3
+    goal = world.options.goal.value    # 0-3: difficulty scope or collection
+    max_act = 5                         # always full game
+    # 1.9.0 — Goal=3 (Collection) treats as Normal-only for region/fill
+    # purposes. DLL handles the actual goal-complete condition at runtime.
+    if goal == 3:
+        num_diffs = 1
+    else:
+        num_diffs = goal + 1            # 1, 2, or 3
 
     active_locations = world.get_active_locations()
 
@@ -445,9 +450,21 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
 
         # Place each non-gate location in open_region with access rule
         # derived from zone → (act, region_num)
+        from BaseClasses import LocationProgressType
+        ZL_BONUS_TYPES = ("bonus_object", "bonus_gold", "bonus_setpickup")
         for quest_id, loc_name, quest_type, classification, loc_id, diff in active_locations:
             if quest_type == "gate":
                 continue  # already placed by _build_gate_region_tree
+
+            # 1.9.0 — bonus check locations: filler-only via EXCLUDED so
+            # AP fill never places progression items at slots that may
+            # never be consumed by the escalating-chance roll. Same as
+            # the non-zone-locking branch below.
+            if quest_type in ZL_BONUS_TYPES:
+                loc = world.create_location(loc_name, loc_id, open_region)
+                loc.progress_type = LocationProgressType.EXCLUDED
+                open_region.locations.append(loc)
+                continue
 
             # 1.8.5 fix (R9) — Level milestones now have access rules so
             # AP fill cannot place early-act progression behind high-level
@@ -481,12 +498,62 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
             loc = world.create_location(loc_name, loc_id, open_region)
             open_region.locations.append(loc)
 
+            # 1.9.0 fix — even for ALWAYS_OPEN_ZONES and unknown zones, we
+            # still need to gate by previous-difficulty Baal at higher
+            # difficulties. Without this, AP fill could place a Normal
+            # gate-key at a Hell-difficulty "always open" location like
+            # "Clear Halls of Vaught (Hell)" — making the Normal gate
+            # unreachable until the player has already beaten NM Baal.
+            # Build the diff-only rule first; zone-key + prev-act rules
+            # stack on top below for non-always-open zones.
+            #
+            # Quests in act > 1 also need the previous act's boss kill at
+            # the same difficulty, regardless of whether the zone itself
+            # is "always open" (you can't teleport to Halls of Vaught
+            # without progressing through Acts 1-4 of the same diff).
+            quest_act = _quest_id_to_act(quest_id)
+            prev_boss_loc = None
+            if quest_act > 1:
+                prev_boss_loc_base = {
+                    1: "Sisters to the Slaughter",
+                    2: "Seven Tombs",
+                    3: "The Guardian",
+                    4: "Terror's End",
+                }.get(quest_act - 1)
+                if prev_boss_loc_base:
+                    prev_boss_loc = prev_boss_loc_base if diff == 0 else f"{prev_boss_loc_base} ({diff_name_fromdiff(diff)})"
+            prev_diff_boss = None
+            if diff > 0:
+                prev_diff_boss = "Eve of Destruction" if diff - 1 == 0 else f"Eve of Destruction ({diff_name_fromdiff(diff-1)})"
+
             if zone_id is None or zone_id in ALWAYS_OPEN_ZONES:
-                continue  # no gating for unknown/always-open zones
+                # Diff-only / prev-act-only rule (no gate keys).
+                if prev_boss_loc or prev_diff_boss:
+                    def _make_open_rule(prev_boss, prev_diff_b, p=player):
+                        def rule(state):
+                            if prev_boss and not state.can_reach_location(prev_boss, p):
+                                return False
+                            if prev_diff_b and not state.can_reach_location(prev_diff_b, p):
+                                return False
+                            return True
+                        return rule
+                    loc.access_rule = _make_open_rule(prev_boss_loc, prev_diff_boss)
+                continue
 
             physical = _zone_to_region(zone_id)
             if physical is None:
-                continue  # unmapped → no gating
+                # Same diff/prev-act gating as ALWAYS_OPEN above.
+                if prev_boss_loc or prev_diff_boss:
+                    def _make_open_rule(prev_boss, prev_diff_b, p=player):
+                        def rule(state):
+                            if prev_boss and not state.can_reach_location(prev_boss, p):
+                                return False
+                            if prev_diff_b and not state.can_reach_location(prev_diff_b, p):
+                                return False
+                            return True
+                        return rule
+                    loc.access_rule = _make_open_rule(prev_boss_loc, prev_diff_boss)
+                continue
 
             act, region_num = physical
             if act > max_act:
@@ -497,8 +564,8 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
                 f"Act {act} Gate {g + 1} Key ({diff_name_fromdiff(diff)})"
                 for g in range(region_num - 1)
             ]
-            # Act transition: needs prev act boss kill on same diff
-            prev_boss_loc = None
+            # Re-derive prev_boss using the physical act (which may differ
+            # from quest_act for hunts that roam) — keep the stricter rule.
             if act > 1:
                 prev_boss_loc_base = {
                     1: "Sisters to the Slaughter",
@@ -508,10 +575,6 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
                 }.get(act - 1)
                 if prev_boss_loc_base:
                     prev_boss_loc = prev_boss_loc_base if diff == 0 else f"{prev_boss_loc_base} ({diff_name_fromdiff(diff)})"
-            # Difficulty transition: needs prev diff Baal kill
-            prev_diff_boss = None
-            if diff > 0:
-                prev_diff_boss = "Eve of Destruction" if diff - 1 == 0 else f"Eve of Destruction ({diff_name_fromdiff(diff-1)})"
 
             def _make_rule(keys, prev_boss, prev_diff_b, p=player):
                 def rule(state):
@@ -564,10 +627,28 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
                     f"Act {from_act} -> Act {to_act}",
                 )
 
+    # SKILL HUNT mode: locations placed in act_regions with no per-location
+    # access rule. Skills are useful (not progression) so AP fill never
+    # places anything that could break the player's seed. In multiworld
+    # mode, other players' progression items may land at this slot's
+    # Hell/NM locations — that's a pacing concern (this slot has to
+    # progress to Hell before forwarding the key) but not a logic
+    # softlock since act_regions already chain via boss_connections.
+    # Users sensitive to multiworld pacing should set
+    # progression_balancing higher to spread items more evenly.
+    # 1.9.0 — Bonus check locations get marked EXCLUDED so AP fill
+    # cannot place progression items at them. The escalating-chance
+    # roll on the DLL side may not consume every slot, and stranded
+    # progression items would soft-lock multiworld players. Filler-only
+    # items at these slots are harmless if never collected.
+    from BaseClasses import LocationProgressType
+    BONUS_TYPES = ("bonus_object", "bonus_gold", "bonus_setpickup")
     for quest_id, loc_name, quest_type, classification, loc_id, diff in active_locations:
         act_num = _quest_id_to_act(quest_id)
         if act_num in act_regions:
             loc = world.create_location(loc_name, loc_id, act_regions[act_num])
+            if quest_type in BONUS_TYPES:
+                loc.progress_type = LocationProgressType.EXCLUDED
             act_regions[act_num].locations.append(loc)
 
 

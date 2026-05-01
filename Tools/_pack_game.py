@@ -64,10 +64,14 @@ SKIP_SUFFIXES = (
 # character name → leaks into every release zip and breaks user updates
 # because SHA256 never matches.
 PER_CHAR_PATTERNS = [
-    re.compile(r"^d2arch_(state|checks|slots|applied|ap|reinvest|fireball)_.+\.dat$"),
-    re.compile(r"^d2arch_skill\d+_.+\.dat$"),
+    # 1.9.0 — same .* widening as generate_manifest.py so empty-char
+    # files (d2arch_ap_.dat written before a character is loaded) are
+    # also caught.
+    re.compile(r"^d2arch_(state|checks|slots|applied|ap|reinvest|fireball)_.*\.dat$"),
+    re.compile(r"^d2arch_skill\d+_.*\.dat$"),
     re.compile(r"^d2arch_bridge_locations(_.*)?\.dat$"),
-    re.compile(r"^ap_stash(_ser)?_.+\.dat$"),
+    re.compile(r"^d2arch_spoiler_.*\.txt$"),
+    re.compile(r"^ap_stash(_ser)?_.*\.dat$"),
 ]
 
 
@@ -95,6 +99,11 @@ def should_skip(rel_root, fname):
         return "backup"
     # .backup_pre_VERSION files (e.g. Patch_D2.mpq.backup_pre_1.8.0)
     if ".backup_pre_" in fname.lower():
+        return "backup"
+    # 1.9.0 — .before_* timestamped backups (Misc.txt.before_pandemonium_*,
+    # skill_data.dat.before_d2r_*, MonStats.txt.before_uberai_*, etc.).
+    # These pile up during dev iterations.
+    if ".before_" in fname.lower():
         return "backup"
     # Screenshots
     if fname.lower().startswith("screenshot") and fname.lower().endswith(".png"):

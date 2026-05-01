@@ -20,8 +20,43 @@ from .locations import (
     LEVEL_MILESTONES_NORMAL, LEVEL_MILESTONES_NIGHTMARE, LEVEL_MILESTONES_HELL,
     GATE_LOCATIONS,
 )
-from .options import Diablo2ArchipelagoOptions
+from .options import (
+    Diablo2ArchipelagoOptions,
+    _COLL_SETS, _COLL_RUNES, _COLL_SPECIALS,
+)
+from .locations import COLL_LOCATIONS, COLL_LOC_BASE
 from .regions import create_regions
+
+
+# 1.9.0 — granular Collection helpers ----------------------------------
+def _build_coll_mask(field_prefix, opts, lo, hi, _kind="set"):
+    """Pack toggle values for items [lo..hi) into a single int bitmask.
+    Used by fill_slot_data to compress 32+33+10 = 75 booleans into 6
+    small integer fields the DLL parses bit-by-bit.
+
+    field_prefix: e.g. "collect_set_" / "collect_rune_" / "collect_special_"
+    opts: self.options
+    lo, hi: half-open range of item indices
+    _kind: which catalog list to look up names from
+    """
+    mask = 0
+    if _kind == "set":
+        names = [field for (field, _disp) in _COLL_SETS]
+    elif _kind == "rune":
+        names = [f"collect_rune_{r}" for r in _COLL_RUNES]
+    elif _kind == "special":
+        names = [field for (field, _disp) in _COLL_SPECIALS]
+    else:
+        return 0
+    for i in range(lo, hi):
+        if i >= len(names):
+            break
+        attr = names[i]
+        if hasattr(opts, attr):
+            v = getattr(opts, attr).value
+            if v:
+                mask |= (1 << (i - lo))
+    return mask
 
 
 class Diablo2ArchipelagoWebWorld(WebWorld):
@@ -79,10 +114,19 @@ class Diablo2ArchipelagoWorld(World):
 
         1.8.0 — Goal simplified to 3 values (0=Full Normal, 1=Full NM, 2=Full Hell).
         Act scope is ALWAYS full game (all 5 acts); only difficulty scope varies.
+
+        1.9.0 — Goal=3 (Collection): difficulty progression is OPTIONAL in
+        this mode (DLL fires goal-complete the moment all collection
+        targets are satisfied), so for AP fill purposes we generate
+        Normal-difficulty quest locations only. The 110 collection
+        locations are added separately at the end of this function.
         """
-        goal = self.options.goal.value  # 0-2 (difficulty scope)
+        goal = self.options.goal.value  # 0-3
         max_act = 5                     # always full game
-        num_difficulties = goal + 1     # 1, 2, or 3
+        if goal == 3:
+            num_difficulties = 1        # Collection mode: Normal-only quest locations
+        else:
+            num_difficulties = goal + 1 # 1, 2, or 3
 
         # Goal quest is always Baal (Eve of Destruction, quest_id 406)
         goal_quest_id = 406
@@ -145,6 +189,96 @@ class Diablo2ArchipelagoWorld(World):
                         loc_name = name + " (Hell)"
                         active.append((quest_id, loc_name, "level", ItemClassification.progression, LOCATION_BASE + quest_id + 2000, 2))
 
+        # 1.9.0 NEW — Collection locations (only when goal=collection).
+        # 110 IDs broken down as 32 sets + 33 runes + 35 gems + 10
+        # specials. Each item is conditionally included based on its
+        # individual toggle in the YAML. The `kind` field on each
+        # COLL_LOCATIONS entry tells us which option-group the item
+        # belongs to.
+        if goal == 3:  # Goal=Collection
+            for loc_id, loc_name, kind, idx in COLL_LOCATIONS:
+                included = False
+                if kind == "set":
+                    field = _COLL_SETS[idx][0]
+                    if hasattr(self.options, field) and getattr(self.options, field).value:
+                        included = True
+                elif kind == "rune":
+                    field = f"collect_rune_{_COLL_RUNES[idx]}"
+                    if hasattr(self.options, field) and getattr(self.options, field).value:
+                        included = True
+                elif kind == "gem":
+                    if self.options.collection_target_gems.value:
+                        included = True
+                elif kind == "special":
+                    field = _COLL_SPECIALS[idx][0]
+                    if hasattr(self.options, field) and getattr(self.options, field).value:
+                        included = True
+                if included:
+                    active.append((-(loc_id), loc_name, "collection",
+                                   ItemClassification.filler, loc_id, 0))
+
+        # 1.9.0 NEW — Bonus check categories (filler-only).
+        # Per-difficulty quotas honor the active goal scope. Each location
+        # has classification=filler so AP fill never places progression
+        # items here — the escalating-chance roll on the DLL side may not
+        # consume every slot, and stranded filler items are harmless.
+        from .locations import (
+            BONUS_BASE_SHRINE, BONUS_BASE_URN, BONUS_BASE_BARREL, BONUS_BASE_CHEST,
+            BONUS_BASE_GOLDMS, BONUS_BASE_SETPICK,
+            BONUS_QUOTA_SHRINE, BONUS_QUOTA_URN, BONUS_QUOTA_BARREL, BONUS_QUOTA_CHEST,
+            GOLD_MILESTONE_NORMAL, GOLD_MILESTONE_NIGHTMARE, GOLD_MILESTONE_HELL,
+            DIFF_LABEL,
+        )
+
+        def _emit_object_locs(toggle_attr: str, base: int, quota: int, label: str):
+            """Add quota×num_difficulties locations for an object category."""
+            if not getattr(self.options, toggle_attr).value:
+                return
+            for diff in range(num_difficulties):
+                for slot in range(quota):
+                    ap_id = base + diff * quota + slot
+                    name = f"{label} #{slot + 1}{DIFF_LABEL[diff]}"
+                    active.append((-(ap_id), name, "bonus_object",
+                                   ItemClassification.filler, ap_id, diff))
+
+        _emit_object_locs("check_shrines", BONUS_BASE_SHRINE, BONUS_QUOTA_SHRINE, "Shrine")
+        _emit_object_locs("check_urns",    BONUS_BASE_URN,    BONUS_QUOTA_URN,    "Urn")
+        _emit_object_locs("check_barrels", BONUS_BASE_BARREL, BONUS_QUOTA_BARREL, "Barrel")
+        _emit_object_locs("check_chests",  BONUS_BASE_CHEST,  BONUS_QUOTA_CHEST,  "Chest")
+
+        # Gold milestones (per-difficulty scoped)
+        if self.options.check_gold_milestones.value:
+            for i, gold in enumerate(GOLD_MILESTONE_NORMAL):
+                ap_id = BONUS_BASE_GOLDMS + i
+                active.append((-(ap_id), f"Gold Milestone: {gold:,}", "bonus_gold",
+                               ItemClassification.filler, ap_id, 0))
+            if num_difficulties >= 2:
+                offs = len(GOLD_MILESTONE_NORMAL)
+                for i, gold in enumerate(GOLD_MILESTONE_NIGHTMARE):
+                    ap_id = BONUS_BASE_GOLDMS + offs + i
+                    active.append((-(ap_id), f"Gold Milestone: {gold:,} (Nightmare)",
+                                   "bonus_gold", ItemClassification.filler, ap_id, 1))
+            if num_difficulties >= 3:
+                offs = len(GOLD_MILESTONE_NORMAL) + len(GOLD_MILESTONE_NIGHTMARE)
+                for i, gold in enumerate(GOLD_MILESTONE_HELL):
+                    ap_id = BONUS_BASE_GOLDMS + offs + i
+                    active.append((-(ap_id), f"Gold Milestone: {gold:,} (Hell)",
+                                   "bonus_gold", ItemClassification.filler, ap_id, 2))
+
+        # Set piece pickups (127 individual pieces; respects per-set
+        # collect_set_* toggles from the Collection options block).
+        if self.options.check_set_pickups.value:
+            # Set pieces map to set indices via firstSlot+pieceCount in
+            # d2arch_collections.c g_collSets[]. Authoring order is fixed:
+            # Civerb's = pieces 0..2, Hsarus = 3..5, Cleglaw = 6..8, etc.
+            # We don't replicate the full piece->set mapping here; the
+            # DLL gates by per-set toggle when firing the check. The
+            # apworld just enumerates all 127 location slots.
+            for i in range(127):
+                ap_id = BONUS_BASE_SETPICK + i
+                active.append((-(ap_id), f"Set Pickup #{i + 1}",
+                               "bonus_setpickup", ItemClassification.filler, ap_id, 0))
+
         return active
 
     def create_regions(self) -> None:
@@ -170,7 +304,12 @@ class Diablo2ArchipelagoWorld(World):
         # --- Zone Locking: 18 gate-keys per played difficulty ---
         zone_keys_in_pool = []
         if zone_locking:
-            num_difficulties = self.options.goal.value + 1  # 0-2 -> 1-3 diffs
+            # Goal=3 (Collection) treats as Normal-only for AP fill purposes.
+            goal_val = self.options.goal.value
+            if goal_val == 3:
+                num_difficulties = 1
+            else:
+                num_difficulties = goal_val + 1  # 0-2 -> 1-3 diffs
             for ap_id, name, act, classification in GATE_KEY_ITEMS:
                 # Determine item's difficulty from AP ID range
                 if 46101 <= ap_id <= 46118:
@@ -279,37 +418,110 @@ class Diablo2ArchipelagoWorld(World):
         if filler_needed > 0:
             self._create_filler_items(filler_needed)
 
+    def get_filler_item_name(self) -> str:
+        """1.9.0: Override AP's default get_filler_item_name to respect
+        traps_enabled and skill_hunting gates. Without this override AP
+        falls back to picking ANY item with classification=filler/trap
+        from item_table when it needs an extra filler — that bypassed our
+        _create_filler_items weight logic and let trap items leak into
+        seeds that had traps_enabled=false (and Reset Point leak into
+        skill_hunting=false seeds).
+
+        Mirrors the weight distribution from _create_filler_items so the
+        secondary fill path produces the same item mix.
+        """
+        weights = self._build_filler_weights()
+        # Filter out zero-weight rows
+        active = [(k, v) for k, v in weights.items() if v > 0]
+        total = sum(v for _, v in active)
+        if total == 0:
+            return "Gold"  # absolute fallback (should never happen)
+        roll = self.random.randrange(total)
+        cum = 0
+        for name, w in active:
+            cum += w
+            if roll < cum:
+                return name
+        return active[-1][0]
+
+    def _build_filler_weights(self) -> dict:
+        """Centralized weight table — used by both _create_filler_items
+        (bulk fill) and get_filler_item_name (secondary single picks).
+        Keeps the two paths consistent so toggles can never be bypassed
+        by AP framework choosing the alternate code path.
+
+        2026-05-01 rebalance per user feedback:
+          - Gold lowered 15->10 (still felt over-represented)
+          - Trap weights halved (10->5 total) — were too punishing
+          - Charm/Set/Unique tripled (3/3/2 -> 9/9/6) — were too rare,
+            now ~28% of pool combined which is the intended "drops feel
+            meaningful" weight target. """
+        weights = {
+            "Gold":                    10,
+            "Experience":              15,
+            "5 Stat Points":           10,
+            "Skill Point":             10,
+            "Reset Point":              5,
+            "Trap: Monsters":           2,
+            "Trap: Slow":               1,
+            "Trap: Weaken":             1,
+            "Trap: Poison":             1,
+            "Drop: Andariel Loot":      1,
+            "Drop: Duriel Loot":        2,
+            "Drop: Mephisto Loot":      2,
+            "Drop: Diablo Loot":        1,
+            "Drop: Baal Loot":          1,
+            "Drop: Random Charm":       9,
+            "Drop: Random Set Item":    9,
+            "Drop: Random Unique":      6,
+        }
+        if not self.options.traps_enabled.value:
+            for trap_name in ("Trap: Monsters", "Trap: Slow",
+                              "Trap: Weaken", "Trap: Poison"):
+                weights[trap_name] = 0
+        if not self.options.skill_hunting.value:
+            weights["Reset Point"] = 0
+        return weights
+
     def _create_filler_items(self, count: int) -> None:
         """Create filler items with normalized percentage distribution.
-        1.8.0: filler weights hardcoded to in-game defaults (options removed)."""
-        weights = {
-            "Gold Bundle (Small)":  10,   # gold_pct=30 split across 3 tiers
-            "Gold Bundle (Medium)": 10,
-            "Gold Bundle (Large)":  10,
-            "5 Stat Points":        15,
-            "Skill Point":          15,
-            "Trap":                 15,
-            "Reset Point":          25,
-        }
 
-        # Normalize: if all zero, distribute evenly
-        total_weight = sum(weights.values())
+        1.9.0 redesign: 17 typed fillers replacing the 8 generic ones.
+        DLL pre-rolls magnitudes (gold 1-10000, xp 1-250000) and specific
+        item picks (charm/set/unique) at character creation, so AP can
+        place generic categories while the DLL still delivers something
+        concrete the spoiler file can name.
+
+        Weights live in _build_filler_weights so this bulk fill and the
+        single-pick get_filler_item_name path can never disagree about
+        the active distribution. """
+        weights = self._build_filler_weights()
+
+        # 1.9.0 fix — strip 0-weight rows BEFORE the distribution loop.
+        # The "last type gets all remaining" rule was accidentally giving
+        # leftover slots to disabled categories (e.g. Reset Point landing
+        # in skill_hunting=false seeds, traps landing in traps_enabled=
+        # false seeds). Active list is already filtered, so the last item
+        # in the sorted-by-weight order is always a real candidate.
+        active_weights = {k: v for k, v in weights.items() if v > 0}
+        total_weight = sum(active_weights.values())
         if total_weight == 0:
-            for k in weights:
-                weights[k] = 1
-            total_weight = len(weights)
+            # All gates closed (no active categories) — fall back to Gold.
+            for _ in range(count):
+                self.multiworld.itempool.append(self.create_item("Gold"))
+            return
 
-        # Calculate counts per type
-        filler_items = []
+        # Calculate counts per type using only active categories.
         remaining = count
-        sorted_types = sorted(weights.keys(), key=lambda k: weights[k], reverse=True)
+        sorted_types = sorted(active_weights.keys(),
+                              key=lambda k: active_weights[k], reverse=True)
 
         for i, filler_name in enumerate(sorted_types):
             if i == len(sorted_types) - 1:
-                # Last type gets all remaining to avoid rounding issues
+                # Last (still active) type gets all remaining for rounding.
                 filler_count = remaining
             else:
-                filler_count = round(count * weights[filler_name] / total_weight)
+                filler_count = round(count * active_weights[filler_name] / total_weight)
                 filler_count = min(filler_count, remaining)
 
             for _ in range(filler_count):
@@ -324,9 +536,17 @@ class Diablo2ArchipelagoWorld(World):
           1 = Full Nightmare (beat Baal on Normal AND Nightmare)
           2 = Full Hell      (beat Baal on Normal, NM, AND Hell)
 
+        1.9.0 — Goal=3 (Collection): the actual win condition fires
+        from the DLL when the collection book completes; for AP fill
+        purposes we use Eve of Destruction Normal as a placeholder
+        (always trivially reachable through skill-hunt fill).
+
         Victory = Eve of Destruction on the chosen difficulty.
         """
-        goal_diff = self.options.goal.value  # 0/1/2
+        goal_diff = self.options.goal.value  # 0/1/2/3
+        # Collection mode (3) maps to Normal for the AP victory location.
+        if goal_diff == 3:
+            goal_diff = 0
         goal_quest_id = 406  # Eve of Destruction (Baal)
 
         # Find the victory location name (with difficulty suffix if needed)
@@ -369,7 +589,19 @@ class Diablo2ArchipelagoWorld(World):
         return {
             "skill_hunting":     self.options.skill_hunting.value,
             "zone_locking":      self.options.zone_locking.value,
-            "goal":              self.options.goal.value,  # 0=Normal, 1=NM, 2=Hell
+            "goal":              self.options.goal.value,  # 0=Normal, 1=NM, 2=Hell, 3=Collection
+            # Goal=Collection — granular per-item bitmasks. The DLL
+            # parses these into setsTargeted[32] / runesTargeted[33] /
+            # specialsTargeted[10] arrays. Bit N of the mask = toggle
+            # value for item N.
+            "collection_sets_mask_lo":     _build_coll_mask("collect_set_",     self.options, 0,  16),
+            "collection_sets_mask_hi":     _build_coll_mask("collect_set_",     self.options, 16, 32),
+            "collection_runes_mask_lo":    _build_coll_mask("collect_rune_",    self.options, 0,  16, _kind="rune"),
+            "collection_runes_mask_md":    _build_coll_mask("collect_rune_",    self.options, 16, 32, _kind="rune"),
+            "collection_runes_mask_hi":    _build_coll_mask("collect_rune_",    self.options, 32, 33, _kind="rune"),
+            "collection_specials_mask":    _build_coll_mask("collect_special_", self.options, 0,  10, _kind="special"),
+            "collection_target_gems":      self.options.collection_target_gems.value,
+            "collection_gold_target":      self.options.collection_gold_target.value,
             "death_link":        self.options.death_link.value,
             # Quest toggles
             "quest_story":            1,  # always ON — engine-required
@@ -380,11 +612,27 @@ class Diablo2ArchipelagoWorld(World):
             "quest_level_milestones": self.options.quest_level_milestones.value,
             # XP + shuffles (shop_shuffle/i_play_assassin removed — no-op in DLL)
             "xp_multiplier":   self.options.xp_multiplier.value,
-            "monster_shuffle": self.options.monster_shuffle.value,
-            "boss_shuffle":    self.options.boss_shuffle.value,
+            "monster_shuffle":  self.options.monster_shuffle.value,
+            "boss_shuffle":     self.options.boss_shuffle.value,
+            # 1.9.0: System 1 — dead-end cave entrance shuffle (Pool A:
+            # Acts 1+2, Pool B: Acts 3+4+5). DLL applies on character load
+            # via ApplyEntranceShuffle, frozen into per-char state file.
+            "entrance_shuffle": self.options.entrance_shuffle.value,
             # 1.8.4: filler toggles — bridge writes to ap_settings.dat,
             # DLL forces g_fillerTrapPct=0 when traps_enabled=0
-            "traps_enabled":   self.options.traps_enabled.value,
+            "traps_enabled":    self.options.traps_enabled.value,
+            # 1.9.0: Bonus check categories (opt-in, filler-only).
+            # DLL hooks shrine/urn/barrel/chest interactions and fires
+            # the matching AP location via the escalating-chance helper
+            # (10% -> 100%, reset per hit). Per-difficulty quotas:
+            # shrines 50, urns/barrels 100, chests 200, set pickups 127,
+            # gold milestones 7+5+5=17. See locations.py BONUS_BASE_*.
+            "check_shrines":         self.options.check_shrines.value,
+            "check_urns":            self.options.check_urns.value,
+            "check_barrels":         self.options.check_barrels.value,
+            "check_chests":          self.options.check_chests.value,
+            "check_set_pickups":     self.options.check_set_pickups.value,
+            "check_gold_milestones": self.options.check_gold_milestones.value,
             # 1.8.0 — Gate preloads (auto-generated per slot in generate_early)
             "act1_preload_normal":    self.preloads[(1, 0)],
             "act1_preload_nightmare": self.preloads[(1, 1)],

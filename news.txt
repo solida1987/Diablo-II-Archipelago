@@ -8,6 +8,354 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.0 - New Features ===
+
+AP MULTIPLAYER POLISH — END-TO-END LOOT, KEY + COUNTER FIXES
+Major polish pass on the AP server <-> bridge <-> game pipeline:
+
+- Self-released checks (you releasing your own quests via in-game
+  completion or via the AP server console) now correctly mark the
+  local quest as DONE in the F1 Quests list and bump the Quest
+  counters (was: stayed at 0/N).
+- Bonus check counters (Shrines/Urns/Barrels/Chests/Set Pickups/
+  Gold Milestones) now reflect what the server has registered, not
+  just what was physically triggered in-game. Includes a backfill
+  at character load so existing characters catch up automatically.
+- Loot drops are now delivered everywhere (including in town).
+  Previously the queue silently DISCARDED items if you happened to
+  be in town when they arrived. Only monster-spawn traps are still
+  blocked in town.
+- Item drops from AP land directly in your inventory if there's
+  room (charm/set/unique). Boss-loot TC drops still spawn on the
+  ground around you.
+- Item required level is now stripped to 1 — you can equip any
+  AP-delivered item regardless of character level. Set / unique
+  bonuses are fully preserved.
+- Item ilvl floor bumped 30 -> 85 so set pieces spawn as actual set
+  items (not magic fallback) and boss TCs roll their full table.
+- Gate keys received via AP now correctly mark the matching gate as
+  [OPEN] in F1 Zones (previously stayed [----] Locked even though
+  the zone was unlocked).
+- F3 tracker Bonus counter now scope-aware: shows the right total
+  for Goal=Normal-only / Nightmare / Hell instead of always *3.
+- Bridge dedup persists per character so items don't re-fire on
+  every login. Stackable fillers (gold/XP/stat pts) no longer
+  duplicate themselves on game restart.
+
+F1 BOOK — TOP TAB BAR + REORGANIZED PAGES
+The F1 book gained a horizontal tab strip across the top of every
+page. Click a tab to jump anywhere — no more hammering Next eight
+times to reach the Logbook. Eleven tabs in this order: Skills,
+Overview, Quests, Zones, Sets I, Sets II, Runes, Gems, Special,
+Logbook, AP. The Zones tab only shows when Zone Locking is on.
+Next / Back still work and walk the visible tab order.
+
+F1 PAGE 1 — NEW OVERVIEW PAGE
+Fresh summary page that shows your progress across every check
+category at a glance: Quests / Skills / Bonus checks (per type) /
+Collection (Sets / Runes / Gems / Specials) / Zones (per
+difficulty) / Total. Lines for disabled categories are skipped so
+the page stays clean for runs that only use a subset.
+
+F1 PAGE 3 — F4 ZONE TRACKER FOLDED INTO THE BOOK
+The standalone F4 zone-locking modal is now a real page in the F1
+book. Pressing F4 toggles the book directly to the Zones tab.
+Redesigned to match the Quest page layout: act tabs (1..5) and
+difficulty tabs (Norm / NM / Hell) on top, scrollable gate list
+on the left, detail panel on the right when you click a gate.
+Status badges: green DONE, orange PEND (key not yet received),
+red NOW (current target), grey locked.
+
+F3 IN-GAME TRACKER — CHECKS BLOCK
+Added two compact lines under the act header showing total
+progress per check category: Quests / Skills / Collection on the
+first line, Bonus / Zones on the second. K-suffix on big totals
+so the tracker stays narrow. Each category suppressed when its
+toggle is off.
+
+F1 BOOK — QUEST LIST + ITEM LOG REDESIGN
+Quest rows redesigned in Logbook style — no more black tile per
+row, just clean text with status colors and a right-aligned
+Done / progress column. Item Log on the AP page now shows a
+per-category breakdown ("Shrines: 18 / 150", "Quests: 47 / 80",
+etc.) instead of a single misleading aggregate count.
+
+F1 BOOK — UNIFORM READABLE COLOR
+All dim grey labels in the book are now tan for readability on
+the dark parchment.
+
+LIVE INI HOT RELOAD
+d2arch.ini is now polled for changes once every half-second.
+Edit positions, sizes, colors etc., save the file, and the
+change appears in-game within ~500 ms — no character relog,
+no game restart. Only the Skill Editor (F1 Page 0) still
+requires a relog.
+
+INI FILE STRUCTURED BY SCREEN
+d2arch.ini was reorganized so every section is grouped under a
+clearly labelled screen banner. Search "F1 PAGE 3" to jump to
+the Zones layout, "TITLE SCREEN" for the main menu, etc. Three
+new INI sections expose layout knobs that were previously
+hardcoded: [EditorOverview], [EditorZonesPage], [EditorItemLog].
+
+PER-TAB INI OVERRIDES (F1 TAB BAR)
+Each of the 11 F1 tabs has six INI keys: button X / Y / W / H
+plus per-tab text X / Y offset. Drag any one tab anywhere
+without affecting the others. Auto-layout defaults still work
+if you leave the per-tab keys at their defaults.
+
+LAUNCHER 1.5.3 — IRON FRAME REDESIGN + EMERALD FLAME SEAM
+Window grew 950×580 → 1040×660 to fit a hand-painted iron-frame
+visual style. New sidebar shows 8 tabs: News / Patch Notes / Guide /
+Settings / Game Log / AP Bridge / Discord / Exit, with a gold arrow
+indicator on the active tab. Bottom action bar (124px tall) hosts
+status text + Bug Form + Report Bug + the gold INSTALL/PLAY button.
+Color tokens calibrated to the design pack: gold #d4a04a, ink
+#e8d9b8, ember #c8541a. New stone-wall + parchment textures sit
+behind the chrome. Procedural emerald-flame band glows through the
+seam between the masthead and the content area — generated at
+launch into a 32-bit alpha bitmap (no PNG asset to ship), drawn
+behind everything with the masthead darkening fading to transparent
+at the seam so the flames glow through cleanly.
+
+LAUNCHER 1.5.2 — SETTINGS & LOGIC GUIDE TAB
+New "Guide" tab in the launcher sidebar opens a complete reference
+for every YAML setting, all 4 Goal modes (Normal / NM / Hell /
+Collection), the AP fill / sphere logic, recommended setups for
+solo + multiworld, the 75 granular Collection toggles, and a FAQ.
+Loaded fresh from raw.githubusercontent on each launch with a
+local fallback to launcher_package.zip's bundled Settings_Guide.md
+so offline users still see the doc.
+
+LAUNCHER 1.5.1 — PRE-LAUNCH INSTALLATION VERIFIER
+PLAY button now runs a fast file-size check against
+game_manifest.json before starting Game.exe. Missing or wrong-sized
+files trigger an automatic re-download of just those files (full
+package not needed). After 3 consecutive failed verify+repair
+cycles the launcher pops a friendly warning suggesting you
+temporarily disable your antivirus or add the launcher folder to
+its exclusion list — the most common cause of file-quarantine
+loops. Counter resets on the first successful launch.
+
+F1 LOGBOOK PAGE (POKEDEX FOR EVERYTHING ELSE)
+Press F1 → Next through Skill Editor / Quest Book / Sets / Runes /
+Gems / Specials → and the new Logbook page shows up. Two scrollable
+columns: LEFT = this character (45+ stat fields), RIGHT = lifetime
+totals across every character ever played. Live counters wired up
+Press F1 → Next through Skill Editor / Quest Book / Sets / Runes /
+Gems / Specials → and the new Logbook page shows up. Two scrollable
+columns: LEFT = this character (45+ stat fields), RIGHT = lifetime
+totals across every character ever played. Live counters wired up
+with D2Game packet hooks for:
+- Time: playtime in real wall-clock seconds (alt-tab aware)
+- Combat: monsters killed (total + by difficulty), champions, unique
+  monsters, super-uniques, bosses killed, player deaths
+- Loot: items picked up + set/unique/rune/gem sub-totals, gold
+  collected (total + per Act 1-5 buckets), gold spent
+- Economy: items sold to vendor, items bought from vendor, items
+  gambled, gold spent, items identified
+- Crafting: cube transmutes (every recipe — gem upgrades, runeword
+  socketing, rerolls, Pandemonium, Cow Portal), runewords created
+- Progression: quests completed, act-completion times
+  (Normal/Nightmare/Hell × 5 acts) stamped on Andariel/Duriel/
+  Mephisto/Diablo/Baal kill
+- Exploration: waypoints used, doors opened, chests opened, barrels
+  broken, jars/urns broken, shrines activated, wells used, corpses
+  looted, monoliths/stones flipped, quest objects used, portals
+  taken, cow level entries, Tristram visits
+- Consumables: potions used (all 6 types), scrolls used, tomes used
+- Events: Pandemonium runs completed (Hellfire Torch drops)
+
+Mouse wheel scrolls each side independently based on cursor X.
+PageUp/PageDown also work. Stats are sticky (only ever increase),
+saved to per-char sidecar `ap_stats_<charname>.dat` plus an account-
+wide `ap_stats_lifetime.dat` for the totals column.
+
+TWO-FLAG ANTI-CHEAT DETECTION (F1 COLLECTION)
+The Collection page detection rule rewritten with a strict two-flag
+rule. A slot only marks "collected" when BOTH:
+- Flag A: the item was observed on the ground with the engine's
+  IFLAG_NEWITEM bit set (guaranteed-fresh from monster/chest/barrel
+  /object — NOT from a player's drop or shared stash)
+- Flag B: that same item is subsequently in your inventory
+
+Items first observed in inventory (cube output, vendor purchase,
+quest reward, items already in inv at character load, items
+withdrawn from any stash including shared STK tabs) are locked
+TAINTED on first observation and never auto-mark, even if you
+later drop and pick them back up. Items dropped by another player
+in MP also fail Flag A — by the time you see them on the ground,
+the engine has already cleared IFLAG_NEWITEM.
+
+The classification tracks each item by its per-game dwUnitId
+(unique within a session). Sidecar version bumped from 1 to 2.
+Existing characters get a one-time grace scan on first load post-
+update so they don't lose pre-update collections; the sidecar is
+then committed at v2 and strict mode applies for the rest of the
+character's life.
+
+WAVE 2 RUNEWORD BACKPORT (21 more 1.11 runewords)
+Twenty-one more vanilla-1.10f placeholder rows in Runes.txt
+authored. These were the bulk of the "big" 1.11 patch additions —
+the famous endgame runewords Blizzard preseeded into 1.10f's
+Runes.txt but never enabled:
+
+Bow/Crossbow: Brand, Edge, Faith, Harmony, Ice, Insight (also
+polearm/staff)
+Polearm/Spear: Infinity, Obedience, Pride, Rift
+Sword/Axe/Mace: Death, Destruction, Grief, Last Wish, Lawbringer,
+Oath
+Body Armor / Weapon: Fortitude
+Helm/Body/Shield: Dragon, Dream, Phoenix, Spirit
+
+Combined with the earlier 7 (Bone/Enlightenment/Myth/Peace/
+Principle/Rain/Treachery), the seven D2R 2.4 (Plague/Pattern/Mist/
+Obsession/Wisdom/Unbending Will/Flickering Flame), and six D2R 2.6
+(Cure/Hearth/Hustle×2/Mosaic/Metamorphosis), the mod now ships
+**41 backported runewords** on top of vanilla 1.10f's 64 native
+runewords. Active runeword count in Runes.txt: 90.
+
+GOAL=COLLECTION APWORLD OPTION
+The apworld now exposes Goal=Collection as a fourth option
+alongside Full Normal/Nightmare/Hell. Five new sub-target options:
+CollectionTargetSets/Runes/Gems/Specials (Toggles, default ON) +
+CollectionGoldTarget (Range 0..100M gold). Generate a YAML with
+`goal: collection` and pick which categories you want to chase. A
+Sorc with Goal=Collection automatically excludes the 6 sets she
+can't equip (Trang-Oul's, IK, etc.) — you only need to collect the
+sets your class can actually use, plus the 25 generic sets shared
+across all classes.
+
+QUALITY OF LIFE — STACK SIZE BUMPS
+- Skeleton Key: 12 → 99
+- Pandemonium Keys (pk1/pk2/pk3): non-stackable → stack to 99
+- Boss Organs (Mephisto's Brain / Diablo's Horn / Baal's Eye):
+  non-stackable → 99
+- Essences (the 4 prime evil essences): non-stackable → 99
+
+So a typical Pandemonium hoarder doesn't waste 30+ inventory slots
+on these.
+
+
+
+DEAD-END CAVE ENTRANCE SHUFFLE (NEW GAME MODE)
+A new "Entrance" toggle on the title screen shuffles entrances to
+all dead-end caves and dungeons across the entire game. Walk into
+"Den of Evil" and end up somewhere completely different — exit and
+you're back where you started. Multi-floor dungeons (Cave L1+L2,
+Tower Cellar L1..L5, etc.) move as a single set so internal
+navigation stays vanilla.
+
+Pool A (Act 1+2 mixed, 21 sets including all 7 Tal Rasha tombs)
+shuffles among itself; Pool B (Act 3+4+5 + Cow Level, 17 sets) does
+the same. Sattolo permutation guarantees no cave ever maps to itself.
+Seed comes from your AP slot or character-name hash so each character
+gets a unique shuffle that's stable per character. All maze dungeons
+get Hell-difficulty room counts in every difficulty — Normal and
+Nightmare dungeons feel grand instead of cramped. Includes act-town
+death-respawn safety so dying in a shuffled higher-act cave doesn't
+strand you in a town you haven't unlocked yet.
+
+PANDEMONIUM EVENT (UBER TRISTRAM) IN 1.10f
+The full D2 1.11+ Pandemonium Event is now playable. Hell-difficulty
+Mephisto/Diablo/Baal drop their organs (mbr/dhn/bey) at ~85% on first
+kill, ~50% on replays. Random Hell monsters drop the 3 Pandemonium
+keys (pk1/pk2/pk3) from the event-loot table.
+
+Mini Uber Recipe (3 keys cubed outside town) spawns Uber Lilith,
+Uber Duriel, and Uber Izual. Finale Recipe (3 organs cubed outside
+town) spawns Uber Mephisto, Uber Diablo, and Uber Baal — all three
+must die in the same encounter to drop the Hellfire Torch (random
+class skill +1-6, +10-20 all stats, +10-20 all res). All six ubers
+are level 110 with greatly buffed stats — bring an endgame build.
+
+The vanilla Cow Portal recipe (Wirt's Leg + Tome of Town Portal)
+still works exactly as before; Pandemonium recipes only fire when
+the cube actually contains the 3-key or 3-organ combination.
+
+STACKABLE STASH TABS (CONSUMABLES / RUNES / GEMS)
+A new SECOND COLUMN of stash tabs appears next to the existing P
+column when the chest is open. Three new gold/yellow tabs stack
+107 distinct stackable item types up to 999 per slot:
+- CON (39 cells): all healing/mana/rejuv potions, scrolls, ToTP/ToID,
+  gas/oil potions, Skeleton Key, arrow/bolt quivers, the 3 Pandemonium
+  keys, the 3 Boss Organs, the 4 Essences, and Token of Absolution.
+- RUN (33 cells): every rune from El to Zod arranged Low/Mid/High/Top.
+- GEM (35 cells): every gem (7 colors × 5 grades).
+
+Drop an item with shift+right-click while a stack tab is active and
+the count increments; left-click a populated slot and one item is
+spawned onto your cursor. AP and SH variants follow the same access
+rules as your normal stash tabs. Charms, jewels, throwing weapons
+with affixes, and quest items are explicitly excluded.
+
+~20 BACKPORTED RUNEWORDS (patch 1.11 + D2R 2.4 + D2R 2.6)
+The seven patch 1.11 runewords (Bone, Enlightenment, Myth, Peace,
+Principle, Rain, Treachery), the seven D2R 2.4 runewords (Plague,
+Pattern, Mist, Obsession, Wisdom, Unbending Will, Flickering Flame),
+and six D2R 2.6 runewords (Cure, Hearth, Hustle armor, Hustle weapon,
+Mosaic, Metamorphosis) are all usable in our 1.10f base. Mosaic and
+Metamorphosis are simplified versions because the underlying engine
+mechanics they rely on (charge-save, attack-state marks) don't exist
+in 1.10f — the simplified versions deliver equivalent power as
+permanent stats.
+
+Seventeen TEST: cube recipes were also added so you can convert
+common vendor items into the runes / sockets needed to craft 1.11
+runewords without farming for hours.
+
+D2R 3.0 SKILL VALUES PORT
+All 210 vanilla character skills (Amazon, Assassin, Barbarian, Druid,
+Necromancer, Paladin, Sorceress) updated to D2R patch 3.0 values:
+mana costs, per-level damage scaling, hitshift, synergy percentages,
+and prerequisite chains all match the latest D2R balance. The new
+synergy parser handles multi-pct cases (e.g. Holy Fire's Resist Fire
++21% AND Salvation +10%) that the old single-paramN format couldn't
+represent.
+
+Skill renames: Fire Ball → Fireball, Sword Mastery → Blade Mastery,
+Pole Arm Mastery → Polearm Mastery, Sanctuary → Sanctuary Aura.
+Internal save-file names unchanged for compatibility; rename only
+affects display.
+
+TOKEN OF ABSOLUTION
+The 1.13c Token of Absolution is now in 1.10f. Cubing the token
+resets all skill and stat allocations — character respec without
+any quest cost.
+
+DEV TOOLS (Ctrl+V) MENU REDESIGN
+3-column grid (~509×620 px) with section headers replaces the old
+single-column scrollable strip. New sections: CHARACTER (gold/stats/
+skills/XP/heal/unlock-all), TRAPS (spawn SuperUnique / Monsters),
+BOSS LOOT (Andariel/Duriel/Mephisto/Diablo/Baal), RUNES (split into
+Low/Mid/High batches plus All-33), BASES (3-socket-eligible armor
+sets), GOODIES (35 gems / potions / cube recipes). New Pand tab for
+direct uber spawns and event item testing.
+
+F1 COLLECTION PAGE (POKEDEX-STYLE TRACKER)
+Press F1 and use Next/Back to navigate to 5 new collection pages.
+Track every vanilla set (32 sets, 127 pieces), every rune (33), every
+gem (35 = 7 colors x 5 grades), 10 special items (Pandemonium Keys,
+Boss Organs, Essences, Hellfire Torch), and a lifetime Gold-Earned
+counter. Pick up an item once and its cell turns gold with a "Collected
+YYYY-MM-DD" timestamp. Sticky tracking means selling or dropping the
+item doesn't reset the flag. Hover any cell for full info: name,
+collection status, drop source, required level. Per-character storage
+so each char has its own collection.
+
+NEW WIN CONDITION: COLLECTION GOAL
+Set Goal=3 in d2arch.ini for a "complete every set + every rune + every
+gem + every special" win condition. Targets freeze at character creation
+(1.8.0+ settings-isolation pattern). When all targets are collected,
+"COLLECTION GOAL COMPLETE!" fires the standard AP victory pipeline.
+
+QUALITY OF LIFE — TOME STACKS RAISED 20 → 999
+Tome of Town Portal and Tome of Identify now stack to 999 charges
+(was 20). One tome lasts essentially forever instead of needing
+constant Akara/Cain refills. Combined with the new STK Consumables
+stash tab, you can park a full tome and pull single charges as
+needed without ever running out mid-run.
+
 === Beta 1.8.5 - New Features ===
 
 INSTANT CONNECT-BUTTON FEEDBACK
@@ -126,3 +474,97 @@ Added Bug Form button in launcher alongside GitHub Issues link.
 - Press F4 for Zone Map (shows gate progression per difficulty)
 - Press Ctrl+V for Dev Tools menu
 - Press Ctrl+O in-game for graphics settings
+
+
+================================================================
+1.9.0 ADDITIONS — Reward redesign + bonus check categories
+================================================================
+
+REWARD CATALOG REDESIGN
+Filler rewards are now individually-typed instead of generic placeholders.
+Every quest reward in the spoiler file (and the AP spoiler) names exactly
+what it gives:
+  - Gold: random 1-10000 per location, pre-rolled at character creation
+  - Experience: random 1-250000 per location
+  - Trap variants: Monsters / Slow / Weaken / Poison (was just "Trap")
+  - Boss Loot: specific boss (Andariel / Duriel / Mephisto / Diablo / Baal)
+  - Drop: Random Charm / Set Item / Unique — pre-rolled specific item
+    drops via QUESTS_CreateItem (items spawn unidentified, like a real
+    monster drop). Spoiler shows the specific pre-rolled item name.
+
+STANDALONE SPOILER FILE
+New per-character spoiler at Game/Save/d2arch_spoiler_<char>.txt lists
+every filler quest's pre-rolled reward. Re-written each character load
+(deterministic per seed). Useful for offline runs and AP-mode preview.
+
+BONUS CHECK CATEGORIES (opt-in, AP and standalone)
+Six new toggleable check sources adding up to ~1494 extra AP locations:
+  - Shrines: 50 per difficulty (escalating-chance roll on activation)
+  - Urns/Jars: 100 per difficulty (smash to roll)
+  - Barrels: 100 per difficulty (smash to roll)
+  - Chests: 200 per difficulty (open to roll)
+  - Set Piece Pickups: up to 127 first-time pickup checks
+  - Gold Milestones: 17 lifetime-gold thresholds (10K -> 12M)
+
+The chance starts at 10% on the first interaction for a slot and rises
++10% per consecutive miss, hitting a guaranteed 100% on the 10th try.
+Resets to 10% after each hit. Average ~3.5 interactions per check.
+
+All bonus locations are FILLER-ONLY — AP fill never places progression
+items here, so unfilled slots cannot soft-lock the run. Toggle them via
+title-screen buttons (column 2) or YAML options (default OFF).
+
+PER-CHARACTER FILE LAYOUT
+All per-character files now live in Game/Save/ next to the .d2s file
+instead of being mixed into Game/Archipelago/. Migration is automatic
+on first character load (legacy files are moved, not duplicated). The
+shared Game/Archipelago/ folder now holds only account-wide files
+(ap_settings.dat, ap_command.dat, shared_stash.dat, etc.).
+
+F1 TRACKER UPDATES
+Page 8 (Statistics) gained an "AP CHECK PROGRESS" section that shows
+per-difficulty progress for shrines/urns/barrels/chests, the set-piece
+pickup counter, and the gold-milestone progress including the next
+threshold to reach. Visible only when at least one bonus category is
+enabled.
+
+ENTRANCE SHUFFLE NOW IN AP
+The dead-end-cave entrance shuffle (1.9.0 System 1) was previously only
+toggleable via d2arch.ini for standalone — it's now a proper YAML option
+(`entrance_shuffle: bool`) that propagates through slot_data so multi-
+world hosts can require it.
+
+================================================================
+1.9.0 BONUS CHECK POLISH (2026-05-01 evening)
+================================================================
+
+PRE-ROLLED BONUS REWARDS
+Each shrine, urn, barrel, chest, set piece pickup, and gold milestone
+slot now has a SPECIFIC pre-rolled reward at character creation. When
+the escalating-chance roll fires the slot, you get the exact reward
+the spoiler file said you would — no more flat 250-gold tokens.
+
+The standalone spoiler (Game/Save/d2arch_spoiler_<char>.txt) now lists
+all 1494 bonus reward slots alongside the per-quest table. Browse
+before you smash to see what each shrine in Act 1 Normal will give.
+
+TITLE-SCREEN LAYOUT FREEDOM
+Every one of the 6 bonus toggle buttons (Shrines/Urns/Barrels/Chests/
+Set Pickups/Gold MS) now reads its own X/Y from d2arch.ini [layout].
+Default places them in a new 4th column at X=460. Override per button
+via ShrinesX/Y, UrnsX/Y, etc., or move the whole group via BonusX/Y.
+
+F1 PAGE 7 (GOLD TAB) MILESTONE STRIP
+Collection page gained a 4-column ✓/· marker grid showing all 17
+gold milestones with which ones you've already crossed. Only visible
+when check_gold_milestones=true.
+
+BUG FIXES
+- Reset Point no longer leaks into Skill Hunting=OFF seeds (was 1-2
+  unwanted Reset items per pool due to "last gets all" rounding rule)
+- Trap items no longer leak into traps_enabled=false seeds
+- Bonus locations are flagged EXCLUDED so AP fill never places
+  progression items at slots whose escalating-chance roll might never
+  consume them — eliminates multiworld softlock risk
+- Set piece pickup checks now respect per-set collect_set_* toggles
+  (pieces of disabled sets don't count)

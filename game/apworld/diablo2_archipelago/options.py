@@ -43,17 +43,168 @@ class ZoneLocking(Toggle):
 
 class Goal(Choice):
     """
-    Determines which difficulty you must complete to win.
+    Determines what condition you must satisfy to win.
 
     Full Normal:    beat Baal on Normal.
     Full Nightmare: beat Baal on Normal AND Nightmare.
     Full Hell:      beat Baal on Normal, Nightmare, AND Hell.
+    Collection:     fill the F1 Collection book — every targeted set,
+                    rune, gem, special item, and (optionally) a gold
+                    threshold. Difficulty progression is OPTIONAL in
+                    this mode; you win the moment your collection
+                    targets are satisfied.
     """
     display_name = "Goal"
     option_full_normal = 0
     option_full_nightmare = 1
     option_full_hell = 2
+    option_collection = 3
     default = 0
+
+
+# ============================================================
+# Collection Goal sub-targets (only meaningful when Goal=Collection)
+# ============================================================
+
+class CollectionTargetGems(Toggle):
+    """[Goal=Collection only] Require all 35 gems (7 colors × 5
+    grades, Chipped..Perfect) to be collected once on this character.
+    Note: gems do NOT have per-item granularity — it's all 35 or none.
+    Each individual gem pickup still counts as an AP location check
+    when this toggle is ON."""
+    display_name = "Collection: Gems"
+    default = True
+
+
+class CollectionGoldTarget(Range):
+    """[Goal=Collection only] Optional lifetime-gold threshold for
+    the Collection goal. 0 = no gold target. The lifetime gold
+    counter on the F1 Collection page is monotonic (never decreases)
+    and tracks gold pickup + quest rewards (excluding vendor sales).
+    Set this to require, e.g., 1,000,000 gold collected as part of
+    the goal."""
+    display_name = "Collection: Gold Target"
+    range_start = 0
+    range_end = 100000000
+    default = 0
+
+
+# ============================================================
+# Per-item Collection toggles (Goal=Collection only)
+#
+# 32 sets + 33 runes + 10 specials = 75 individual checkboxes.
+# Each enabled item generates an AP location/check when collected
+# (handled in __init__.py:create_locations + DLL Coll_MarkSlotCollected).
+#
+# Standalone (non-AP) mode IGNORES these toggles and uses ALL of
+# them as collection targets — the YAML options only matter when
+# generating a multiworld.
+#
+# Defaults: every set/rune/special is ON by default. Players who
+# want a focused goal (e.g. "just runes" or "no class-locked sets")
+# can disable individual items in their YAML.
+#
+# The classes below are generated programmatically to keep this
+# file readable. Each becomes a proper Toggle subclass added to
+# this module's namespace, then registered in PerGameOptions later.
+# ============================================================
+
+import sys as _sys
+
+# (slot_data field, display name) — 32 vanilla sets in catalog order.
+# slot_data field names match the DLL parser in d2arch_save.c /
+# d2arch_ap.c so don't rename without also updating those.
+_COLL_SETS = [
+    ("collect_set_civerbs",    "Civerb's Vestments"),
+    ("collect_set_hsarus",     "Hsarus' Defense"),
+    ("collect_set_cleglaws",   "Cleglaw's Brace"),
+    ("collect_set_irathas",    "Iratha's Finery"),
+    ("collect_set_isenharts",  "Isenhart's Armory"),
+    ("collect_set_vidalas",    "Vidala's Rig"),
+    ("collect_set_milabregas", "Milabrega's Regalia"),
+    ("collect_set_cathans",    "Cathan's Traps"),
+    ("collect_set_tancreds",   "Tancred's Battlegear"),
+    ("collect_set_sigons",     "Sigon's Complete Steel"),
+    ("collect_set_infernal",   "Infernal Tools"),
+    ("collect_set_berserkers", "Berserker's Garb"),
+    ("collect_set_deaths",     "Death's Disguise"),
+    ("collect_set_angelical",  "Angelical Raiment"),
+    ("collect_set_arctic",     "Arctic Gear"),
+    ("collect_set_arcannas",   "Arcanna's Tricks"),
+    # Class-locked LoD sets (7)
+    ("collect_set_natalyas",   "Natalya's Odium [Assassin]"),
+    ("collect_set_aldurs",     "Aldur's Watchtower [Druid]"),
+    ("collect_set_immortal",   "Immortal King [Barbarian]"),
+    ("collect_set_talrasha",   "Tal Rasha's Wrappings [Sorceress]"),
+    ("collect_set_griswolds",  "Griswold's Legacy [Paladin]"),
+    ("collect_set_trangouls",  "Trang-Oul's Avatar [Necromancer]"),
+    ("collect_set_mavinas",    "M'avina's Battle Hymn [Amazon]"),
+    # Generic LoD sets (9)
+    ("collect_set_disciple",   "The Disciple"),
+    ("collect_set_heavens",    "Heaven's Brethren"),
+    ("collect_set_orphans",    "Orphan's Call"),
+    ("collect_set_hwanins",    "Hwanin's Majesty"),
+    ("collect_set_sazabis",    "Sazabi's Grand Tribute"),
+    ("collect_set_bulkathos",  "Bul-Kathos' Children"),
+    ("collect_set_cowking",    "Cow King's Leathers"),
+    ("collect_set_najs",       "Naj's Ancient Set"),
+    ("collect_set_mcauleys",   "McAuley's Folly"),
+]
+
+# 33 runes from El (low) to Zod (top).
+_COLL_RUNES = [
+    "el", "eld", "tir", "nef", "eth", "ith", "tal", "ral", "ort", "thul",
+    "amn", "sol", "shael", "dol", "hel", "io", "lum", "ko", "fal", "lem",
+    "pul", "um", "mal", "ist", "gul", "vex", "ohm", "lo", "sur", "ber",
+    "jah", "cham", "zod",
+]
+
+# 10 specials (3 keys + 3 organs + 3 essences + Hellfire Torch).
+_COLL_SPECIALS = [
+    ("collect_special_pk1",  "Key of Terror (pk1)"),
+    ("collect_special_pk2",  "Key of Hate (pk2)"),
+    ("collect_special_pk3",  "Key of Destruction (pk3)"),
+    ("collect_special_mbr",  "Mephisto's Brain (mbr)"),
+    ("collect_special_dhn",  "Diablo's Horn (dhn)"),
+    ("collect_special_bey",  "Baal's Eye (bey)"),
+    ("collect_special_tes",  "Twisted Essence of Suffering (tes)"),
+    ("collect_special_ceh",  "Charged Essence of Hatred (ceh)"),
+    ("collect_special_bet",  "Burning Essence of Terror (bet)"),
+    ("collect_special_cm2",  "Hellfire Torch (cm2)"),
+]
+
+def _make_collect_toggle(field_name, display, doc_extra=""):
+    """Create a Toggle subclass at runtime and register it on this
+    module so the options framework can pick it up by attribute name."""
+    cls_name = ''.join(p.capitalize() for p in field_name.split('_'))
+    bases = (Toggle,)
+    attrs = {
+        '__doc__': f"[Goal=Collection only] Include this item in your "
+                   f"collection goal. When ON in AP mode, the slot becomes "
+                   f"an AP location/check that fires when the item is "
+                   f"first collected. {doc_extra}".strip(),
+        'display_name': f"Collect: {display}",
+        'default': True,
+    }
+    cls = type(cls_name, bases, attrs)
+    setattr(_sys.modules[__name__], cls_name, cls)
+    return cls_name, cls
+
+# Build all 75 toggle classes. The returned (cls_name, cls) pairs
+# are stashed on private lists so the dataclass annotations later
+# can reference them in the same order.
+_COLL_SET_CLASSES = [
+    _make_collect_toggle(field, display)
+    for field, display in _COLL_SETS
+]
+_COLL_RUNE_CLASSES = [
+    _make_collect_toggle(f"collect_rune_{name}", f"{name.capitalize()} Rune")
+    for name in _COLL_RUNES
+]
+_COLL_SPECIAL_CLASSES = [
+    _make_collect_toggle(field, display)
+    for field, display in _COLL_SPECIALS
+]
 
 
 # ============================================================
@@ -176,6 +327,19 @@ class BossShuffle(Toggle):
     default = False
 
 
+class EntranceShuffle(Toggle):
+    """
+    Shuffle dead-end cave entrances across each character's seed.
+    Pool A (Acts 1+2) and Pool B (Acts 3+4+5) are shuffled
+    independently so progression remains solvable.
+
+    Frozen at character creation — once baked into the per-character
+    state file, AP reconnects can't change it.
+    """
+    display_name = "Entrance Shuffle"
+    default = False
+
+
 # ============================================================
 # Filler Options
 # ============================================================
@@ -195,37 +359,146 @@ class TrapsEnabled(Toggle):
 
 
 # ============================================================
+# Bonus Check Categories (1.9.0 — opt-in)
+# ============================================================
+# These add up to ~1494 extra check locations that fire on object
+# interactions instead of quest completions. All filler-only — AP
+# never places progression items at these locations, so unfilled
+# slots cannot soft-lock the run.
+#
+# Per-difficulty quotas are gated by the active goal scope: a goal
+# of full_normal only includes Normal slots, full_nightmare adds
+# Nightmare's quota on top, full_hell adds Hell's quota on top.
+#
+# Each interaction rolls an escalating chance: 10% on the first
+# attempt for a given slot, +10% per consecutive miss, capped at 100%
+# (guaranteed) on the 10th attempt. Resets to 10% after a hit.
+
+class CheckShrines(Toggle):
+    """
+    Add 50 shrine activations per difficulty as AP locations.
+    Smashing a shrine rolls the escalating-chance check (avg ~3.5 tries
+    per slot). Filler-only — no progression items are placed here.
+    """
+    display_name = "Check Shrines"
+    default = False
+
+
+class CheckUrns(Toggle):
+    """
+    Add 100 urn/jar destructions per difficulty as AP locations.
+    Plenty of urns in tombs/dungeons make this easy to fill.
+    Filler-only.
+    """
+    display_name = "Check Urns"
+    default = False
+
+
+class CheckBarrels(Toggle):
+    """
+    Add 100 barrel destructions per difficulty as AP locations.
+    Filler-only.
+    """
+    display_name = "Check Barrels"
+    default = False
+
+
+class CheckChests(Toggle):
+    """
+    Add 200 chest openings per difficulty as AP locations.
+    All chest types count (small/large/super/locked).
+    Filler-only.
+    """
+    display_name = "Check Chests"
+    default = False
+
+
+class CheckSetPickups(Toggle):
+    """
+    Fire an AP check the first time you pick up each unique set piece.
+    Up to 127 checks total across all set pieces. Respects the 32
+    individual collect_set_* toggles — pieces of disabled sets don't
+    count.
+    """
+    display_name = "Check Set Pickups"
+    default = False
+
+
+class CheckGoldMilestones(Toggle):
+    """
+    Add 17 lifetime-gold milestone checks. Normal grants 7 milestones
+    up to 3M, Nightmare adds 5 more up to 6M, Hell adds the final 5
+    up to 12M. Uses the same lifetime gold counter as Goal=Collection.
+    """
+    display_name = "Check Gold Milestones"
+    default = False
+
+
+# ============================================================
 # Combined Options Dataclass
 # ============================================================
 
-@dataclass
-class Diablo2ArchipelagoOptions(PerGameCommonOptions):
+from dataclasses import make_dataclass
+
+# Build the option list programmatically so the 75 collection toggles
+# don't bloat this file with manual field-by-field declarations. The
+# resulting dataclass is functionally identical to the old static
+# @dataclass — AP's framework just reads __annotations__.
+_FIELDS = [
     # Mode toggles
-    skill_hunting: SkillHunting
-    zone_locking: ZoneLocking
+    ("skill_hunting",        SkillHunting),
+    ("zone_locking",         ZoneLocking),
     # Goal
-    goal: Goal
+    ("goal",                 Goal),
+    # Gems-as-a-whole + gold target (granular per-item toggles below)
+    ("collection_target_gems",  CollectionTargetGems),
+    ("collection_gold_target",  CollectionGoldTarget),
     # Quest toggles (story is always ON internally — engine-required)
-    quest_hunting: QuestHunting
-    quest_kill_zones: QuestKillZones
-    quest_exploration: QuestExploration
-    quest_waypoints: QuestWaypoints
-    quest_level_milestones: QuestLevelMilestones
+    ("quest_hunting",          QuestHunting),
+    ("quest_kill_zones",       QuestKillZones),
+    ("quest_exploration",      QuestExploration),
+    ("quest_waypoints",        QuestWaypoints),
+    ("quest_level_milestones", QuestLevelMilestones),
     # Class filter
-    skill_class_filter: SkillClassFilter
-    include_amazon: IncludeAmazon
-    include_sorceress: IncludeSorceress
-    include_necromancer: IncludeNecromancer
-    include_paladin: IncludePaladin
-    include_barbarian: IncludeBarbarian
-    include_druid: IncludeDruid
-    include_assassin: IncludeAssassin
+    ("skill_class_filter",     SkillClassFilter),
+    ("include_amazon",         IncludeAmazon),
+    ("include_sorceress",      IncludeSorceress),
+    ("include_necromancer",    IncludeNecromancer),
+    ("include_paladin",        IncludePaladin),
+    ("include_barbarian",      IncludeBarbarian),
+    ("include_druid",          IncludeDruid),
+    ("include_assassin",       IncludeAssassin),
     # XP
-    xp_multiplier: XPMultiplier
-    # Shuffles (shop_shuffle removed — no logic implemented in DLL)
-    monster_shuffle: MonsterShuffle
-    boss_shuffle: BossShuffle
-    # 1.8.4: filler toggles
-    traps_enabled: TrapsEnabled
+    ("xp_multiplier",          XPMultiplier),
+    # Shuffles
+    ("monster_shuffle",        MonsterShuffle),
+    ("boss_shuffle",           BossShuffle),
+    ("entrance_shuffle",       EntranceShuffle),
+    # Filler
+    ("traps_enabled",          TrapsEnabled),
+    # Bonus check categories (1.9.0 — opt-in)
+    ("check_shrines",          CheckShrines),
+    ("check_urns",             CheckUrns),
+    ("check_barrels",          CheckBarrels),
+    ("check_chests",           CheckChests),
+    ("check_set_pickups",      CheckSetPickups),
+    ("check_gold_milestones",  CheckGoldMilestones),
     # DeathLink
-    death_link: DeathLink
+    ("death_link",             DeathLink),
+]
+
+# 32 sets — append to fields list
+_FIELDS += [(field, cls) for (field, _disp), (_cn, cls)
+            in zip(_COLL_SETS, _COLL_SET_CLASSES)]
+# 33 runes
+_FIELDS += [(f"collect_rune_{name}", cls)
+            for name, (_cn, cls) in zip(_COLL_RUNES, _COLL_RUNE_CLASSES)]
+# 10 specials
+_FIELDS += [(field, cls) for (field, _disp), (_cn, cls)
+            in zip(_COLL_SPECIALS, _COLL_SPECIAL_CLASSES)]
+
+Diablo2ArchipelagoOptions = make_dataclass(
+    'Diablo2ArchipelagoOptions',
+    _FIELDS,
+    bases=(PerGameCommonOptions,),
+)

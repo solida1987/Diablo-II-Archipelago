@@ -147,3 +147,23 @@ r08 + jew + magic ring -> tempered ring				100					3	"ring,mag"	jew	r08					"use
 r08 + jew + magic amulet -> tempered amulet				100					3	"amu,mag"	jew	r08					"usetype,tmp"				levelreq			5	5																																																																															0
 r01 + gcv + tempered weapon -> +30-50 ar				100					3	"weap,tmp"	r01	gcv					useitem				levelreq			2	2	att			30	50																																																																										0
 "3 chipped gems + 1 magic weapon -> socketed, magic weapon"	1			0					4	"weap,mag"	"gem0,qty=3"						"usetype,mag"	25		50	sock			1	2																																																																															0
+TEST: Tome of TP -> Shael rune	1			0	28				1	tbk							r13																																																																																							0
+TEST: Tome of ID -> Thul rune	1			0	28				1	ibk							r10																																																																																							0
+TEST: Antidote -> Lem rune	1			0	28				1	yps							r20																																																																																							0
+TEST: Stamina pot -> 3-socket Light Plate	1			0	28				1	vps							ltp				sock			3	3																																																																															0
+TEST: Thawing pot -> 3-socket Crown	1			0	28				1	wms							crn				sock			3	3																																																																															0
+TEST: TP scroll -> Sol rune	1			0	28				1	tsc							r12																																																																																							0
+TEST: ID scroll -> Um rune	1			0	28				1	isc							r22																																																																																							0
+TEST: Minor Healing -> Pul rune	1			0	28				1	hp1							r21																																																																																							0
+TEST: Light Healing -> Ral rune	1			0	28				1	hp2							r08																																																																																							0
+TEST: Minor Mana -> Hel rune	1			0	28				1	mp1							r15																																																																																							0
+TEST: Light Mana -> Amn rune	1			0	28				1	mp2							r11																																																																																							0
+TEST: Mana -> Nef rune	1			0	28				1	mp3							r04																																																																																							0
+TEST: Greater Mana -> Gul rune	1			0	28				1	mp4							r25																																																																																							0
+TEST: Super Mana -> Eld rune	1			0	28				1	mp5							r02																																																																																							0
+TEST: Healing -> Ort rune	1			0	28				1	hp3							r09																																																																																							0
+TEST: Greater Healing -> Mal rune	1			0	28				1	hp4							r23																																																																																							0
+TEST: Super Healing -> Ith rune	1			0	28				1	hp5							r06																																																																																							0
+Pandemonium key	1			100	28				3	pk1	pk2	pk3					Cow Portal																																																																																							
+Pandemonium Finale key	1			100	28				3	dhn	bey	mbr					Cow Portal																																																																																							
+Token of Absolution	1			100					4	tes	ceh	bet	fed				toa																																																																																							0

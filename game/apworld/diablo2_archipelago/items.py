@@ -302,15 +302,44 @@ ALL_SKILL_ITEMS = (
 ALL_SKILL_ITEMS_WITH_TRAPS = ALL_SKILL_ITEMS + ASSASSIN_TRAP_SKILLS
 
 # Filler items
+#
+# 1.9.0 redesign: replaced the 8 generic placeholders with 17 typed
+# fillers. The DLL pre-rolls specific magnitudes (gold 1-10000, xp
+# 1-250000) and specific item picks (which charm / which set piece /
+# which unique) at character creation, stores them in the per-char
+# state file, and consumes them deterministically when the matching
+# AP item arrives. This replaces the old "roll-at-drop-time" model
+# so spoilers (both AP and the new standalone spoiler file) can show
+# what each location's reward will be before the run starts.
 FILLER_ITEMS = [
-    (45500, "Gold Bundle (Small)",  ItemClassification.filler),
-    (45501, "Gold Bundle (Medium)", ItemClassification.filler),
-    (45502, "Gold Bundle (Large)",  ItemClassification.filler),
-    (45503, "5 Stat Points",        ItemClassification.filler),
-    (45504, "Skill Point",          ItemClassification.filler),
-    (45505, "Trap",                 ItemClassification.trap),
-    (45506, "Reset Point",          ItemClassification.filler),
-    (45507, "Boss Loot Drop",       ItemClassification.filler),
+    # Direct stat / point items
+    (45500, "Gold",                       ItemClassification.filler),  # DLL rolls 1-10000
+    (45503, "5 Stat Points",              ItemClassification.filler),
+    (45504, "Skill Point",                ItemClassification.filler),
+    (45506, "Reset Point",                ItemClassification.filler),
+    (45508, "Experience",                 ItemClassification.filler),  # DLL rolls 1-250000
+
+    # Trap variants (replaces single 45505 "Trap")
+    (45505, "Trap: Monsters",             ItemClassification.trap),
+    (45511, "Trap: Slow",                 ItemClassification.trap),
+    (45512, "Trap: Weaken",               ItemClassification.trap),
+    (45513, "Trap: Poison",               ItemClassification.trap),
+
+    # Boss-loot drops (replaces single 45507 "Boss Loot Drop")
+    # Each drops the named boss's TC at the player's ilvl+5.
+    (45514, "Drop: Andariel Loot",        ItemClassification.filler),
+    (45515, "Drop: Duriel Loot",          ItemClassification.filler),
+    (45516, "Drop: Mephisto Loot",        ItemClassification.filler),
+    (45517, "Drop: Diablo Loot",          ItemClassification.filler),
+    (45518, "Drop: Baal Loot",            ItemClassification.filler),
+
+    # Specific-item drops. DLL pre-rolls WHICH charm / set piece /
+    # unique to drop at char creation; the spoiler file shows the
+    # specific name. Items always drop unidentified, like a real
+    # monster drop.
+    (45519, "Drop: Random Charm",         ItemClassification.filler),
+    (45520, "Drop: Random Set Item",      ItemClassification.filler),
+    (45521, "Drop: Random Unique",        ItemClassification.filler),
 ]
 
 # Zone Key items (for Zone Explorer game mode)

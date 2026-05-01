@@ -387,6 +387,74 @@ for quest_id, name, max_acts, level in LEVEL_MILESTONES_NIGHTMARE:
 for quest_id, name, max_acts, level in LEVEL_MILESTONES_HELL:
     location_table[name + " (Hell)"] = LOCATION_BASE + quest_id + 2000
 
+# ============================================================
+# 1.9.0 — Bonus Check Categories (opt-in, filler-only)
+# ============================================================
+# Layout (each block contiguous, easy to reason about):
+#   60000-60049  Shrine N normal slot N           (50 slots)
+#   60050-60099  Shrine N nightmare slot N        (50)
+#   60100-60149  Shrine N hell slot N             (50)
+#   60200-60299  Urn N normal slot N              (100)
+#   60300-60399  Urn N nightmare                  (100)
+#   60400-60499  Urn N hell                       (100)
+#   60500-60599  Barrel N normal                  (100)
+#   60600-60699  Barrel N nightmare               (100)
+#   60700-60799  Barrel N hell                    (100)
+#   60800-60999  Chest N normal                   (200)
+#   61000-61199  Chest N nightmare                (200)
+#   61200-61399  Chest N hell                     (200)
+#   65000-65006  Gold milestone normal (7)
+#   65007-65011  Gold milestone nightmare (5)
+#   65012-65016  Gold milestone hell (5)
+#   65100-65226  Set piece pickup (127)
+# Total: 1494 new locations.
+BONUS_BASE_SHRINE  = 60000
+BONUS_BASE_URN     = 60200
+BONUS_BASE_BARREL  = 60500
+BONUS_BASE_CHEST   = 60800
+BONUS_BASE_GOLDMS  = 65000
+BONUS_BASE_SETPICK = 65100
+
+BONUS_QUOTA_SHRINE = 50
+BONUS_QUOTA_URN    = 100
+BONUS_QUOTA_BARREL = 100
+BONUS_QUOTA_CHEST  = 200
+
+GOLD_MILESTONE_NORMAL    = [10_000, 100_000, 200_000, 400_000, 800_000, 1_800_000, 3_000_000]
+GOLD_MILESTONE_NIGHTMARE = [3_500_000, 4_000_000, 4_500_000, 5_000_000, 6_000_000]
+GOLD_MILESTONE_HELL      = [7_000_000, 8_000_000, 9_000_000, 10_000_000, 12_000_000]
+
+DIFF_LABEL = ["", " (Nightmare)", " (Hell)"]
+
+# Object-check locations (Shrines/Urns/Barrels/Chests)
+def _add_bonus_block(base: int, quota: int, label: str):
+    for diff in range(3):
+        for slot in range(quota):
+            ap_id = base + diff * quota + slot
+            name = f"{label} #{slot + 1}{DIFF_LABEL[diff]}"
+            location_table[name] = ap_id
+
+_add_bonus_block(BONUS_BASE_SHRINE, BONUS_QUOTA_SHRINE, "Shrine")
+_add_bonus_block(BONUS_BASE_URN,    BONUS_QUOTA_URN,    "Urn")
+_add_bonus_block(BONUS_BASE_BARREL, BONUS_QUOTA_BARREL, "Barrel")
+_add_bonus_block(BONUS_BASE_CHEST,  BONUS_QUOTA_CHEST,  "Chest")
+
+# Gold milestones — one location per threshold, suffixed by difficulty.
+for i, gold in enumerate(GOLD_MILESTONE_NORMAL):
+    location_table[f"Gold Milestone: {gold:,}"] = BONUS_BASE_GOLDMS + i
+for i, gold in enumerate(GOLD_MILESTONE_NIGHTMARE):
+    location_table[f"Gold Milestone: {gold:,} (Nightmare)"] = BONUS_BASE_GOLDMS + len(GOLD_MILESTONE_NORMAL) + i
+for i, gold in enumerate(GOLD_MILESTONE_HELL):
+    location_table[f"Gold Milestone: {gold:,} (Hell)"] = (
+        BONUS_BASE_GOLDMS + len(GOLD_MILESTONE_NORMAL) + len(GOLD_MILESTONE_NIGHTMARE) + i
+    )
+
+# Set piece pickup locations — one per piece in the d2arch_collections.c
+# g_collSetPieces[] catalog (127 entries authored). The DLL fires the
+# matching index when a fresh set piece is picked up for the first time.
+for i in range(127):
+    location_table[f"Set Pickup #{i + 1}"] = BONUS_BASE_SETPICK + i
+
 # Reverse lookup: ap_id -> name
 location_id_to_name: dict[int, str] = {v: k for k, v in location_table.items()}
 
@@ -447,5 +515,76 @@ GATE_LOCATIONS = _gate_location_entries()  # 54 entries
 for loc_id, name, _act, _diff, _g in GATE_LOCATIONS:
     location_table[name] = loc_id
 
-# Update reverse lookup after adding gate locations
+
+# ============================================================
+# 1.9.0 — Collection locations (Goal=Collection mode)
+#
+# 110 location IDs for the granular per-item collection system:
+#   50000-50031 = 32 sets       ("Collection: Set <Name>")
+#   50032-50064 = 33 runes      ("Collection: <Rune>")
+#   50065-50099 = 35 gems       ("Collection: <Color> <Grade>")
+#   50100-50109 = 10 specials   ("Collection: <Item>")
+#
+# Each enabled toggle in the YAML adds the corresponding location to
+# the slot's location pool. Fires when the player collects the item
+# (DLL side: Coll_MarkSlotCollected emits the check).
+# ============================================================
+
+COLL_LOC_BASE = 50000
+
+_COLL_SET_NAMES = [
+    "Civerb's Vestments", "Hsarus' Defense", "Cleglaw's Brace",
+    "Iratha's Finery", "Isenhart's Armory", "Vidala's Rig",
+    "Milabrega's Regalia", "Cathan's Traps", "Tancred's Battlegear",
+    "Sigon's Complete Steel", "Infernal Tools", "Berserker's Garb",
+    "Death's Disguise", "Angelical Raiment", "Arctic Gear",
+    "Arcanna's Tricks",
+    "Natalya's Odium", "Aldur's Watchtower", "Immortal King",
+    "Tal Rasha's Wrappings", "Griswold's Legacy", "Trang-Oul's Avatar",
+    "M'avina's Battle Hymn",
+    "The Disciple", "Heaven's Brethren", "Orphan's Call",
+    "Hwanin's Majesty", "Sazabi's Grand Tribute", "Bul-Kathos' Children",
+    "Cow King's Leathers", "Naj's Ancient Set", "McAuley's Folly",
+]
+
+_COLL_RUNE_NAMES = [
+    "El", "Eld", "Tir", "Nef", "Eth", "Ith", "Tal", "Ral", "Ort", "Thul",
+    "Amn", "Sol", "Shael", "Dol", "Hel", "Io", "Lum", "Ko", "Fal", "Lem",
+    "Pul", "Um", "Mal", "Ist", "Gul", "Vex", "Ohm", "Lo", "Sur", "Ber",
+    "Jah", "Cham", "Zod",
+]
+
+_COLL_GEM_COLORS = ["Amethyst", "Topaz", "Sapphire", "Emerald", "Ruby", "Diamond", "Skull"]
+_COLL_GEM_GRADES = ["Chipped", "Flawed", "Normal", "Flawless", "Perfect"]
+
+_COLL_SPECIAL_NAMES = [
+    "Key of Terror", "Key of Hate", "Key of Destruction",
+    "Mephisto's Brain", "Diablo's Horn", "Baal's Eye",
+    "Twisted Essence of Suffering", "Charged Essence of Hatred",
+    "Burning Essence of Terror", "Hellfire Torch",
+]
+
+# Build entries: (loc_id, name, kind, idx)
+COLL_LOCATIONS = []
+for i, set_name in enumerate(_COLL_SET_NAMES):
+    COLL_LOCATIONS.append((COLL_LOC_BASE + i,
+                           f"Collection: Set {set_name}", "set", i))
+for i, rune in enumerate(_COLL_RUNE_NAMES):
+    COLL_LOCATIONS.append((COLL_LOC_BASE + 32 + i,
+                           f"Collection: {rune} Rune", "rune", i))
+for c, color in enumerate(_COLL_GEM_COLORS):
+    for g, grade in enumerate(_COLL_GEM_GRADES):
+        idx = c * 5 + g
+        COLL_LOCATIONS.append((COLL_LOC_BASE + 65 + idx,
+                               f"Collection: {grade} {color}", "gem", idx))
+for i, special in enumerate(_COLL_SPECIAL_NAMES):
+    COLL_LOCATIONS.append((COLL_LOC_BASE + 100 + i,
+                           f"Collection: {special}", "special", i))
+
+# Add to location table (for AP framework lookup)
+for loc_id, name, _kind, _idx in COLL_LOCATIONS:
+    location_table[name] = loc_id
+
+
+# Update reverse lookup after adding gate + collection locations
 location_id_to_name = {v: k for k, v in location_table.items()}

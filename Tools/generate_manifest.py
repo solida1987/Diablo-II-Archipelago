@@ -35,10 +35,14 @@ SKIP_PREFIXES = ("d2arch_",)
 # release and the launcher fails to apply them on user installs (SHA256
 # never matches because every user has different per-char content).
 PER_CHAR_PATTERNS = [
-    re.compile(r"^d2arch_(state|checks|slots|applied|ap|reinvest|fireball)_.+\.dat$"),
-    re.compile(r"^d2arch_skill\d+_.+\.dat$"),
+    # 1.9.0 — also match empty char-name suffix (e.g. d2arch_ap_.dat
+    # generated when the bridge starts before a character is loaded);
+    # changed `.+` to `.*` so the tail can be empty.
+    re.compile(r"^d2arch_(state|checks|slots|applied|ap|reinvest|fireball)_.*\.dat$"),
+    re.compile(r"^d2arch_skill\d+_.*\.dat$"),
     re.compile(r"^d2arch_bridge_locations(_.*)?\.dat$"),
-    re.compile(r"^ap_stash(_ser)?_.+\.dat$"),
+    re.compile(r"^d2arch_spoiler_.*\.txt$"),  # 1.9.0 — per-char standalone spoiler
+    re.compile(r"^ap_stash(_ser)?_.*\.dat$"),
 ]
 
 
@@ -117,6 +121,11 @@ def should_skip(rel_path, base):
         return "backup"
     # Trailing .backup_pre_VERSION on files (e.g. Patch_D2.mpq.backup_pre_1.8.0)
     if ".backup_pre_" in base.lower():
+        return "backup"
+    # 1.9.0 — .before_* timestamped backups (e.g. Misc.txt.before_pandemonium_*,
+    # skill_data.dat.before_d2r_*, skill_icon_map.dat.before_1.7.1_iconfix).
+    # These pile up during dev iterations and were leaking into manifests.
+    if ".before_" in base.lower():
         return "backup"
     return None
 
