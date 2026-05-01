@@ -1,303 +1,8 @@
 {
   "version": "Beta-1.9.0",
   "version_display": "Beta-1.9.0",
-  "file_count": 908,
+  "file_count": 893,
   "files": [
-    {
-      "path": "Bnclient.dll",
-      "sha256": "57f16ef1bd5af6c64a181a3b92e29297460479f2c475085fbdf1db8b38c77c55",
-      "size": 131137
-    },
-    {
-      "path": "D2.Detours.dll",
-      "sha256": "fe7b486b514b69a83f05e089c4d2b199b2ae28bc33b8941caaa05fe4136ae045",
-      "size": 161792
-    },
-    {
-      "path": "D2.DetoursLauncher.exe",
-      "sha256": "eced7a47cd4710de8b30c0156379966c0faab497abf4c37fadb229d7451f270d",
-      "size": 142336
-    },
-    {
-      "path": "D2Arch_Launcher.exe",
-      "sha256": "ee5650511a1797dd028cb14273eff6480547082f1c2eab805c051acd6399cb1c",
-      "size": 121344
-    },
-    {
-      "path": "D2Archipelago.dll",
-      "sha256": "ec1443e99b3c35f9f5c52fb6548311568bf57a75da8177b6f9dcf7ebc06231a3",
-      "size": 631808
-    },
-    {
-      "path": "D2CMP.dll",
-      "sha256": "e725036e1118d34b98d2b739525ff75a225e6964b425469e4773c93f0c9cf882",
-      "size": 155710
-    },
-    {
-      "path": "D2Client.dll",
-      "sha256": "94466b84c0593ab682f1d3d8dc65ef4f8170f33e430865d802bc752458b2b282",
-      "size": 1085505
-    },
-    {
-      "path": "D2Common.dll",
-      "sha256": "b9d1a27c6a35992932c7c47438d02e5269f878e899f6e614d507902cecd1beab",
-      "size": 725057
-    },
-    {
-      "path": "D2DDraw.dll",
-      "sha256": "40923c543da57b3c2ed7464763d83a48b3676e462d840d9ddb12264b337738fe",
-      "size": 81984
-    },
-    {
-      "path": "D2Debugger.dll",
-      "sha256": "4db01104d43466dc0e9a5fac0993a305210f67ed4e890195d2501dd855f37244",
-      "size": 918016
-    },
-    {
-      "path": "D2Direct3D.dll",
-      "sha256": "6ab69b0c3c5d19df185943626bdc3e77a7f5f8d84c7819a5d92fd8a169f852c8",
-      "size": 110659
-    },
-    {
-      "path": "D2Game.dll",
-      "sha256": "2bd92fb25e3e4b8269930712620ba9db00cdc1aa44569d87dc4aba76553272b6",
-      "size": 1159231
-    },
-    {
-      "path": "D2Gdi.dll",
-      "sha256": "862c15afdcf61d1f968ef80b3001157e5a3cd3dfe730c9779ee533b63af380cb",
-      "size": 53310
-    },
-    {
-      "path": "D2Glide.dll",
-      "sha256": "0ba13737d4caaebbb5a82ecc64924ed7a0ce1bb5dc453ab5998985695f927e95",
-      "size": 94272
-    },
-    {
-      "path": "D2Lang.dll",
-      "sha256": "1b6c4d1831fb22ac04caf4fb03d881de619af82c11b8d8c7e91f00a1899bd304",
-      "size": 77887
-    },
-    {
-      "path": "D2Launch.dll",
-      "sha256": "ce90d3f8570c72867fd9de192e4687ecfd7c8b75e7975776fc6a5791673cdbc0",
-      "size": 200769
-    },
-    {
-      "path": "D2MCPClient.dll",
-      "sha256": "ab7611c1dfdf3f1a2274cfbf1a629fa8cbd63859c9c4b2a407fb5ec09a0b83a0",
-      "size": 49220
-    },
-    {
-      "path": "D2Multi.dll",
-      "sha256": "370a55a2d39b446152eb0639776e1ad5dc8392a609fa736351671f623c0fdfab",
-      "size": 155712
-    },
-    {
-      "path": "D2Net.dll",
-      "sha256": "07cf1675c58cec7b62f3ac1ea4a08e21a0517f2b508f9c21cad1d3f3c845c79f",
-      "size": 53310
-    },
-    {
-      "path": "D2Win.dll",
-      "sha256": "9d47815916fc7082ef86fc50705331e3f59d1ffe19e46217ac0551f7d9ee6066",
-      "size": 151614
-    },
-    {
-      "path": "D2gfx.dll",
-      "sha256": "b4247efe73169b66fe95c8cc3d085b9646e8fbf171688fee6b69799f791e56b8",
-      "size": 81982
-    },
-    {
-      "path": "D2sound.dll",
-      "sha256": "be8395e14196941d5771d606966d831459ce0f26277242e486328ac3ba8b1c1d",
-      "size": 86080
-    },
-    {
-      "path": "Diablo II.exe",
-      "sha256": "147e33cc5d2dd9520d143847b35c1c8410a432c605155e0d9678b5b9450a7938",
-      "size": 36864
-    },
-    {
-      "path": "Fog.dll",
-      "sha256": "c4f377cc056e0a5e465d4118d18f3d98e9e650496cf0b5afea559057793b0dba",
-      "size": 188476
-    },
-    {
-      "path": "Game.exe",
-      "sha256": "1ea46ed66d3b9c12965edf13b6d8141cf570249d53991ecadab4892ed8f99ea9",
-      "size": 90112
-    },
-    {
-      "path": "Patch_D2.mpq",
-      "sha256": "fedd72b65b1cf2cfbf24268cbbc553c264ee0ae985daf3ecbe34c7dc9d32c300",
-      "size": 1997247
-    },
-    {
-      "path": "SFMPQ.dll",
-      "sha256": "2ccae12f297f3b5eb234d7824dfde0a84c4991c2c9c72fee32304ae6b7c2a196",
-      "size": 192512
-    },
-    {
-      "path": "SGD2FreeRes.dll",
-      "sha256": "77383b68f608a3c8d804ef668adc19a7256ff6315203f4087747d337205c6058",
-      "size": 318464
-    },
-    {
-      "path": "SGD2FreeRes.mpq",
-      "sha256": "92b48c595373913022652b7232ae0fc3bbcf6afe1d1db6e24bad60ed80481b83",
-      "size": 1254845
-    },
-    {
-      "path": "SGD2FreeResolution.json",
-      "sha256": "e4a33e0ea04dc731908e25b291d3ee511de64aaff8e0c56180a4069ca54e9999",
-      "size": 655
-    },
-    {
-      "path": "START.bat",
-      "sha256": "e86272c865e90844c10178dd81cfe625b757c9765f3e1ccbbf041f3b596ed9d5",
-      "size": 655
-    },
-    {
-      "path": "Storm.dll",
-      "sha256": "4b93e877c11a93a4e255b130a7d4fb5d8722788fb7673297295b8301e488f061",
-      "size": 266302
-    },
-    {
-      "path": "d2char.mpq",
-      "sha256": "1d6d55f50beb8dad04cc8a1c86123f90cd95a8fde734ff55525f985fbff01ea6",
-      "size": 266071129
-    },
-    {
-      "path": "d2data.mpq",
-      "sha256": "d814a751a571417551e40381284412d7245764ec02ab841abf048889c24317b6",
-      "size": 269191615
-    },
-    {
-      "path": "d2gl.ini",
-      "sha256": "39e4543b9c27a956fa0cb49939d89202dec51a0cacbc75eea585f2ee5674f38b",
-      "size": 2954
-    },
-    {
-      "path": "d2gl.json",
-      "sha256": "c8929378ff39496a2be13db04c0cf66438f71488ae905dab763eeb13776f9a7d",
-      "size": 1654
-    },
-    {
-      "path": "d2gl.mpq",
-      "sha256": "8dd68138633ed08e5daaf2ed88c8403e6832afec0d9cc64efa1dac506105a271",
-      "size": 65115804
-    },
-    {
-      "path": "d2sfx.mpq",
-      "sha256": "737d128b3e81526c630503a435b56c70bbdaee2e76d39df4efb025e721432aba",
-      "size": 48927126
-    },
-    {
-      "path": "ddraw.dll",
-      "sha256": "85e0f7d530dfda134793a57cb3e76b0287dcc96892ee57162dd68f47283b03a9",
-      "size": 411648
-    },
-    {
-      "path": "ddraw.ini",
-      "sha256": "9f936936eb0b65fb23111c77ae0e16cc8a8467be405144ab5c5faf06b739436a",
-      "size": 30641
-    },
-    {
-      "path": "default.key",
-      "sha256": "ecfc6ed0513e615e9e6da8eb879a2e38ff00ee6c902f9573592b361ed3e4e947",
-      "size": 1146
-    },
-    {
-      "path": "dsoal-aldrv.dll",
-      "sha256": "dbf37e2d5629612ac5ff7f36f6ea2e5203054b379a175899c44f21dc861e9518",
-      "size": 1121792
-    },
-    {
-      "path": "dsound.dll",
-      "sha256": "d7ca0601cfe56c3c8191e1cb88223fed1219cd962894eba041cc7aca2984acfb",
-      "size": 142336
-    },
-    {
-      "path": "game_manifest.json",
-      "sha256": "55eb43f47167527d436091b2dedf2380aeb8df37c12228fa022b7e762face6f4",
-      "size": 77264
-    },
-    {
-      "path": "glide3x.dll",
-      "sha256": "64f9ceb7ae55361dd4e7f339e407b97c4ef27bd40e0f7fc6772c5fda9a4a062f",
-      "size": 2838528
-    },
-    {
-      "path": "winmm.dll",
-      "sha256": "5ab4664c9a7ddf766c15af965eaa897acc77f2b72f6f5c0c69ce9c73c0844f73",
-      "size": 99840
-    },
-    {
-      "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "51fab0cfb8f639244df726e5ec7b91dc28656e1a25313fe1a2dbe04cd16e3ec5",
-      "size": 38688
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__init__.py",
-      "sha256": "011bb4f8df08cf6ed8155f95b7d5731057c4a004e000aa12cc51bc4f519173c6",
-      "size": 32771
-    },
-    {
-      "path": "apworld/diablo2_archipelago/archipelago.json",
-      "sha256": "528ec19744ffd01ef41b76317dc3c6c6932872c5fd88076d009fd23d766c39fd",
-      "size": 152
-    },
-    {
-      "path": "apworld/diablo2_archipelago/items.py",
-      "sha256": "3cc0b2fd8097dd4bad36237610f545e01c8c8467d8d4ed5089ef1eacd20914a3",
-      "size": 23648
-    },
-    {
-      "path": "apworld/diablo2_archipelago/locations.py",
-      "sha256": "ea94823b5bfd9ced0bc3854041268eae486bb7952d9f24f8cd1ee5dd70f7f17c",
-      "size": 33696
-    },
-    {
-      "path": "apworld/diablo2_archipelago/options.py",
-      "sha256": "5ffe28b1215fdf5f2b926be6e91cbf63cdaa011fa24c1c5ecd0b7641575343b0",
-      "size": 18301
-    },
-    {
-      "path": "apworld/diablo2_archipelago/regions.py",
-      "sha256": "f9bb86208ab47d87ed6ed8f5fb78ba363b0ffc9b162ac62466bd08bbf6470c72",
-      "size": 29764
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/items.cpython-313.pyc",
-      "sha256": "b0b571dbb9acbfb1548c402a8d25890ff28949cdffcc78e159d35d294fb1925e",
-      "size": 20762
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/locations.cpython-313.pyc",
-      "sha256": "b1e5cf559424dba1753ca4409df855fe1574342ecfd9a6147be1630edb4605be",
-      "size": 22652
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/regions.cpython-313.pyc",
-      "sha256": "bdd0121ac1cd82a68cbf50c6148c1d5ea04579caefc46d17fca6a341bdf0d98d",
-      "size": 22505
-    },
-    {
-      "path": "ap_bridge_dist/ap_bridge.exe",
-      "sha256": "cc38f818b313f9606174d5cb0013cb4947189c53c073b19aaf578b6aab09e40c",
-      "size": 3097949
-    },
-    {
-      "path": "ap_bridge_dist/_internal/VCRUNTIME140.dll",
-      "sha256": "052ad6a20d375957e82aa6a3c441ea548d89be0981516ca7eb306e063d5027f4",
-      "size": 120400
-    },
-    {
-      "path": "ap_bridge_dist/_internal/VCRUNTIME140_1.dll",
-      "sha256": "6a99bc0128e0c7d6cbbf615fcc26909565e17d4ca3451b97f8987f9c6acbc6c8",
-      "size": 49776
-    },
     {
       "path": "ap_bridge_dist/_internal/_asyncio.pyd",
       "sha256": "48fdd95938c43b8b3e1f6312de651a53d459e8e2c754fbbdf48e99f5caa1f55b",
@@ -609,34 +314,14 @@
       "size": 758104
     },
     {
-      "path": "ap_bridge_dist/_internal/websockets/speedups.cp314-win_amd64.pyd",
-      "sha256": "97297d94ac8affd34831ef5cc4fd9abaebc4388097251a2a8e6b336f9158572e",
-      "size": 11776
+      "path": "ap_bridge_dist/_internal/VCRUNTIME140.dll",
+      "sha256": "052ad6a20d375957e82aa6a3c441ea548d89be0981516ca7eb306e063d5027f4",
+      "size": 120400
     },
     {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/INSTALLER",
-      "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
-      "size": 4
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/METADATA",
-      "sha256": "918b2fe38207665a087398b54267e77c9d643ce7706410016c9ef6a88b6e3030",
-      "size": 6978
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/RECORD",
-      "sha256": "00d83c5eb3be6a189620d77d9b78ee31a8893f9e8d9697c89dcc419a4db31582",
-      "size": 7725
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/REQUESTED",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
-    },
-    {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/WHEEL",
-      "sha256": "ee4e96732e7cf222587b995fe4ad3de4d2e0faea014e713e4fc78727dd86e3fe",
-      "size": 101
+      "path": "ap_bridge_dist/_internal/VCRUNTIME140_1.dll",
+      "sha256": "6a99bc0128e0c7d6cbbf615fcc26909565e17d4ca3451b97f8987f9c6acbc6c8",
+      "size": 49776
     },
     {
       "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/entry_points.txt",
@@ -644,19 +329,84 @@
       "size": 51
     },
     {
+      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/INSTALLER",
+      "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+      "size": 4
+    },
+    {
+      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/licenses/LICENSE",
+      "sha256": "3d6a0c050d8bec52fabad502e45fb25bd02bcadbd70dea34d447b6a0ff4e6da8",
+      "size": 1514
+    },
+    {
+      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/METADATA",
+      "sha256": "25c0ef5a8f03552c39ba80c015b93d37c7c95ee449be7adc2d7541172063c0df",
+      "size": 6799
+    },
+    {
+      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/RECORD",
+      "sha256": "c7132b1d2b1a913bf5ce92668293e90f8f05fe3211501722e31e0582af22e7ff",
+      "size": 7616
+    },
+    {
+      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/REQUESTED",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
       "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/top_level.txt",
       "sha256": "08ca5d2a49712acbd980283296dc5458e1e26d95d9d6e60856971af71b10f079",
       "size": 11
     },
     {
-      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/licenses/LICENSE",
-      "sha256": "0f44514998aca209d3482d10204a8adf2aa4296ff157a36a5c0922f2280632d3",
-      "size": 1538
+      "path": "ap_bridge_dist/_internal/websockets-16.0.dist-info/WHEEL",
+      "sha256": "ee4e96732e7cf222587b995fe4ad3de4d2e0faea014e713e4fc78727dd86e3fe",
+      "size": 101
     },
     {
-      "path": "Archipelago/.ap_tmp_pgwtmvip",
-      "sha256": "1ae8dfbdf05cb80a3d2695dcde68d278015e7001ae4ff3f24033a53c4d52a6b2",
-      "size": 234
+      "path": "ap_bridge_dist/_internal/websockets/speedups.cp314-win_amd64.pyd",
+      "sha256": "97297d94ac8affd34831ef5cc4fd9abaebc4388097251a2a8e6b336f9158572e",
+      "size": 11776
+    },
+    {
+      "path": "ap_bridge_dist/ap_bridge.exe",
+      "sha256": "cc38f818b313f9606174d5cb0013cb4947189c53c073b19aaf578b6aab09e40c",
+      "size": 3097949
+    },
+    {
+      "path": "apworld/diablo2_archipelago.apworld",
+      "sha256": "51fab0cfb8f639244df726e5ec7b91dc28656e1a25313fe1a2dbe04cd16e3ec5",
+      "size": 38688
+    },
+    {
+      "path": "apworld/diablo2_archipelago/__init__.py",
+      "sha256": "011bb4f8df08cf6ed8155f95b7d5731057c4a004e000aa12cc51bc4f519173c6",
+      "size": 32771
+    },
+    {
+      "path": "apworld/diablo2_archipelago/archipelago.json",
+      "sha256": "528ec19744ffd01ef41b76317dc3c6c6932872c5fd88076d009fd23d766c39fd",
+      "size": 152
+    },
+    {
+      "path": "apworld/diablo2_archipelago/items.py",
+      "sha256": "7e6ba5c45d5b189007cfd44bf05090d5911f509f94844220adcd5254e4cfdfba",
+      "size": 23204
+    },
+    {
+      "path": "apworld/diablo2_archipelago/locations.py",
+      "sha256": "ea94823b5bfd9ced0bc3854041268eae486bb7952d9f24f8cd1ee5dd70f7f17c",
+      "size": 33696
+    },
+    {
+      "path": "apworld/diablo2_archipelago/options.py",
+      "sha256": "5ffe28b1215fdf5f2b926be6e91cbf63cdaa011fa24c1c5ecd0b7641575343b0",
+      "size": 18301
+    },
+    {
+      "path": "apworld/diablo2_archipelago/regions.py",
+      "sha256": "f9bb86208ab47d87ed6ed8f5fb78ba363b0ffc9b162ac62466bd08bbf6470c72",
+      "size": 29764
     },
     {
       "path": "Archipelago/ArchIcons15.DC6",
@@ -694,54 +444,214 @@
       "size": 362099
     },
     {
-      "path": "Archipelago/SkillEditorPanel.DC6",
-      "sha256": "9192a40d9022215a39e8ea4686db77fd4b724225c64f360e17581098c268ad77",
-      "size": 155890
-    },
-    {
-      "path": "Archipelago/ap_item_locations.dat",
-      "sha256": "33d4c88e7c9ae76246cbc0fc18f8159bdab5ce31dbc335023430972a94ea50d5",
-      "size": 352
-    },
-    {
-      "path": "Archipelago/ap_stats_lifetime.dat",
-      "sha256": "93845ac04e695df918277f8bcfc57c7f652c6c8cb8167637ff3c70fac1853c9e",
-      "size": 944
-    },
-    {
-      "path": "Archipelago/custom_bosses.dat",
-      "sha256": "b77eddd01ac2eb2b81d8125b35139afab45de67c1902abb52f74026ccbc87bc1",
-      "size": 4242
-    },
-    {
       "path": "Archipelago/d2arch.ini",
       "sha256": "f2df28447850d1e03f8952b924f6fc2c0586390c2cc7b8a1e007e6f23ebba1c8",
       "size": 34077
     },
     {
       "path": "Archipelago/news.txt",
-      "sha256": "f2a670d3541e20ba1c31315f63edaebac11e7a7ebf7599bcc93c4b86737dc276",
-      "size": 28405
+      "sha256": "d304e15552ebc4feb3de6468ae2111b8a98ae823e0c819d735f4476ff9d828d0",
+      "size": 27835
     },
     {
-      "path": "Archipelago/orig_iconcel.dat",
-      "sha256": "8bbd8467a052d9b7b5b83e637843bbeb0a0a9fcd96b571c0b333d6e62c411817",
-      "size": 1337
+      "path": "Archipelago/shuffle_presets/shuffle_preset_01.dat",
+      "sha256": "7df814e2fc3d2bc54afe79ec0a77bad5289425d25d34522ec26f3cdbd00a6128",
+      "size": 101369
     },
     {
-      "path": "Archipelago/shared_stash.dat",
-      "sha256": "774a284d7a7ac3af0d7b940ff9f8eb6a3074543c4e5f23dbf3264201e243887d",
-      "size": 76744
+      "path": "Archipelago/shuffle_presets/shuffle_preset_01.json",
+      "sha256": "7693d330e4c8378ef4e63d6e4ccb6fb1c3af09c85fecdc050377c730c4cdaca9",
+      "size": 2513557
     },
     {
-      "path": "Archipelago/shared_stash_ser.dat",
-      "sha256": "5f33f13b09f71144e0c005c6d13b9f00c5270b1107700b03d96088367c709b46",
-      "size": 5264
+      "path": "Archipelago/shuffle_presets/shuffle_preset_02.dat",
+      "sha256": "1667466abd1cbb28ec11f1c1b201946f53a6db70a90c8f1935de81cbd792cba4",
+      "size": 101351
     },
     {
-      "path": "Archipelago/shared_stash_stk.dat",
-      "sha256": "9bd9ed5afcadf4e046ebbdc048688ed6cc795734474fcba56d4a5af3211cdb4a",
-      "size": 42024
+      "path": "Archipelago/shuffle_presets/shuffle_preset_02.json",
+      "sha256": "2a7fa1af44c34cac5b75c1727b661c837e51b56e225fda74b02cb9b994cdf339",
+      "size": 2510393
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_03.dat",
+      "sha256": "3d41cd0eb1bcf76428da05131a714c9aebca79925fac63f2648154a9be76c326",
+      "size": 101218
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_03.json",
+      "sha256": "8f28f1a447a656e24b9ef7c8cd297835163cf7e6014b715dcdaa382d677f9eb3",
+      "size": 2513923
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_04.dat",
+      "sha256": "f1d7c6a7a6dc81627b237bef474a8d348d9f31ff905ece4184406ceec68a751b",
+      "size": 101257
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_04.json",
+      "sha256": "7110bc484739747927960ed8981618c8f462c0841a738f4c9c8a81e523765640",
+      "size": 2513561
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_05.dat",
+      "sha256": "11d2ff2c146f719e6da8e98c9ca07af3fe4c8d57d65aadc6e7ae4fdae1925b15",
+      "size": 101269
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_05.json",
+      "sha256": "3a628ab1e28cd0cda19605ea7010e6cbaaf8563463fa3caed4229174415f3b94",
+      "size": 2513066
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_06.dat",
+      "sha256": "02bf9cffd6808df0fd96919a711d13fb9fb2831e21a6558cb2598b9b9a916be5",
+      "size": 101266
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_06.json",
+      "sha256": "44fe65ea1056bd20cd5f694d9e425f93f792658de88456f0d3c40475680899d1",
+      "size": 2513767
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_07.dat",
+      "sha256": "99e1148a6cda98d71387d67ebe99fec305cf9923a3f6e95fcc1dde8e33f7e43d",
+      "size": 101260
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_07.json",
+      "sha256": "545055eb1047c72dc4a388b141f1b819e834a0e67ddd4b4ba0b91a2c52887ef7",
+      "size": 2512083
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_08.dat",
+      "sha256": "bfa06e14468064981b2e7202977462e76f6eea3649b983b4269aa00287fa8015",
+      "size": 101129
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_08.json",
+      "sha256": "9a14ae63b64b732944ac5156e848125bd064f40083383cb2969802155fedba70",
+      "size": 2512701
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_09.dat",
+      "sha256": "af89b5b53f1d582bc541add37bb28e6e0a6cd73755f7baeaa721a97e1fb71961",
+      "size": 101389
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_09.json",
+      "sha256": "cc050707038e035abebc19e8286b05271556a3e0d82b081c2aa9e3e70c42ee13",
+      "size": 2514000
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_10.dat",
+      "sha256": "ad748e08bdbc4cd7f7ce57a087763cb69c32cfa439ca23e551a3af821a546849",
+      "size": 101254
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_10.json",
+      "sha256": "199163fc35b2f607921bca03e8bf47d2b12a8bdd7015b25a19915226cc641a92",
+      "size": 2513286
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_11.dat",
+      "sha256": "1a8b5d996a36aa21686b2fee8c174d0ac1b7896210e5eab89efd91e74a064241",
+      "size": 101245
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_11.json",
+      "sha256": "233be78ae0cd6e063a7a95ac1ad794533deb549cd4ea1891d0df760e345371e0",
+      "size": 2513162
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_12.dat",
+      "sha256": "91b1e4af53aad2a25d9922a5877458ff38284caa91a4f5b86ebcef56e0a41541",
+      "size": 101467
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_12.json",
+      "sha256": "6fb6d84e454ae0bca54f87e74bdae3e9a5472fea90fc07619db50e1aea23e5f9",
+      "size": 2514391
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_13.dat",
+      "sha256": "17d78a532a3354f146369c93a138b4a56077199f1079f69b9df9c6f230feb5bf",
+      "size": 101301
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_13.json",
+      "sha256": "043c9b361bddde2d8c847235b496900738a6c6b0460d04c7c8ecf04d56b9e748",
+      "size": 2513866
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_14.dat",
+      "sha256": "0721d4d8cbeeb5bf3c5ba242b2b5296c89b1b6e5d007fa8d691f1d45de8651ba",
+      "size": 101288
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_14.json",
+      "sha256": "61b0ad047df1154e0ccda55f522cebfd54972014f5a03a0b2c67af0697729d3f",
+      "size": 2513824
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_15.dat",
+      "sha256": "09b269bf3da93ea1175f0f1aaa870fa14d1771a97300e2efc93d287715da8c4d",
+      "size": 101222
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_15.json",
+      "sha256": "d24c5f64aa2d6cce44c0b8b21556edea3b2399d59553f19b62aeafc1dc544e12",
+      "size": 2511675
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_16.dat",
+      "sha256": "3ed2c3d8db65ab8991ed9233bfa4b618aaf12e75ee342a19c717858606e1baa4",
+      "size": 101327
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_16.json",
+      "sha256": "7a4ff742085a82f6f91b5dff90e3a0d854ed4b27d9daa5262fdd2a7665fbe4ee",
+      "size": 2513301
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_17.dat",
+      "sha256": "79aa0f815f506031ad9385e9aee61f2cab3a96f868c866b858d1b9516c15783c",
+      "size": 101317
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_17.json",
+      "sha256": "231fcc2cb87b024b56f677d28e0fc841febaf55d0cbed6411785d9a1ceb9de34",
+      "size": 2513511
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_18.dat",
+      "sha256": "0e18a0f1c0ebe45855077fbeae9e10ecfeda73e27975e63b5075460bebd67068",
+      "size": 101442
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_18.json",
+      "sha256": "c84a0eccce8ff92930f969b3f3ea10fa6e36bee12a4d844fa52c2dae541a366d",
+      "size": 2511807
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_19.dat",
+      "sha256": "40256f9db95e1e13c92a9de1d93463948512f85c47f91ac786022765e24078a7",
+      "size": 101235
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_19.json",
+      "sha256": "00917bc834b4315ba2d380f6b1f6f4f1ca0d6e0264c060a0da9c01ec54909424",
+      "size": 2511801
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_20.dat",
+      "sha256": "c62bb6ce3cd9346cc6633425e74cff880d394fafab604755ef546ba5d957a4de",
+      "size": 101335
+    },
+    {
+      "path": "Archipelago/shuffle_presets/shuffle_preset_20.json",
+      "sha256": "6a7b401f1dc75a7b19dfdc206992b7dbce9c6cd1a01d1e3add09c79d2601f769",
+      "size": 2514902
     },
     {
       "path": "Archipelago/skill_data.dat",
@@ -750,13 +660,13 @@
     },
     {
       "path": "Archipelago/skill_icon_map.dat",
-      "sha256": "327535e9e959688a0d0d4697f36eab3615e578df3786f33223d02b137a4578b0",
-      "size": 1682
+      "sha256": "84e3108102e2a09f0c35bfbe58213285acaf8cd97a55af1feee171254f5a3d99",
+      "size": 1472
     },
     {
-      "path": "Archipelago/treasure_cows.dat",
-      "sha256": "5ef68a2417fa72ce73ae8660e42646d174b2301f9239f1944ad38635574190be",
-      "size": 2066
+      "path": "Archipelago/SkillEditorPanel.DC6",
+      "sha256": "9192a40d9022215a39e8ea4686db77fd4b724225c64f360e17581098c268ad77",
+      "size": 155890
     },
     {
       "path": "Archipelago/version.dat",
@@ -764,359 +674,129 @@
       "size": 10
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_01.dat",
-      "sha256": "a203eb9a86c9e142a8181a4cbc0fab6b88f4c096690ca7a62bde9542f6755972",
-      "size": 102049
+      "path": "Bnclient.dll",
+      "sha256": "57f16ef1bd5af6c64a181a3b92e29297460479f2c475085fbdf1db8b38c77c55",
+      "size": 131137
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_01.json",
-      "sha256": "db289755c974a9124f683b91914ac32291550df908783876110d37cd262debb1",
-      "size": 2655512
+      "path": "D2.Detours.dll",
+      "sha256": "fe7b486b514b69a83f05e089c4d2b199b2ae28bc33b8941caaa05fe4136ae045",
+      "size": 161792
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_02.dat",
-      "sha256": "f3446fc092be25cc3c3477e3aec4ddb2fea92220b7a95f37ccf816429734a255",
-      "size": 102031
+      "path": "D2.DetoursLauncher.exe",
+      "sha256": "eced7a47cd4710de8b30c0156379966c0faab497abf4c37fadb229d7451f270d",
+      "size": 142336
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_02.json",
-      "sha256": "679a6c73db8be4c40fae1c6ba988cdb3b44e106c90d20cc1f216d2c151e87ebc",
-      "size": 2652348
+      "path": "D2Arch_Launcher.exe",
+      "sha256": "ee5650511a1797dd028cb14273eff6480547082f1c2eab805c051acd6399cb1c",
+      "size": 121344
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_03.dat",
-      "sha256": "4914d2a65e8bf13c49c586696e1ca8e33e43bf5cb9d6cb1d432c2b29a546bde8",
-      "size": 101898
+      "path": "D2Archipelago.dll",
+      "sha256": "ec1443e99b3c35f9f5c52fb6548311568bf57a75da8177b6f9dcf7ebc06231a3",
+      "size": 631808
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_03.json",
-      "sha256": "ba79244f25cd0602a8a4485ab4ba44b8244eff59faf0d08871784a357bb967eb",
-      "size": 2655878
+      "path": "D2Client.dll",
+      "sha256": "94466b84c0593ab682f1d3d8dc65ef4f8170f33e430865d802bc752458b2b282",
+      "size": 1085505
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_04.dat",
-      "sha256": "2b73ad1523657b4bd27ffa192926a1f95a977dc48ba7242d8d664e4b520f3043",
-      "size": 101937
+      "path": "D2CMP.dll",
+      "sha256": "e725036e1118d34b98d2b739525ff75a225e6964b425469e4773c93f0c9cf882",
+      "size": 155710
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_04.json",
-      "sha256": "a2402a59229120c9a34e93f080c72120865a1371334006f73726043db680868e",
-      "size": 2655516
+      "path": "D2Common.dll",
+      "sha256": "b9d1a27c6a35992932c7c47438d02e5269f878e899f6e614d507902cecd1beab",
+      "size": 725057
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_05.dat",
-      "sha256": "7ae2b423961d63270ec5ed474abc54f9bb425f6374a71fbf7e34bbd7ace00188",
-      "size": 101949
+      "path": "D2DDraw.dll",
+      "sha256": "40923c543da57b3c2ed7464763d83a48b3676e462d840d9ddb12264b337738fe",
+      "size": 81984
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_05.json",
-      "sha256": "b3480a015e1b24824a0710d8f55a59b4a198816a44028237fa1f379826b50a75",
-      "size": 2655021
+      "path": "D2Debugger.dll",
+      "sha256": "4db01104d43466dc0e9a5fac0993a305210f67ed4e890195d2501dd855f37244",
+      "size": 918016
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_06.dat",
-      "sha256": "337ac863bfa8b939d62b4b15ed0412eaa3bbbc98e44af2f91152d040a6931cf2",
-      "size": 101946
+      "path": "D2Direct3D.dll",
+      "sha256": "6ab69b0c3c5d19df185943626bdc3e77a7f5f8d84c7819a5d92fd8a169f852c8",
+      "size": 110659
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_06.json",
-      "sha256": "08132a7bf7d3863717ca6f0eb40b231114c23d46de34a028ac95c25b7df4b741",
-      "size": 2655722
+      "path": "D2Game.dll",
+      "sha256": "2bd92fb25e3e4b8269930712620ba9db00cdc1aa44569d87dc4aba76553272b6",
+      "size": 1159231
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_07.dat",
-      "sha256": "015b5d05fb5e020208147d871907814e7c5ebcb934e731b9c58fbce63cac770e",
-      "size": 101940
+      "path": "D2Gdi.dll",
+      "sha256": "862c15afdcf61d1f968ef80b3001157e5a3cd3dfe730c9779ee533b63af380cb",
+      "size": 53310
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_07.json",
-      "sha256": "6697e067f23ff396dfad428d36c45ccb5fb947f84039d4ad933cf376f2ceb8a6",
-      "size": 2654038
+      "path": "D2gfx.dll",
+      "sha256": "b4247efe73169b66fe95c8cc3d085b9646e8fbf171688fee6b69799f791e56b8",
+      "size": 81982
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_08.dat",
-      "sha256": "a3d4ce9ee42d25b884d35a92b9478c0f8e69c26631beaf2d50c50d8d11e6bf5c",
-      "size": 101809
+      "path": "d2gl.ini",
+      "sha256": "ede63110095f4e0d12e5ad6b59383d7427b9782af8ac5bd5dfa05d28342d3014",
+      "size": 2824
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_08.json",
-      "sha256": "9b54d273c999aaae96c1ff0f26c87809110e8d40c7d28ab2c144989671efc395",
-      "size": 2654656
+      "path": "d2gl.json",
+      "sha256": "d10422bfc28710ee3c841a49193767036e723ae61a07773dc93bc6a008ba6c49",
+      "size": 1599
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_09.dat",
-      "sha256": "5c956c25e27bdfcab36f485e6c1fcda39b8531bc016fcbf267a0b2a343a4e47e",
-      "size": 102069
+      "path": "d2gl.mpq",
+      "sha256": "8dd68138633ed08e5daaf2ed88c8403e6832afec0d9cc64efa1dac506105a271",
+      "size": 65115804
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_09.json",
-      "sha256": "7628637e346cf6d57f02daa33bb9a8bbea78136751f309e2b19cb26e9fa39596",
-      "size": 2655955
+      "path": "D2Glide.dll",
+      "sha256": "0ba13737d4caaebbb5a82ecc64924ed7a0ce1bb5dc453ab5998985695f927e95",
+      "size": 94272
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_10.dat",
-      "sha256": "345695e73fbe9ed48fbb3cbe123040a40cc830e8a27f55f8c7f3bfdd07856e6b",
-      "size": 101934
+      "path": "D2Lang.dll",
+      "sha256": "1b6c4d1831fb22ac04caf4fb03d881de619af82c11b8d8c7e91f00a1899bd304",
+      "size": 77887
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_10.json",
-      "sha256": "0f6a1186f8fa3e90e0897e8fee4ad6bb3f688b65289c0e2f54d33743382795b9",
-      "size": 2655241
+      "path": "D2Launch.dll",
+      "sha256": "ce90d3f8570c72867fd9de192e4687ecfd7c8b75e7975776fc6a5791673cdbc0",
+      "size": 200769
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_11.dat",
-      "sha256": "16038eab4ab879e368aa64c1b017aa56dc5936fde427a7444e88801c8b68b85e",
-      "size": 101925
+      "path": "D2MCPClient.dll",
+      "sha256": "ab7611c1dfdf3f1a2274cfbf1a629fa8cbd63859c9c4b2a407fb5ec09a0b83a0",
+      "size": 49220
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_11.json",
-      "sha256": "0d791f825e4da91bf946bb9ea7cb22854dace74070cd5f5180d02fd8e3aba33f",
-      "size": 2655117
+      "path": "D2Multi.dll",
+      "sha256": "370a55a2d39b446152eb0639776e1ad5dc8392a609fa736351671f623c0fdfab",
+      "size": 155712
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_12.dat",
-      "sha256": "a9cea8a541f6a240a671dc62eba85f91804f6f7cf8ab8293bcd4549d2edd876c",
-      "size": 102147
+      "path": "D2Net.dll",
+      "sha256": "07cf1675c58cec7b62f3ac1ea4a08e21a0517f2b508f9c21cad1d3f3c845c79f",
+      "size": 53310
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_12.json",
-      "sha256": "4dfee918cae5a4e186778501cd3b95fc505c0811439fd97b7324f652282d50bb",
-      "size": 2656346
+      "path": "D2sound.dll",
+      "sha256": "be8395e14196941d5771d606966d831459ce0f26277242e486328ac3ba8b1c1d",
+      "size": 86080
     },
     {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_13.dat",
-      "sha256": "429acd414788a1535f81c3c7cc2d669efb0ad98da69a34d785b3b0b5ec2550cc",
-      "size": 101981
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_13.json",
-      "sha256": "0621d929b775e2196bdc0951f511bf835ed0efae7e4fc10950b48816cb6e3b86",
-      "size": 2655821
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_14.dat",
-      "sha256": "4cd45fba03f121715572675a2b575095ac7f8af83f75922a7debebf161162d88",
-      "size": 101968
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_14.json",
-      "sha256": "594f1c6638d03ea063388c8930e06df15874a0b50b30244ae0642c63bb472e7c",
-      "size": 2655779
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_15.dat",
-      "sha256": "684d6e419aa33dca3b180834c0aa530aeef8b320419e59875a4324db24426b1e",
-      "size": 101902
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_15.json",
-      "sha256": "9bbe64b970dd1e53f70d1c25a8dc59e2daa751064f276194aff35c3803c9cb78",
-      "size": 2653630
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_16.dat",
-      "sha256": "ea7144df8e8d9cc963af6b63862d9ac947fc84905c70b0e1c1ad8ef1d8f8a562",
-      "size": 102007
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_16.json",
-      "sha256": "fec56ce7397f08fb824e10982ced372824b5790317bd0c21fb26a3e4724b1c65",
-      "size": 2655256
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_17.dat",
-      "sha256": "3c560d7f3b1f47235eae9020d2e83f19cdd48b3cf5776a20589ed2924277fbf2",
-      "size": 101997
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_17.json",
-      "sha256": "e7b1513069ee72363b4ea1b8ffd64f7b0a3ec42f3aecac73d78b9fe7dfe40f44",
-      "size": 2655466
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_18.dat",
-      "sha256": "65548d7e7343eac63b5ef9fb4b75db47a415c700c297ee844814dcb48f9c500a",
-      "size": 102122
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_18.json",
-      "sha256": "4a50fda4c8c5cdf68437c3b954402d0377dc8815d86ad43e6d78baf8ba588d67",
-      "size": 2653762
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_19.dat",
-      "sha256": "c284276c319c4b801acfa578ceed628f15790d0b0c50fe468c5c815a1ee215ed",
-      "size": 101915
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_19.json",
-      "sha256": "cf68cb7c16c7906b12024f1a09e9dc47b5898d9b8d83cbd9dc7c304c4a36c247",
-      "size": 2653756
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_20.dat",
-      "sha256": "ed6e803f5dac0d35f5bfefada3df245dedb4b91c69d23118f4e7dfa5d374be51",
-      "size": 102015
-    },
-    {
-      "path": "Archipelago/shuffle_presets/shuffle_preset_20.json",
-      "sha256": "e9ea2d80ec44b21c652ca562c99610bb742442b0d41d565b6263b48a30bc07f1",
-      "size": 2656857
-    },
-    {
-      "path": "data/global/excel/ElemTypes.txt",
-      "sha256": "91addf64ff87abb19dcceba77f6da6ed84e9e4194d30eeb1d69d36edd55cdc15",
-      "size": 195
-    },
-    {
-      "path": "data/global/excel/HorCubeEx.txt",
-      "sha256": "af87502e786041291f2d9c011017347bca5fac55e90b6d29f446ee86900d3b00",
-      "size": 7580
-    },
-    {
-      "path": "data/global/excel/ItemStatCost.txt",
-      "sha256": "ee7fa82b48e0c4f27a566334b2da13cf1c83f5c4c0439552084a231cb5938375",
-      "size": 40109
-    },
-    {
-      "path": "data/global/excel/ItemTypes.txt",
-      "sha256": "d399dc5d0f3a3e1a4f1eb611dabef8311b7025392c416f58dc26baff93af3550",
-      "size": 8775
-    },
-    {
-      "path": "data/global/excel/Levels.txt",
-      "sha256": "24d072c76fddc8b3a656a5bd287b1730f73d93caa705032d3c564221a1683bdd",
-      "size": 64844
-    },
-    {
-      "path": "data/global/excel/LvlMaze.txt",
-      "sha256": "4a8e96540b10af6a3fcb12f5711df4d2806d8b1bcfc5b1da1a000d9d3af32bf5",
-      "size": 3364
-    },
-    {
-      "path": "data/global/excel/LvlPrest.txt",
-      "sha256": "6f7ada2e30627673d5b80e0ef0b3809a220cf2f44b4e8b189150e516dbee0ded",
-      "size": 134829
-    },
-    {
-      "path": "data/global/excel/LvlSub.txt",
-      "sha256": "d3dc9dc70066f819ff9e0c1b433b327952789ed7ad3e5eadccf7160280ddc64f",
-      "size": 3466
-    },
-    {
-      "path": "data/global/excel/LvlTypes.txt",
-      "sha256": "4d8a6cc08afd6c66a493b677b1601182695a437dcc0ab5fedecc379537e5c84c",
-      "size": 10719
-    },
-    {
-      "path": "data/global/excel/MagicPrefix.txt",
-      "sha256": "f58b05c7b5db4464cbce1087b73a6f99592be56ea955fe60dd901fcddb56c561",
-      "size": 57588
-    },
-    {
-      "path": "data/global/excel/MagicSuffix.txt",
-      "sha256": "47d4399809c3f123f338deebb139139b0f775f47c435e286954457b0cd47de21",
-      "size": 65863
-    },
-    {
-      "path": "data/global/excel/Misc.txt",
-      "sha256": "afeb3dbc210f40b0167c2c1c9299d5752e5da937787cb083a0d2880777098b32",
-      "size": 55839
-    },
-    {
-      "path": "data/global/excel/Missiles.txt",
-      "sha256": "f903fd04f61aa676585d54bc2f98c3e5a42328188318ce15b9671e85609ec0ae",
-      "size": 192971
-    },
-    {
-      "path": "data/global/excel/MonMode.txt",
-      "sha256": "2663c45b5ca74916db0114335babe7fc6dd9d357322892df501f7850e4385b52",
-      "size": 238
-    },
-    {
-      "path": "data/global/excel/MonType.txt",
-      "sha256": "755edd9bbe12e8427373d1725e0bcea62f31fca0a75871936057cca432960faa",
-      "size": 1363
-    },
-    {
-      "path": "data/global/excel/Overlay.txt",
-      "sha256": "a37e80510e8921d4b06c9e0559a56096586d86ba295345f6bd55b4c2254b036f",
-      "size": 27588
-    },
-    {
-      "path": "data/global/excel/PlrMode.txt",
-      "sha256": "23106da08603bc215624e2837f3990b5ed4b5521bbe8b4a80b0ea6b6502fb8e3",
-      "size": 302
-    },
-    {
-      "path": "data/global/excel/Properties.txt",
-      "sha256": "257bc45defb825cc43feb01ef2110df1cb5ba5cf4cd6318993a0bc133c10ebd6",
-      "size": 26741
-    },
-    {
-      "path": "data/global/excel/Runes.txt",
-      "sha256": "5d0d9a5c77a614c90c1678eab7a8fd30f9e95724439098eb40e466c50efa20c0",
-      "size": 20991
-    },
-    {
-      "path": "data/global/excel/SetItems.txt",
-      "sha256": "5696730cf84564f1cb815fb362fba13f23e22f5176e854730733519048f711be",
-      "size": 26934
-    },
-    {
-      "path": "data/global/excel/SoundEnviron.txt",
-      "sha256": "d69131977215f8d3ac91326ffa708fad24eeddb61efae3965cf4b4d9d41de90c",
-      "size": 5741
-    },
-    {
-      "path": "data/global/excel/Sounds.txt",
-      "sha256": "6ab753bceb4a314d8e755eabcd4d3f084da76a5564f5ba6734dffd4cc9eedc58",
-      "size": 505304
-    },
-    {
-      "path": "data/global/excel/SuperUniques.txt",
-      "sha256": "a2f954f2ca3e27353d8895650263928845cf8e9378e41fd4005a1a6b3f27320a",
-      "size": 8071
-    },
-    {
-      "path": "data/global/excel/TreasureClass.txt",
-      "sha256": "a109de6a1e0ec75565b4485b054101df480fb96d6c266d6e4d62df4f27fcbbbe",
-      "size": 69635
-    },
-    {
-      "path": "data/global/excel/TreasureClassEx.txt",
-      "sha256": "4c76ede33a8b3a5ad3eba95afd083f3bb93f7ed830828882034aac422c760f95",
-      "size": 87854
-    },
-    {
-      "path": "data/global/excel/UniqueAppellation.txt",
-      "sha256": "fbb5661f61f578219cd6b72b6709a319c0ee906fb9b1fb44f018ab17c3aa4c1a",
-      "size": 294
-    },
-    {
-      "path": "data/global/excel/UniqueItems.txt",
-      "sha256": "0fc16b02cf10f2833730c86d570ee9c68c1ea1883476f24b41de1ea774189ef7",
-      "size": 73539
-    },
-    {
-      "path": "data/global/excel/UniqueItems2.txt",
-      "sha256": "a7e118d895f11784fa58f96580f8bee6a8aabf5faf3dc8caf39220fb5bf1af40",
-      "size": 42820
-    },
-    {
-      "path": "data/global/excel/UniquePrefix.txt",
-      "sha256": "564ce70637b464c3cfe735c898310208b062751f80c5952afb78bbfb48f45369",
-      "size": 392
-    },
-    {
-      "path": "data/global/excel/UniqueSuffix.txt",
-      "sha256": "5c9597373fd8c3621c94afc95aa80487c59c81349c663635a2cae2f156e862f7",
-      "size": 527
-    },
-    {
-      "path": "data/global/excel/UniqueTitle.txt",
-      "sha256": "3ecf4e1b3fdbd905e3057407fac1b82ff6faf30425cfc2ed64e0cd79a6acde8e",
-      "size": 250
+      "path": "D2Win.dll",
+      "sha256": "9d47815916fc7082ef86fc50705331e3f59d1ffe19e46217ac0551f7d9ee6066",
+      "size": 151614
     },
     {
       "path": "data/global/excel/arena.bin",
@@ -1130,8 +810,8 @@
     },
     {
       "path": "data/global/excel/armor.txt",
-      "sha256": "d8a4827d52807652f8de33d1b9b335ab8bdd40d1b60b5cbabce24ff9987b30fa",
-      "size": 76370
+      "sha256": "6ce5a09e8c6bc07dddea916412f18e57af860f7c870e3ef9e3003ea8beeaaf99",
+      "size": 76166
     },
     {
       "path": "data/global/excel/armtype.bin",
@@ -1165,8 +845,8 @@
     },
     {
       "path": "data/global/excel/books.txt",
-      "sha256": "60e2527c2b30487ff68fcaaad163831abc6f6ef5e4ec6d42478ff5f30c2eeec5",
-      "size": 315
+      "sha256": "f3cba2d3e4906024b0652aa0bc9591d34abdc8bbd8d0964ae575d3a209be567e",
+      "size": 311
     },
     {
       "path": "data/global/excel/charstats.bin",
@@ -1175,8 +855,8 @@
     },
     {
       "path": "data/global/excel/charstats.txt",
-      "sha256": "bfd28714a573384da0575c6525b3733c82e3bf97f47d0f3e1b8552d137bff51f",
-      "size": 3360
+      "sha256": "210a6f1371a475442a6f9b27a2d03b2bebc2e3e93c1e586583c112596301a8b3",
+      "size": 3351
     },
     {
       "path": "data/global/excel/chartemplate.bin",
@@ -1195,8 +875,8 @@
     },
     {
       "path": "data/global/excel/compcode.txt",
-      "sha256": "a26b8437a13e5777801d8794ed49d103cdd5d274afbd013f09a107ca11ba2a4b",
-      "size": 1862
+      "sha256": "51076017de38e853b0b5f137192d10afc9eb59db89dfffe0751af043ef6f7755",
+      "size": 1746
     },
     {
       "path": "data/global/excel/composit.bin",
@@ -1210,13 +890,13 @@
     },
     {
       "path": "data/global/excel/cubemain.txt",
-      "sha256": "39ac48d0f0743bdf86e88f59bf1de6e88479cc89d751e70288f559a20f195388",
-      "size": 33012
+      "sha256": "63e22003610609ebfcd1189b064192ca16a90afb0cab3ef5ed4a1ab065fb570b",
+      "size": 32843
     },
     {
       "path": "data/global/excel/cubemod.txt",
-      "sha256": "9829829bfcf62f8660a4e6c187156a50e4a87da2f61ffe890b273d600d415dad",
-      "size": 176
+      "sha256": "5170d307cd48b6e59b37d5de43b585d13cf03c1f8aef01d6a05d59273bb32e94",
+      "size": 162
     },
     {
       "path": "data/global/excel/difficultylevels.bin",
@@ -1225,13 +905,18 @@
     },
     {
       "path": "data/global/excel/difficultylevels.txt",
-      "sha256": "6929153657001e19f2ea0e04d839a5f2534d00b91460d76006d9c51784d76fa3",
-      "size": 586
+      "sha256": "aaa1a5d93df8c62707cf05308d82418ae7058ac1ac15ac768331f2abe440ff88",
+      "size": 582
     },
     {
       "path": "data/global/excel/elemtypes.bin",
       "sha256": "bdfbe77eccedf24d166e41af1dc3dea54f793b0fa3b0ddca0ccb3590c3021185",
       "size": 56
+    },
+    {
+      "path": "data/global/excel/ElemTypes.txt",
+      "sha256": "b21ceb2ecd75483264773e079f7888c1d9c69416f6fe8de11df1746856829bc9",
+      "size": 181
     },
     {
       "path": "data/global/excel/events.bin",
@@ -1240,8 +925,8 @@
     },
     {
       "path": "data/global/excel/events.txt",
-      "sha256": "c438f847029dfc5d80e2184bb96684bf226bcc5a42ef86904eff7f6265a7572c",
-      "size": 420
+      "sha256": "aa0f8c19a43b8cdb00a712434791ca086d6827018cdc5b7d2f80319a52a1e146",
+      "size": 406
     },
     {
       "path": "data/global/excel/experience.bin",
@@ -1250,8 +935,8 @@
     },
     {
       "path": "data/global/excel/experience.txt",
-      "sha256": "a6f0f717bfdf4ab36ac2b55d5aa67b9a6e04d32c650facffbfcb00ed7e505c6d",
-      "size": 7116
+      "sha256": "5a9748320bd4796d5b660f9ad4fc33e20a73966ba1d02512e58b94e6ece98983",
+      "size": 7014
     },
     {
       "path": "data/global/excel/gamble.bin",
@@ -1265,8 +950,8 @@
     },
     {
       "path": "data/global/excel/gems.txt",
-      "sha256": "157925b4d12502eed32139ca7a246b6f1f7bfca3ea2291239def4bbf8a222bf0",
-      "size": 7793
+      "sha256": "52ea3e27a905f0bb2dc2bf0d60835e6f980f16e797c91e85aeccee561e219145",
+      "size": 7723
     },
     {
       "path": "data/global/excel/hiredesc.bin",
@@ -1280,13 +965,18 @@
     },
     {
       "path": "data/global/excel/hireling.txt",
-      "sha256": "c743a6489456bd2c29143ae55312fda8fb6acb226d55a637c2c8f54a555afa78",
-      "size": 26415
+      "sha256": "ca71456a7202e34f27698f7ac7d932d8fffdba250c06db7b354f29807ae15a72",
+      "size": 26294
     },
     {
       "path": "data/global/excel/hitclass.bin",
       "sha256": "ad4b04eb8b90e52eda5b589eee7cc5d509c2a104e7259de541550a8e53dd6d4b",
       "size": 60
+    },
+    {
+      "path": "data/global/excel/HorCubeEx.txt",
+      "sha256": "69af77ce8a27cb46596b54a7fc373253ab8a5fced5bf3c8fcaa25a5084c517fb",
+      "size": 7515
     },
     {
       "path": "data/global/excel/inventory.bin",
@@ -1295,8 +985,8 @@
     },
     {
       "path": "data/global/excel/inventory.txt",
-      "sha256": "b11f2c15da5edb66608b4da9f35af37b5a43082a55a9abea87266a021448a64d",
-      "size": 8801
+      "sha256": "97326443c5bc98b08f529625971738a57b3a0627e6a56217e817efe891b6bc32",
+      "size": 8767
     },
     {
       "path": "data/global/excel/itemratio.bin",
@@ -1305,8 +995,8 @@
     },
     {
       "path": "data/global/excel/itemratio.txt",
-      "sha256": "f8ebb2128c09311d2f17f9f3ea9e1933441f3322ab2c4c203eb9858a00af90ff",
-      "size": 662
+      "sha256": "965793f982fed16f768ff117059dc460f24e5bc7290e309951b0a8dc9b4534de",
+      "size": 655
     },
     {
       "path": "data/global/excel/itemscode.bin",
@@ -1319,9 +1009,19 @@
       "size": 116320
     },
     {
+      "path": "data/global/excel/ItemStatCost.txt",
+      "sha256": "4d743b7f3e260a6647f259de25a931fd2554d52315d316eac467f110ee096c27",
+      "size": 39749
+    },
+    {
       "path": "data/global/excel/itemtypes.bin",
       "sha256": "233068c5ff96101cd9c460ddf6b7274286e4bd7967dc8168ddda80c3908826b3",
       "size": 23488
+    },
+    {
+      "path": "data/global/excel/ItemTypes.txt",
+      "sha256": "04dc469680ff78c33cef55a852b3bad8b4c63d5f776fd5fbcfaae276e8d95f02",
+      "size": 8670
     },
     {
       "path": "data/global/excel/leveldefs.bin",
@@ -1334,6 +1034,11 @@
       "size": 72356
     },
     {
+      "path": "data/global/excel/Levels.txt",
+      "sha256": "ed8a9c2f18d16b19ef49f80819ca4c25c77bcdfd681c93b742b9073388f92093",
+      "size": 64709
+    },
+    {
       "path": "data/global/excel/lowqualityitems.bin",
       "sha256": "aaeb6f0eab7d768ac48ecf2fcca82fced595b0529467c2e6cbdd9d38aa3821e3",
       "size": 140
@@ -1344,9 +1049,19 @@
       "size": 2216
     },
     {
+      "path": "data/global/excel/LvlMaze.txt",
+      "sha256": "c014c7474da8bcce8494b69190b57f0774eb7c1473e3240d729c07db1c4744a6",
+      "size": 3283
+    },
+    {
       "path": "data/global/excel/lvlprest.bin",
       "sha256": "e770515fe5d66cfdacd5e0247866a43d566c97fa5b1885968064237c5a23fab5",
       "size": 470884
+    },
+    {
+      "path": "data/global/excel/LvlPrest.txt",
+      "sha256": "1d1b9a92b5dce790c53fb5786b65c4595e205c0857d6637312ccad376fbf69a1",
+      "size": 133737
     },
     {
       "path": "data/global/excel/lvlsub.bin",
@@ -1354,9 +1069,19 @@
       "size": 11836
     },
     {
+      "path": "data/global/excel/LvlSub.txt",
+      "sha256": "96a016818433989fb341e71b5f927055205af1b02fb9cce7253bba63cc908095",
+      "size": 3430
+    },
+    {
       "path": "data/global/excel/lvltypes.bin",
       "sha256": "9399f78364f96ef4bbd3971f808ada15af810dde65c76e9b9132128c8e2c3ece",
       "size": 69412
+    },
+    {
+      "path": "data/global/excel/LvlTypes.txt",
+      "sha256": "fd7fa26728a6387fc6e5192cddd313c35c2d23fd26c244c7e923389cc0c5291d",
+      "size": 10681
     },
     {
       "path": "data/global/excel/lvlwarp.bin",
@@ -1369,14 +1094,29 @@
       "size": 96340
     },
     {
+      "path": "data/global/excel/MagicPrefix.txt",
+      "sha256": "db5ec15867c933b636ab622885ca392caca8d3346d327bc01dbee287bb42e2c4",
+      "size": 56917
+    },
+    {
       "path": "data/global/excel/magicsuffix.bin",
       "sha256": "ec44c7bcff0323661170832452a9996759acc7673f15b6dc7fe07998a9f36206",
       "size": 107572
     },
     {
+      "path": "data/global/excel/MagicSuffix.txt",
+      "sha256": "fe708fad529499efee05843647c53d949e059dab018bb96165ff9a780bfc3bda",
+      "size": 65114
+    },
+    {
       "path": "data/global/excel/misc.bin",
       "sha256": "49bd0ba36c70cc76d6f288dfca1f683b394e07f99bbd5f42c3b0419f715fddcc",
       "size": 64028
+    },
+    {
+      "path": "data/global/excel/misc.txt",
+      "sha256": "799a43aca634c2eb6f33e0dcda103ea9edf6cf4105b40a41210cb98fc3d7892e",
+      "size": 55686
     },
     {
       "path": "data/global/excel/misscalc.bin",
@@ -1385,8 +1125,8 @@
     },
     {
       "path": "data/global/excel/misscalc.txt",
-      "sha256": "3aaaea44299543cc09ca5b23835fbb46182ce6365757d8ff838513e28f1422b0",
-      "size": 1143
+      "sha256": "e91919d263bf8c5cca629204b4ceeac3c979d25142572387c323e83ef981f7b7",
+      "size": 1099
     },
     {
       "path": "data/global/excel/misscode.bin",
@@ -1399,14 +1139,19 @@
       "size": 287284
     },
     {
+      "path": "data/global/excel/Missiles.txt",
+      "sha256": "b5ace0c023b1acc4a829cc789e37a2658705fb02e7afabbe08ecaa35101fe3af",
+      "size": 192286
+    },
+    {
       "path": "data/global/excel/monai.bin",
       "sha256": "85bd517119550bcb29f46056b3be1be4cd8a8bdaebf646d8d67c7fe19f8c350c",
       "size": 292
     },
     {
       "path": "data/global/excel/monai.txt",
-      "sha256": "a3380b971addd780bdf9afcddac6a5bb0807f7352a8c681e4219043b76970235",
-      "size": 7530
+      "sha256": "73abdbf4dbaf2659290e70884ce665a0a7e8ac2cf209ba0f2c155b8bef77778d",
+      "size": 7385
     },
     {
       "path": "data/global/excel/monequip.bin",
@@ -1415,8 +1160,8 @@
     },
     {
       "path": "data/global/excel/monequip.txt",
-      "sha256": "0254d070195e61ada97cec052ae14aaf10597bb1c5fc4da7eddde5cd05a7e17f",
-      "size": 1763
+      "sha256": "51815212a54ada8cc1bf030cdcdeca5021a4b8cb027d5e25b1414bde7e74f002",
+      "size": 1717
     },
     {
       "path": "data/global/excel/monitempercent.bin",
@@ -1430,13 +1175,18 @@
     },
     {
       "path": "data/global/excel/monlvl.txt",
-      "sha256": "bda243efe1d1e9591f75b8cf97ac73f78ff691362381f35cc000233eb46c092a",
-      "size": 14707
+      "sha256": "7624abe33673f8bf4f243de141fb387a1d78f1192466ace49ac8b3c175fa4df8",
+      "size": 14595
     },
     {
       "path": "data/global/excel/monmode.bin",
       "sha256": "3129eca38b8f1c9c7b2d466f154d2ba11ca20dd9889b732966b0ef71f6639307",
       "size": 836
+    },
+    {
+      "path": "data/global/excel/MonMode.txt",
+      "sha256": "7305927dbae0377357ab106ea6fbae4267796513dbf02908eb5dc2689a63f827",
+      "size": 221
     },
     {
       "path": "data/global/excel/monplace.bin",
@@ -1445,8 +1195,8 @@
     },
     {
       "path": "data/global/excel/monplace.txt",
-      "sha256": "1bc9f2d3acf57b65eb7036641c54e7424e5f235bfcd79a71a4ec040b46bc0b75",
-      "size": 658
+      "sha256": "2451e8580477da926e39592250245d803935aaa1da2dd69080b0bcfd31e901e9",
+      "size": 620
     },
     {
       "path": "data/global/excel/monpreset.bin",
@@ -1455,8 +1205,8 @@
     },
     {
       "path": "data/global/excel/monpreset.txt",
-      "sha256": "c71ac39afa5e2046510d4f44d8f809828104aa7d20ae7e5dd11f9385eab87bce",
-      "size": 3594
+      "sha256": "681089df6f113f177644d3d09c3bf9c300614a7b6989909afc22ed6e21f65655",
+      "size": 3364
     },
     {
       "path": "data/global/excel/monprop.bin",
@@ -1465,8 +1215,8 @@
     },
     {
       "path": "data/global/excel/monprop.txt",
-      "sha256": "2e7b22f19aa571f1ee3cca8426e219d146471b0b13a25c5fb70a452c2c8c9f4d",
-      "size": 2454
+      "sha256": "07ce4ef5f9e9262c8fbf75ee79a2f9cbedef0f9735bfaaeb04e2c66c913da1f5",
+      "size": 2440
     },
     {
       "path": "data/global/excel/monseq.bin",
@@ -1475,8 +1225,8 @@
     },
     {
       "path": "data/global/excel/monseq.txt",
-      "sha256": "5a042af5d3411ed337c71b014125ceae608a7b8f76c7ab437539553e14bc6992",
-      "size": 27761
+      "sha256": "8778d39ccc2db432603b9f8f204d3a03371fc10aaef908bbd66ee7821b4a6722",
+      "size": 26750
     },
     {
       "path": "data/global/excel/monsounds.bin",
@@ -1485,8 +1235,8 @@
     },
     {
       "path": "data/global/excel/monsounds.txt",
-      "sha256": "d0da7ef1c3b34d575c27f4a56a3755fd2a4038afce632257220625644e858880",
-      "size": 22927
+      "sha256": "b1bc5315c5d3ab2ed87f99a0ddc3f5971aa2f32a9a2481c61ec96ad663d2d1f5",
+      "size": 22785
     },
     {
       "path": "data/global/excel/monstats.bin",
@@ -1495,8 +1245,8 @@
     },
     {
       "path": "data/global/excel/monstats.txt",
-      "sha256": "2c82a69709d10dc01169fc493ac6957ff22d405f040f623a48c9a6ec8605f3b1",
-      "size": 417639
+      "sha256": "da3782bb5342c90e1f0534e4fa100fe652891a54d2bb248bd9d27c644414b390",
+      "size": 416927
     },
     {
       "path": "data/global/excel/monstats2.bin",
@@ -1505,13 +1255,18 @@
     },
     {
       "path": "data/global/excel/monstats2.txt",
-      "sha256": "47e76c82c0d9b955766e087adcb5192d01cb69b5400378346f2b871d89fd1175",
-      "size": 137394
+      "sha256": "0f02327535c4c76f5a429c759a6d3a2687fd09b56f540be057f57d9899e46753",
+      "size": 136788
     },
     {
       "path": "data/global/excel/montype.bin",
       "sha256": "81c4732b29d441a64cdf2bcd0c157cd71fa872f29f1765b4ea01ec65a2d2ce6f",
       "size": 712
+    },
+    {
+      "path": "data/global/excel/MonType.txt",
+      "sha256": "8ec62472c23bfc8b723054a1f8f73e47b20f371d86a60853e8af1d738688940b",
+      "size": 1303
     },
     {
       "path": "data/global/excel/monumod.bin",
@@ -1520,8 +1275,8 @@
     },
     {
       "path": "data/global/excel/monumod.txt",
-      "sha256": "d515513e953c4db98b39f1af9cb6d58c972630a0f9a765d1381411128b9cdf0c",
-      "size": 2492
+      "sha256": "94a595466ecd636ea9493e734d692fa718088ddee3af2d66671d42753fd7fbdf",
+      "size": 2448
     },
     {
       "path": "data/global/excel/npc.bin",
@@ -1530,8 +1285,8 @@
     },
     {
       "path": "data/global/excel/npc.txt",
-      "sha256": "912becf632e93306b00e2d1feaa879be8611b4cc6cec8fdad91594482e7e0afd",
-      "size": 1367
+      "sha256": "c79f0ee1a9972bcf8c6cc3bb073155e3ccb3198a1cd144d1d21b59428c0b44a3",
+      "size": 1349
     },
     {
       "path": "data/global/excel/objects.bin",
@@ -1540,8 +1295,8 @@
     },
     {
       "path": "data/global/excel/objects.txt",
-      "sha256": "213fa9d26f10508ee225edd09d1cc57125195a7ae978567e7f68a36bf47b990c",
-      "size": 211972
+      "sha256": "13cdf31607e4bd346956cdc8e11f4c4cd3dbe00f16c88f081a882a57eaa7e54c",
+      "size": 211397
     },
     {
       "path": "data/global/excel/objgroup.bin",
@@ -1564,14 +1319,19 @@
       "size": 38680
     },
     {
+      "path": "data/global/excel/Overlay.txt",
+      "sha256": "aeba849b369c03857f95692933afb917783dd9d331c8b62b892cd9654a9c907f",
+      "size": 27293
+    },
+    {
       "path": "data/global/excel/pettype.bin",
       "sha256": "dddd06c2d89abb73798be40d05645d1eb6f187b747a628bad4d547ba978b133f",
       "size": 4484
     },
     {
       "path": "data/global/excel/pettype.txt",
-      "sha256": "144f83f31fac99e371544f3b60c16eb95fb27cd86282c28df45f035314a6699b",
-      "size": 1288
+      "sha256": "4ce6ffd68c0db2be0b394f1c8c025aa929b6d4ceb14333a03c3426a43da89b42",
+      "size": 1267
     },
     {
       "path": "data/global/excel/playerclass.bin",
@@ -1584,6 +1344,11 @@
       "size": 1044
     },
     {
+      "path": "data/global/excel/PlrMode.txt",
+      "sha256": "a8a7f499b9c01ddf1aea40b8d006de0d923640a277a44d28a1fc87c53faecec0",
+      "size": 281
+    },
+    {
       "path": "data/global/excel/plrtype.bin",
       "sha256": "e79def3dccbc8885be5438dec686d9635f8f102a726ef00aa9e3d3eb2fb20f9b",
       "size": 368
@@ -1592,6 +1357,11 @@
       "path": "data/global/excel/properties.bin",
       "sha256": "acc79581250f8ef81b27251e8083809ff22a9dc70b215ffae728209ae390d8e4",
       "size": 12286
+    },
+    {
+      "path": "data/global/excel/Properties.txt",
+      "sha256": "98d8a8ee93ab326e12d415412641e643b8c15cc68238f27532a856bd3c25fbe5",
+      "size": 26472
     },
     {
       "path": "data/global/excel/qualityitems.bin",
@@ -1614,9 +1384,19 @@
       "size": 50404
     },
     {
+      "path": "data/global/excel/Runes.txt",
+      "sha256": "94a642dd71d92c08c7d6917dd9d13996e6480982cd681523efdecd132918cc2e",
+      "size": 20815
+    },
+    {
       "path": "data/global/excel/setitems.bin",
       "sha256": "b793de221bf5ebe94e4f8fdbab6b0c4a6ce0f5b1ba8f4ff78f12dc3d851272ce",
       "size": 55884
+    },
+    {
+      "path": "data/global/excel/SetItems.txt",
+      "sha256": "20ff016375f41d11b8a228bce9445e6faacbc5f19d2c9812a984bde313467122",
+      "size": 26805
     },
     {
       "path": "data/global/excel/sets.bin",
@@ -1625,8 +1405,8 @@
     },
     {
       "path": "data/global/excel/sets.txt",
-      "sha256": "e6694bc603f1f29efdfa981c3f747708e11bb0410786fa8bf5ab634f60f6b822",
-      "size": 6321
+      "sha256": "816057c1bbad6fd5635565c8bffabe563583527605e7b782bf8c05836e22cbc2",
+      "size": 6287
     },
     {
       "path": "data/global/excel/shrines.bin",
@@ -1635,8 +1415,8 @@
     },
     {
       "path": "data/global/excel/shrines.txt",
-      "sha256": "1dae6107c983c5e03079ac6916cf77a3d828df4b2a0517818504dcf20a68fb6d",
-      "size": 2262
+      "sha256": "cfce481b4ece35a6ad3457a56664fc0afee75c5106d6122241a9585c43d94c83",
+      "size": 2238
     },
     {
       "path": "data/global/excel/skillcalc.bin",
@@ -1645,8 +1425,8 @@
     },
     {
       "path": "data/global/excel/skillcalc.txt",
-      "sha256": "eb19168fd90095e39cd18515f7331011d4fd8df034c4efbe8c10b38eb930e032",
-      "size": 2017
+      "sha256": "942137f2f4582c35953c568340996a618292cb56f309dba41176ffa73431a6d7",
+      "size": 1943
     },
     {
       "path": "data/global/excel/skilldesc.bin",
@@ -1655,8 +1435,8 @@
     },
     {
       "path": "data/global/excel/skilldesc.txt",
-      "sha256": "ecc3730f788449f73e74c672e1523db4c3ad31349bc8e1fe7d55a04cd9a500fd",
-      "size": 64867
+      "sha256": "96edc768bdd7837a314127de4f305b3d9c6f3386391802e1a5251ff7981c7595",
+      "size": 64645
     },
     {
       "path": "data/global/excel/skilldesccode.bin",
@@ -1670,8 +1450,8 @@
     },
     {
       "path": "data/global/excel/skills.txt",
-      "sha256": "3e2e1072b0afda8f41ba864c61511749d7bc45b93bbcfc14c025bdc6b864d285",
-      "size": 172777
+      "sha256": "e994519936fa10ce7b6e493350e8214418f3bb24bfc6eca794995f8091ea2add",
+      "size": 172419
     },
     {
       "path": "data/global/excel/skillscode.bin",
@@ -1679,9 +1459,19 @@
       "size": 5828
     },
     {
+      "path": "data/global/excel/SoundEnviron.txt",
+      "sha256": "7fb7160c6ecb43105cbd3b96fe04ad76c4e5fa80a173ef6d83a3f69bf0ff771e",
+      "size": 5690
+    },
+    {
       "path": "data/global/excel/sounds.bin",
       "sha256": "c1eec066a08f6b3c728c2e4decb1269d593ca13e4c9d24267a0186d4843b2bc7",
       "size": 9402
+    },
+    {
+      "path": "data/global/excel/Sounds.txt",
+      "sha256": "dd43ee24b1a480c61decacad3b8fdfaa4e4c9112af7a52a89fca45ffed159ac9",
+      "size": 500604
     },
     {
       "path": "data/global/excel/states.bin",
@@ -1690,8 +1480,8 @@
     },
     {
       "path": "data/global/excel/states.txt",
-      "sha256": "fd33b3f4d097c6ef89594384926e331fbfccb8f7d81a2f66c200b6bed94a7b5a",
-      "size": 20810
+      "sha256": "5b1e30692706ea73d34cffbeec62372bc75eb9526010646b1abaa5a21c4d7f93",
+      "size": 20625
     },
     {
       "path": "data/global/excel/storepage.bin",
@@ -1704,9 +1494,24 @@
       "size": 3436
     },
     {
+      "path": "data/global/excel/SuperUniques.txt",
+      "sha256": "57cd3149c91aabc8e3398a68726e3dc4ea2c5f8a7a394b1d8c93064ddb4dc5c0",
+      "size": 8003
+    },
+    {
+      "path": "data/global/excel/TreasureClass.txt",
+      "sha256": "855765cda6323a3e38301b33d73a9a921370b548dcedb46b45b6c308d343bfbb",
+      "size": 68914
+    },
+    {
       "path": "data/global/excel/treasureclassex.bin",
       "sha256": "c9b912851479723b0de613d3ef997858f3d060c070a4045f79833db45578d29e",
       "size": 622660
+    },
+    {
+      "path": "data/global/excel/TreasureClassEx.txt",
+      "sha256": "b104ad80b392328a8f15020c09a4eb957a4a43e3d23c0293d40a601875ce2773",
+      "size": 87007
     },
     {
       "path": "data/global/excel/uniqueappellation.bin",
@@ -1714,9 +1519,24 @@
       "size": 54
     },
     {
+      "path": "data/global/excel/UniqueAppellation.txt",
+      "sha256": "85aad83b707351d4d5eeaf8252c9e0fb7f0eeb948b8f75ab81a8e09f36af6ae0",
+      "size": 268
+    },
+    {
       "path": "data/global/excel/uniqueitems.bin",
       "sha256": "25ba3198af240c86cdaf0de60f03dabfcee63e203723c20daaf1b349f0a0a2a7",
       "size": 133136
+    },
+    {
+      "path": "data/global/excel/UniqueItems.txt",
+      "sha256": "c8643edb73fc7d425815e21346874299b146f7d06722b9a0831ccafada292659",
+      "size": 73136
+    },
+    {
+      "path": "data/global/excel/UniqueItems2.txt",
+      "sha256": "c140dcc8f0fcc45c5ca344120b0bc2f083ecdff923a2e345a23d8b3196197f74",
+      "size": 42446
     },
     {
       "path": "data/global/excel/uniqueprefix.bin",
@@ -1724,14 +1544,29 @@
       "size": 110
     },
     {
+      "path": "data/global/excel/UniquePrefix.txt",
+      "sha256": "426c5a1007cbc6623e451939fc3422f5a049fd38934e76e40b8b840d92094ae6",
+      "size": 338
+    },
+    {
       "path": "data/global/excel/uniquesuffix.bin",
       "sha256": "79f3983a50b9efbbb14ccce270ae7f2eb5f280ffcd1665e984bb607f5a4f9d9b",
       "size": 142
     },
     {
+      "path": "data/global/excel/UniqueSuffix.txt",
+      "sha256": "b44e0a3e3661583f5c66282c75c3e0ec8aa128e25097b807e3a366b19ae6ecf3",
+      "size": 457
+    },
+    {
       "path": "data/global/excel/uniquetitle.bin",
       "sha256": "f17a320cb61c25c374ccd1a1e718c9054855f070f90f330900954d955bcab275",
       "size": 36
+    },
+    {
+      "path": "data/global/excel/UniqueTitle.txt",
+      "sha256": "a850e4c83a0ab25d07de264e15d6730181d6ab8fc5206e2258be0ba3e63d1f11",
+      "size": 233
     },
     {
       "path": "data/global/excel/weapons.bin",
@@ -1740,8 +1575,8 @@
     },
     {
       "path": "data/global/excel/weapons.txt",
-      "sha256": "05a938e3fc0b8974bc722bfa8974f44e45e99d19c6877613ff731104b12b3536",
-      "size": 118029
+      "sha256": "706f39eafa8393e428b049ef7f629eb59096435f62f849b6ab2b144b704ccd4b",
+      "size": 117721
     },
     {
       "path": "data/global/items/invbrnz.dc6",
@@ -3414,6 +3249,11 @@
       "size": 681
     },
     {
+      "path": "data/global/items/stk/invrbk.dc6",
+      "sha256": "bf2f23429538da9f8d5f07f19bf0233d38fda556cd1eb876fb23dd7bc86620da",
+      "size": 1341
+    },
+    {
       "path": "data/global/items/stk/invrCham.dc6",
       "sha256": "988cd2ec0319822c63e780f6025da40a54ae081488e74fa0e312007c503f057f",
       "size": 688
@@ -3452,6 +3292,36 @@
       "path": "data/global/items/stk/invrHel.dc6",
       "sha256": "8073897eb60c978ba874e16a3823d537f152a6d86deeb7ff5685e3bb52982c72",
       "size": 688
+    },
+    {
+      "path": "data/global/items/stk/invrin.dc6",
+      "sha256": "c6cb1f4f41fec072e9baa11a42c0174530a0dcede1e613fb5c9d9a9e6acd654d",
+      "size": 249
+    },
+    {
+      "path": "data/global/items/stk/invrin1.dc6",
+      "sha256": "4105354056a5e1eb02018cb81a93f2df375ccabe9b3f425c2c0327790d2d2311",
+      "size": 234
+    },
+    {
+      "path": "data/global/items/stk/invrin2.dc6",
+      "sha256": "b4d296af3577c9ee173888d7749e63b4e0d9cbb827af9352f17e91d7d9431486",
+      "size": 239
+    },
+    {
+      "path": "data/global/items/stk/invrin3.dc6",
+      "sha256": "48a760ca9cedea8d47b16349af0fac2335c450648a4ea3681be7bafafb078c56",
+      "size": 256
+    },
+    {
+      "path": "data/global/items/stk/invrin4.dc6",
+      "sha256": "879af9b3be1cf9e06899c8836f0d093fc70c8a2c6c9c6efccce37f03837a824a",
+      "size": 252
+    },
+    {
+      "path": "data/global/items/stk/invrin5.dc6",
+      "sha256": "9b2a48b7b1d8872009f9fdb5fed4209cc2ce360df13daada8a5ccf6a9ff57280",
+      "size": 241
     },
     {
       "path": "data/global/items/stk/invrIo.dc6",
@@ -3504,6 +3374,11 @@
       "size": 687
     },
     {
+      "path": "data/global/items/stk/invrng.dc6",
+      "sha256": "8d6389a404b4671c2852a588301b3cb387eea8a8f9d9ee332113422a39b6029a",
+      "size": 915
+    },
+    {
       "path": "data/global/items/stk/invrOhm.dc6",
       "sha256": "292bcd913bf47724200f0c27f7df4251a62198179552878c884fbedb8bb5d70e",
       "size": 686
@@ -3514,6 +3389,16 @@
       "size": 686
     },
     {
+      "path": "data/global/items/stk/invrpl.dc6",
+      "sha256": "5b39ba295640896c2571499a24e2b48ae2cafa83898f6022c4cda6a2a2536b48",
+      "size": 275
+    },
+    {
+      "path": "data/global/items/stk/invrps.dc6",
+      "sha256": "e4d353cca9771e3b67ef4b4bf343a5666609d88e6906ddef267d9308300c40f0",
+      "size": 214
+    },
+    {
       "path": "data/global/items/stk/invrPul.dc6",
       "sha256": "77b8f9bfbc82d3a6b6fce5fd490e8951204564f2458dea97505fc536d49d5881",
       "size": 686
@@ -3522,6 +3407,11 @@
       "path": "data/global/items/stk/invrRal.dc6",
       "sha256": "6ba53e448886ace7f6471f1508549404bd30a1aee19b468f8c5fdd30d04e8121",
       "size": 687
+    },
+    {
+      "path": "data/global/items/stk/invrsc.dc6",
+      "sha256": "78d98d621995f9ffb39eb0b1bce5c5db9b208bc51d22083943203ae3cefbac44",
+      "size": 405
     },
     {
       "path": "data/global/items/stk/invrShae.dc6",
@@ -3559,74 +3449,14 @@
       "size": 688
     },
     {
-      "path": "data/global/items/stk/invrVex.dc6",
-      "sha256": "5158c5ab443dc4f5f11b576fa73fd334acf2523f16af1282a3df73b6daf2ec4b",
-      "size": 687
-    },
-    {
-      "path": "data/global/items/stk/invrZod.dc6",
-      "sha256": "0a4aa2da3085975a406594f6a83134ea45bc2b8d5d91a3aac7e5abde6aede8ef",
-      "size": 688
-    },
-    {
-      "path": "data/global/items/stk/invrbk.dc6",
-      "sha256": "bf2f23429538da9f8d5f07f19bf0233d38fda556cd1eb876fb23dd7bc86620da",
-      "size": 1341
-    },
-    {
-      "path": "data/global/items/stk/invrin.dc6",
-      "sha256": "c6cb1f4f41fec072e9baa11a42c0174530a0dcede1e613fb5c9d9a9e6acd654d",
-      "size": 249
-    },
-    {
-      "path": "data/global/items/stk/invrin1.dc6",
-      "sha256": "4105354056a5e1eb02018cb81a93f2df375ccabe9b3f425c2c0327790d2d2311",
-      "size": 234
-    },
-    {
-      "path": "data/global/items/stk/invrin2.dc6",
-      "sha256": "b4d296af3577c9ee173888d7749e63b4e0d9cbb827af9352f17e91d7d9431486",
-      "size": 239
-    },
-    {
-      "path": "data/global/items/stk/invrin3.dc6",
-      "sha256": "48a760ca9cedea8d47b16349af0fac2335c450648a4ea3681be7bafafb078c56",
-      "size": 256
-    },
-    {
-      "path": "data/global/items/stk/invrin4.dc6",
-      "sha256": "879af9b3be1cf9e06899c8836f0d093fc70c8a2c6c9c6efccce37f03837a824a",
-      "size": 252
-    },
-    {
-      "path": "data/global/items/stk/invrin5.dc6",
-      "sha256": "9b2a48b7b1d8872009f9fdb5fed4209cc2ce360df13daada8a5ccf6a9ff57280",
-      "size": 241
-    },
-    {
-      "path": "data/global/items/stk/invrng.dc6",
-      "sha256": "8d6389a404b4671c2852a588301b3cb387eea8a8f9d9ee332113422a39b6029a",
-      "size": 915
-    },
-    {
-      "path": "data/global/items/stk/invrpl.dc6",
-      "sha256": "5b39ba295640896c2571499a24e2b48ae2cafa83898f6022c4cda6a2a2536b48",
-      "size": 275
-    },
-    {
-      "path": "data/global/items/stk/invrps.dc6",
-      "sha256": "e4d353cca9771e3b67ef4b4bf343a5666609d88e6906ddef267d9308300c40f0",
-      "size": 214
-    },
-    {
-      "path": "data/global/items/stk/invrsc.dc6",
-      "sha256": "78d98d621995f9ffb39eb0b1bce5c5db9b208bc51d22083943203ae3cefbac44",
-      "size": 405
-    },
-    {
       "path": "data/global/items/stk/invrun.dc6",
       "sha256": "e57b3486ae25600c13351e70ee1b4e9d5a7a5106b6ae64a5a95764027712fd78",
       "size": 153
+    },
+    {
+      "path": "data/global/items/stk/invrVex.dc6",
+      "sha256": "5158c5ab443dc4f5f11b576fa73fd334acf2523f16af1282a3df73b6daf2ec4b",
+      "size": 687
     },
     {
       "path": "data/global/items/stk/invrxb.dc6",
@@ -3637,6 +3467,11 @@
       "path": "data/global/items/stk/invrxbu.dc6",
       "sha256": "4b4e34209de26d32d2079c944824849e0c2217e98cbc07ae4f6a985a22f2ec23",
       "size": 563
+    },
+    {
+      "path": "data/global/items/stk/invrZod.dc6",
+      "sha256": "0a4aa2da3085975a406594f6a83134ea45bc2b8d5d91a3aac7e5abde6aede8ef",
+      "size": 688
     },
     {
       "path": "data/global/items/stk/invsbb.dc6",
@@ -4134,46 +3969,6 @@
       "size": 141012
     },
     {
-      "path": "data/global/ui/SPELLS/AmSkillicon.DC6",
-      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
-      "size": 512217
-    },
-    {
-      "path": "data/global/ui/SPELLS/AsSkillicon.DC6",
-      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
-      "size": 512217
-    },
-    {
-      "path": "data/global/ui/SPELLS/BaSkillicon.DC6",
-      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
-      "size": 512217
-    },
-    {
-      "path": "data/global/ui/SPELLS/DrSkillicon.DC6",
-      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
-      "size": 512217
-    },
-    {
-      "path": "data/global/ui/SPELLS/NeSkillicon.DC6",
-      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
-      "size": 512217
-    },
-    {
-      "path": "data/global/ui/SPELLS/PaSkillicon.DC6",
-      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
-      "size": 512217
-    },
-    {
-      "path": "data/global/ui/SPELLS/Skillicon.DC6",
-      "sha256": "fe005c08fc87ae8cf414cd0029365ab4910483ed37a1e62c8539b2b2d27f65a6",
-      "size": 58560
-    },
-    {
-      "path": "data/global/ui/SPELLS/SoSkillicon.DC6",
-      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
-      "size": 512217
-    },
-    {
       "path": "data/global/ui/SPELLS/a1q1.DC6",
       "sha256": "7092796bdda0da373fa2945ff71428102d846fdead2244596e375287ce1b4b1b",
       "size": 149631
@@ -4309,6 +4104,21 @@
       "size": 149707
     },
     {
+      "path": "data/global/ui/SPELLS/AmSkillicon.DC6",
+      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
+      "size": 512217
+    },
+    {
+      "path": "data/global/ui/SPELLS/AsSkillicon.DC6",
+      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
+      "size": 512217
+    },
+    {
+      "path": "data/global/ui/SPELLS/BaSkillicon.DC6",
+      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
+      "size": 512217
+    },
+    {
       "path": "data/global/ui/SPELLS/blue_square.DC6",
       "sha256": "abe23ec16b3f6f1aa5db033146feb851436f14505f15ce375b9bfbe584b1321d",
       "size": 1020
@@ -4394,6 +4204,11 @@
       "size": 1096
     },
     {
+      "path": "data/global/ui/SPELLS/DrSkillicon.DC6",
+      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
+      "size": 512217
+    },
+    {
       "path": "data/global/ui/SPELLS/editor_bot.DC6",
       "sha256": "a80b30ae01a190c3e29a21f589621e60446373e520174922acd3dcfa914a6955",
       "size": 70664
@@ -4424,6 +4239,11 @@
       "size": 1823
     },
     {
+      "path": "data/global/ui/SPELLS/NeSkillicon.DC6",
+      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
+      "size": 512217
+    },
+    {
       "path": "data/global/ui/SPELLS/orange_square.DC6",
       "sha256": "bea53083bb3d0cf3cb180af8cac8f7553d76959e21a499bcafd22f667ee3b56b",
       "size": 1020
@@ -4432,6 +4252,11 @@
       "path": "data/global/ui/SPELLS/orange_square_41.DC6",
       "sha256": "2be66f5242097a7cd88c15b9a664f807baa7429b5f7bc5525131a112bf737499",
       "size": 1823
+    },
+    {
+      "path": "data/global/ui/SPELLS/PaSkillicon.DC6",
+      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
+      "size": 512217
     },
     {
       "path": "data/global/ui/SPELLS/questdone.DC6",
@@ -4452,6 +4277,11 @@
       "path": "data/global/ui/SPELLS/redbutton.DC6",
       "sha256": "889c7fe01c60a0d835e8a3aea491a512268f0b5e573f18c60f2b3250f7d6c02d",
       "size": 9784
+    },
+    {
+      "path": "data/global/ui/SPELLS/Skillicon.DC6",
+      "sha256": "fe005c08fc87ae8cf414cd0029365ab4910483ed37a1e62c8539b2b2d27f65a6",
+      "size": 58560
     },
     {
       "path": "data/global/ui/SPELLS/skltree_a_back.DC6",
@@ -4519,9 +4349,64 @@
       "size": 3720
     },
     {
+      "path": "data/global/ui/SPELLS/SoSkillicon.DC6",
+      "sha256": "f4b46a11af22f15717c28d98355a1044b0fc2aada7cc91bf49f07829510657ed",
+      "size": 512217
+    },
+    {
       "path": "data/local/LNG/ENG/patchstring.tbl",
       "sha256": "b8117e573e588794b85d67787602140c647de4cb8f3ddfca155fd8f5e90bb5ed",
       "size": 42513
+    },
+    {
+      "path": "ddraw.dll",
+      "sha256": "85e0f7d530dfda134793a57cb3e76b0287dcc96892ee57162dd68f47283b03a9",
+      "size": 411648
+    },
+    {
+      "path": "ddraw.ini",
+      "sha256": "8588680925a383efbce626dd4b661bf9062d3a2a3afd511f89e04e6a550c7e4d",
+      "size": 28908
+    },
+    {
+      "path": "default.key",
+      "sha256": "ecfc6ed0513e615e9e6da8eb879a2e38ff00ee6c902f9573592b361ed3e4e947",
+      "size": 1146
+    },
+    {
+      "path": "Diablo II.exe",
+      "sha256": "147e33cc5d2dd9520d143847b35c1c8410a432c605155e0d9678b5b9450a7938",
+      "size": 36864
+    },
+    {
+      "path": "dsoal-aldrv.dll",
+      "sha256": "dbf37e2d5629612ac5ff7f36f6ea2e5203054b379a175899c44f21dc861e9518",
+      "size": 1121792
+    },
+    {
+      "path": "dsound.dll",
+      "sha256": "d7ca0601cfe56c3c8191e1cb88223fed1219cd962894eba041cc7aca2984acfb",
+      "size": 142336
+    },
+    {
+      "path": "Fog.dll",
+      "sha256": "c4f377cc056e0a5e465d4118d18f3d98e9e650496cf0b5afea559057793b0dba",
+      "size": 188476
+    },
+    {
+      "path": "Game.exe",
+      "sha256": "1ea46ed66d3b9c12965edf13b6d8141cf570249d53991ecadab4892ed8f99ea9",
+      "size": 90112
+    },
+    {
+      "path": "game_manifest.json",
+      "sha256": "554d3c44caccf03095bb546f7dea8b1d01a279ba0e5d7ea095cab5ba4ea8d838",
+      "size": 75053
+    },
+    {
+      "path": "glide3x.dll",
+      "sha256": "64f9ceb7ae55361dd4e7f339e407b97c4ef27bd40e0f7fc6772c5fda9a4a062f",
+      "size": 2838528
     },
     {
       "path": "patch/D2Archipelago.dll",
@@ -4542,6 +4427,46 @@
       "path": "patch/Fog.dll",
       "sha256": "3e329689f7a6948ff2370cd812150cfc3cb462f73c58dd5b21f0ff5b7e9177fe",
       "size": 27136
+    },
+    {
+      "path": "Patch_D2.mpq",
+      "sha256": "fedd72b65b1cf2cfbf24268cbbc553c264ee0ae985daf3ecbe34c7dc9d32c300",
+      "size": 1997247
+    },
+    {
+      "path": "SFMPQ.dll",
+      "sha256": "2ccae12f297f3b5eb234d7824dfde0a84c4991c2c9c72fee32304ae6b7c2a196",
+      "size": 192512
+    },
+    {
+      "path": "SGD2FreeRes.dll",
+      "sha256": "77383b68f608a3c8d804ef668adc19a7256ff6315203f4087747d337205c6058",
+      "size": 318464
+    },
+    {
+      "path": "SGD2FreeRes.mpq",
+      "sha256": "92b48c595373913022652b7232ae0fc3bbcf6afe1d1db6e24bad60ed80481b83",
+      "size": 1254845
+    },
+    {
+      "path": "SGD2FreeResolution.json",
+      "sha256": "6b4c1b83b90a52da1c3052308993761875cfcfe7af26ac68b4a397cc7f049737",
+      "size": 634
+    },
+    {
+      "path": "START.bat",
+      "sha256": "e86272c865e90844c10178dd81cfe625b757c9765f3e1ccbbf041f3b596ed9d5",
+      "size": 655
+    },
+    {
+      "path": "Storm.dll",
+      "sha256": "4b93e877c11a93a4e255b130a7d4fb5d8722788fb7673297295b8301e488f061",
+      "size": 266302
+    },
+    {
+      "path": "winmm.dll",
+      "sha256": "5ab4664c9a7ddf766c15af965eaa897acc77f2b72f6f5c0c69ce9c73c0844f73",
+      "size": 99840
     }
   ]
 }

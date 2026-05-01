@@ -7,11 +7,16 @@ Both arguments are optional. Defaults: game_dir="Game", output_zip="game_package
 """
 import zipfile, os, sys
 
-# Original Blizzard files - must NOT be distributed (EULA compliance)
+# Original Blizzard files - must NOT be distributed (EULA compliance).
+# 1.9.1 fix — d2char/d2data/d2sfx leaked into the 1.9.0 game_package.zip
+# (580 MB) and into the manifest, both EULA-illegal. Users must copy
+# these from their own D2 install. Once the launcher is rebuilt with
+# these added to ORIGINAL_D2_FILES, it will copy them automatically.
 SKIP_FILES = {
     "D2.LNG", "SmackW32.dll", "binkw32.dll", "d2exp.mpq",
     "d2music.mpq", "d2speech.mpq", "d2video.mpq", "d2xmusic.mpq",
-    "d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll"
+    "d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll",
+    "d2char.mpq", "d2data.mpq", "d2sfx.mpq",
 }
 SKIP_DIRS = {
     "save", ".git", "crashdump",

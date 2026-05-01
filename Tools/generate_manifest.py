@@ -7,11 +7,18 @@ Usage: python generate_manifest.py <game_folder> <version> [output_file]
 import os, sys, json, hashlib
 
 # Original Blizzard files - must NOT be distributed (EULA compliance)
-# These are copied from user's own D2 install during setup
+# These are copied from user's own D2 install during setup.
+# 1.9.1 fix — d2char/d2data/d2sfx were shipping in releases (580 MB EULA
+# violation) AND breaking the launcher's verify pass on user installs
+# because raw.github.com has no copy to compare SHAs against → 404 +
+# "Files keep failing to download". The shipped 1.9.0 launcher does not
+# yet copy these from the user's D2 install; users must place them in the
+# game folder manually until the launcher is rebuilt to handle them.
 ORIGINAL_D2_FILES = {
     "D2.LNG", "SmackW32.dll", "binkw32.dll", "d2exp.mpq",
     "d2music.mpq", "d2speech.mpq", "d2video.mpq", "d2xmusic.mpq",
-    "d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll"
+    "d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll",
+    "d2char.mpq", "d2data.mpq", "d2sfx.mpq",
 }
 
 import re
@@ -46,14 +53,34 @@ PER_CHAR_PATTERNS = [
 ]
 
 
+# 1.9.0 fix — text-file extensions where git normalizes CRLF -> LF on
+# commit (autocrlf=true on Windows). raw.githubusercontent.com serves
+# the LF version, but the dev's working tree has CRLF. The launcher
+# downloads LF and hashes LF, so manifest entries computed on the
+# CRLF working-tree copy fail to match. Normalize before hashing for
+# these extensions so manifest SHAs match what GitHub actually serves.
+TEXT_EXTENSIONS = {
+    ".txt", ".md", ".json", ".bat", ".ini", ".py", ".c", ".h",
+    ".cs", ".csv", ".cfg", ".log", ".xml", ".yml", ".yaml",
+}
+
+
+def _is_text_path(path):
+    base = os.path.basename(path).lower()
+    _, ext = os.path.splitext(base)
+    return ext in TEXT_EXTENSIONS
+
+
 def sha256_file(path):
+    """SHA-256 of file content. Text files normalize CRLF -> LF first
+    so the hash matches what raw.githubusercontent.com serves
+    (git's autocrlf=true on Windows stores LF in the index)."""
     h = hashlib.sha256()
     with open(path, "rb") as f:
-        while True:
-            chunk = f.read(8192)
-            if not chunk:
-                break
-            h.update(chunk)
+        data = f.read()
+    if _is_text_path(path):
+        data = data.replace(b"\r\n", b"\n")
+    h.update(data)
     return h.hexdigest()
 
 
