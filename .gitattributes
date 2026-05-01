@@ -1,1 +1,25 @@
 *.mpq !text !filter !merge !diff
+
+# D2 1.10f's TXT data parser is CRLF-only. The launcher's repair pipeline
+# downloads files from raw.githubusercontent.com — which serves the blob
+# bytes git has stored. With autocrlf=true on Windows, git normalizes to LF
+# on commit, so users get LF and D2 crashes (Fog.dll NULL deref) loading
+# the first .txt it tries to translate (compcode in tests).
+#
+# `-text` tells git to NOT normalize line endings: store and serve the
+# exact bytes committed. We commit these files as CRLF so raw serves CRLF.
+# (eol=crlf alone doesn't help — that only affects working-tree checkout,
+# raw.github.com still serves the LF-normalized blob.)
+game/data/global/excel/*.txt -text
+game/data/local/lng/eng/*.txt -text
+# Both case-spellings of the LNG dir (git is case-sensitive)
+game/data/local/LNG/ENG/*.txt -text
+
+# Binary D2 assets — never normalize line endings
+*.tbl binary
+*.bin binary
+*.dc6 binary
+*.ds1 binary
+*.dt1 binary
+*.cof binary
+*.d2s binary
