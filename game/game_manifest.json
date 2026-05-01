@@ -445,8 +445,8 @@
     },
     {
       "path": "Archipelago/d2arch.ini",
-      "sha256": "f2df28447850d1e03f8952b924f6fc2c0586390c2cc7b8a1e007e6f23ebba1c8",
-      "size": 34077
+      "sha256": "5a23b45fcc8629704deb0d4bd10889109ffcfd37180717f6bc5010c0dd7c068a",
+      "size": 35125
     },
     {
       "path": "Archipelago/news.txt",
@@ -690,8 +690,8 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "ee5650511a1797dd028cb14273eff6480547082f1c2eab805c051acd6399cb1c",
-      "size": 121344
+      "sha256": "777632a3f4f6ff52c31c4d1c434ebdb6819ebb285749f51b5bffa7ba0b53af89",
+      "size": 121856
     },
     {
       "path": "D2Archipelago.dll",
@@ -745,8 +745,8 @@
     },
     {
       "path": "d2gl.ini",
-      "sha256": "ede63110095f4e0d12e5ad6b59383d7427b9782af8ac5bd5dfa05d28342d3014",
-      "size": 2824
+      "sha256": "39e4543b9c27a956fa0cb49939d89202dec51a0cacbc75eea585f2ee5674f38b",
+      "size": 2954
     },
     {
       "path": "d2gl.json",
@@ -4365,8 +4365,8 @@
     },
     {
       "path": "ddraw.ini",
-      "sha256": "8588680925a383efbce626dd4b661bf9062d3a2a3afd511f89e04e6a550c7e4d",
-      "size": 28908
+      "sha256": "9f936936eb0b65fb23111c77ae0e16cc8a8467be405144ab5c5faf06b739436a",
+      "size": 30641
     },
     {
       "path": "default.key",
@@ -4450,8 +4450,8 @@
     },
     {
       "path": "START.bat",
-      "sha256": "e86272c865e90844c10178dd81cfe625b757c9765f3e1ccbbf041f3b596ed9d5",
-      "size": 655
+      "sha256": "be0a79f91f36ecfe258eca7d5ba58e0fb6e063a4fd4a6bcbcc3cd50ab0de9b79",
+      "size": 682
     },
     {
       "path": "Storm.dll",
