@@ -836,15 +836,16 @@ static const char* EXTRA_NPC_NAMES[27] = {
     "Anya", "Larzuk", "Malah", "Nihlathak", "Qual-Kehk",
 };
 
-/* MonStats hcIdx -> npcIdx mapping. Cross-referenced with the NPC
- * block of g_shuffleBannedIdx[] in d2arch_shuffle.c which lists every
- * vendor / hireable / quest-NPC hcIdx. Missing rows: 0 = unknown
- * (silently ignored). Cain has 6 hcIdx variants across acts; A1 Cain
- * (146) folds to npcIdx 5, every later variant (244/245/246/265/520)
- * folds to npcIdx 18 (Cain A3) since the player's interactions with
- * "rescued Cain" are functionally one logical NPC. */
-static int Extra_HcIdxToNpcIdx(int hcIdx) {
-    switch (hcIdx) {
+/* MonStats txtId -> npcIdx mapping. The 1.9.2 shuffle ban list at
+ * d2arch_shuffle.c:182-201 confirms these are MonStats row indices
+ * (txtId, read from pUnit+0x04), NOT the hcIdx SuperUnique field.
+ * NPCs are regular monsters in D2 — their hcIdx is 0 or unrelated.
+ * Cain has 6 txtId variants across acts; A1 Cain (146) folds to
+ * npcIdx 5, every later variant (244/245/246/265/520) folds to
+ * npcIdx 18 (Cain A3) since the player's interactions with "rescued
+ * Cain" are functionally one logical NPC. */
+static int Extra_HcIdxToNpcIdx(int txtId) {
+    switch (txtId) {
         /* Act 1 */
         case 148: return 0;   /* Akara */
         case 154: return 1;   /* Charsi */
@@ -1007,44 +1008,50 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
 
         int chain = 0;
         while (unit && chain++ < 100) {
-            DWORD type = 0; DWORD txtId = 0; DWORD pMonData = 0;
+            DWORD type = 0; DWORD txtId = 0;
             DWORD pNpcPath = 0;
             int   npcX = 0, npcY = 0;
-            int   hcIdx = -1;
             __try {
                 type     = *(DWORD*)(unit + 0x00);
                 txtId    = *(DWORD*)(unit + 0x04);
-                pMonData = *(DWORD*)(unit + 0x14);
                 pNpcPath = *(DWORD*)(unit + 0x2C);
                 if (pNpcPath) {
                     npcX = (int)*(WORD*)(pNpcPath + 0x02);
                     npcY = (int)*(WORD*)(pNpcPath + 0x06);
                 }
-                if (pMonData) {
-                    hcIdx = (int)*(WORD*)(pMonData + 0x26);
-                }
                 /* Advance to next unit in room chain */
                 unit = *(DWORD*)(unit + 0xE8);
             } __except(EXCEPTION_EXECUTE_HANDLER) { break; }
 
-            if (type != 1 || hcIdx < 0) continue;
-            int npcIdx = Extra_HcIdxToNpcIdx(hcIdx);
-            if (npcIdx < 0) continue;
+            if (type != 1) continue;        /* type 1 = UNIT_MONSTER (NPCs included) */
+            int npcIdx = Extra_HcIdxToNpcIdx((int)txtId);
+            if (npcIdx < 0) continue;       /* not one of our 27 NPCs */
 
             /* Distance check (Chebyshev — diagonal counts as 1 tile) */
             int dx = playerX - npcX; if (dx < 0) dx = -dx;
             int dy = playerY - npcY; if (dy < 0) dy = -dy;
             int dist = (dx > dy) ? dx : dy;
+
+            /* Diagnostic: log the FIRST time we see ANY known NPC in
+             * the scan, regardless of distance, so we know the unit
+             * walk + txtId mapping is finding NPCs at all. Throttled
+             * to 1 log per NPC per session so the log doesn't fill up. */
+            static BOOL s_seenLogged[27] = {0};
+            if (!s_seenLogged[npcIdx]) {
+                s_seenLogged[npcIdx] = TRUE;
+                Log("NPC SEEN: txtId=%d -> npcIdx=%d (%s) at NPC(%d,%d) "
+                    "player(%d,%d) dist=%d (need <=%d for near-counter)\n",
+                    (int)txtId, npcIdx, EXTRA_NPC_NAMES[npcIdx],
+                    npcX, npcY, playerX, playerY, dist, NPC_NEAR_TILES);
+            }
+
             if (dist > NPC_NEAR_TILES) continue;
 
-            /* Player was stationary this tick (or hasn't moved since
-             * last tick reset). Bump the near-counter for this NPC. */
             s_nearTicks[npcIdx]++;
             if (s_nearTicks[npcIdx] == NPC_STATIONARY_TICKS) {
-                /* First time crossing the threshold this run — fire. */
-                Log("NPC FIRE: scan-detected hcIdx=%d -> npcIdx=%d (%s) "
-                    "after %d stationary ticks at (%d,%d) dist=%d\n",
-                    hcIdx, npcIdx, EXTRA_NPC_NAMES[npcIdx],
+                Log("NPC FIRE: scan-detected txtId=%d -> npcIdx=%d (%s) "
+                    "after %d throttled ticks near at (%d,%d) dist=%d\n",
+                    (int)txtId, npcIdx, EXTRA_NPC_NAMES[npcIdx],
                     NPC_STATIONARY_TICKS, playerX, playerY, dist);
                 Extra_OnNpcDialogue(npcIdx, g_currentDifficulty);
             }
