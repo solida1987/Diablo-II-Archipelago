@@ -1253,6 +1253,14 @@ static void Quests_WriteSpoilerFile(void) {
     extern void Bonus_AppendSpoilerToFile(FILE* f);
     Bonus_AppendSpoilerToFile(f);
 
+    /* 1.9.2 — Append extra check rewards section if any extra categories
+     * are enabled. Includes cow level (9), merc milestones (6), Hellforge
+     * + high runes (12), NPC dialogue (81), runeword crafting (50), cube
+     * recipes (135). All flat 1000 gold per fire (per-slot pre-rolling
+     * lands in 1.9.3). */
+    extern void Extra_AppendSpoilerToFile(FILE* f);
+    Extra_AppendSpoilerToFile(f);
+
     fclose(f);
     Log("Quests_WriteSpoilerFile: wrote %s\n", path);
 }

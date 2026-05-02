@@ -571,3 +571,115 @@ void Extra_OnCubeRecipe(int recipeIdx) {
     _snprintf(tag, sizeof(tag), "Cube Recipe #%d", recipeIdx);
     Extra_FireApLocation(EXTRA_BASE_CUBE + recipeIdx, tag);
 }
+
+/* ==================================================================
+ * STANDALONE SPOILER FILE — appended to the per-character spoiler
+ * .txt that Quests_WriteSpoilerFile produces. Lists every extra
+ * check slot with its standalone reward (flat 1000 gold for 1.9.2).
+ *
+ * Mirrors Bonus_AppendSpoilerToFile but simpler since the 1.9.2
+ * extras don't pre-roll per-slot rewards (every fire grants a flat
+ * 1000 gold). Per-slot pre-rolling is a 1.9.3 follow-up — when that
+ * lands this function will switch to formatting the rolled reward
+ * the same way Bonus_FormatReward does.
+ * ================================================================== */
+void Extra_AppendSpoilerToFile(FILE* f) {
+    if (!f) return;
+    int activeCount = 0;
+    for (int c = 0; c < EX_TOGGLE_COUNT; c++) {
+        if (g_extraEnabled[c]) activeCount++;
+    }
+    if (activeCount == 0) return;
+
+    fprintf(f, "\n================ Extra Check Rewards ================\n\n");
+    fprintf(f, "Each extra check fires the first time you trigger it (per\n");
+    fprintf(f, "character per slot, deduplicated via the fired bitmap).\n");
+    fprintf(f, "Standalone reward is a flat 1000 gold per fire — per-slot\n");
+    fprintf(f, "pre-rolled rewards (matching the bonus-check pipeline) are\n");
+    fprintf(f, "a 1.9.3 follow-up.\n\n");
+
+    static const char* DIFF_NAMES[3] = { "Normal", "Nightmare", "Hell" };
+
+    /* Cat 1 — Cow Level expansion (9 slots) */
+    if (g_extraEnabled[EX_COW]) {
+        fprintf(f, "  -- Cow Level (9 slots) --\n");
+        for (int d = 0; d < 3; d++) {
+            fprintf(f, "    Cow Level Entry (%s)        -> 1000 Gold\n",
+                    DIFF_NAMES[d]);
+        }
+        for (int d = 0; d < 3; d++) {
+            fprintf(f, "    Cow King Killed (%s)        -> 1000 Gold\n",
+                    DIFF_NAMES[d]);
+        }
+        static const int milestones[3] = { 100, 500, 1000 };
+        for (int i = 0; i < 3; i++) {
+            fprintf(f, "    %d Cows Killed                -> 1000 Gold\n",
+                    milestones[i]);
+        }
+        fprintf(f, "\n");
+    }
+
+    /* Cat 2 — Mercenary milestones (6 slots) */
+    if (g_extraEnabled[EX_MERC]) {
+        fprintf(f, "  -- Mercenary Milestones (6 slots) --\n");
+        fprintf(f, "    First Mercenary Hired         -> 1000 Gold\n");
+        static const int rezCounts[4] = { 5, 10, 25, 50 };
+        for (int i = 0; i < 4; i++) {
+            fprintf(f, "    %d Merc Resurrects             -> 1000 Gold\n",
+                    rezCounts[i]);
+        }
+        fprintf(f, "    Merc Reaches Level 30         -> 1000 Gold\n");
+        fprintf(f, "\n");
+    }
+
+    /* Cat 3 — Hellforge + High Runes (12 slots) */
+    if (g_extraEnabled[EX_HFRUNES]) {
+        fprintf(f, "  -- Hellforge + High Runes (12 slots) --\n");
+        for (int d = 0; d < 3; d++) {
+            fprintf(f, "    Hellforge Used (%s)         -> 1000 Gold\n",
+                    DIFF_NAMES[d]);
+        }
+        static const char* TIER_NAMES[3] = { "Pul-Gul", "Vex-Ber", "Jah-Zod" };
+        for (int t = 0; t < 3; t++) {
+            for (int d = 0; d < 3; d++) {
+                fprintf(f, "    High Rune %s (%s)       -> 1000 Gold\n",
+                        TIER_NAMES[t], DIFF_NAMES[d]);
+            }
+        }
+        fprintf(f, "\n");
+    }
+
+    /* Cat 4 — NPC Dialogue (81 slots: 27 NPCs × 3 diff) */
+    if (g_extraEnabled[EX_NPC]) {
+        fprintf(f, "  -- NPC Dialogue (81 slots, 27 NPCs x 3 diff) --\n");
+        fprintf(f, "    1.9.2: framework ships, in-game detection lands in 1.9.3.\n");
+        fprintf(f, "    Until then, slots can be unlocked via AP /release.\n");
+        for (int n = 0; n < 27; n++) {
+            for (int d = 0; d < 3; d++) {
+                fprintf(f, "    NPC #%-2d (%s)              -> 1000 Gold\n",
+                        n + 1, DIFF_NAMES[d]);
+            }
+        }
+        fprintf(f, "\n");
+    }
+
+    /* Cat 5 — Runeword crafting (50 slots) */
+    if (g_extraEnabled[EX_RUNEWORD]) {
+        fprintf(f, "  -- Runeword Crafting (50 slots) --\n");
+        fprintf(f, "    1.9.2: framework ships, in-game detection lands in 1.9.3.\n");
+        for (int i = 0; i < EXTRA_CT_RUNEWORD; i++) {
+            fprintf(f, "    Runeword #%-3d                -> 1000 Gold\n", i + 1);
+        }
+        fprintf(f, "\n");
+    }
+
+    /* Cat 6 — Cube recipes (135 slots) */
+    if (g_extraEnabled[EX_CUBE]) {
+        fprintf(f, "  -- Cube Recipes (135 slots) --\n");
+        fprintf(f, "    1.9.2: framework ships, in-game detection lands in 1.9.3.\n");
+        for (int i = 0; i < EXTRA_CT_CUBE; i++) {
+            fprintf(f, "    Cube Recipe #%-3d             -> 1000 Gold\n", i + 1);
+        }
+        fprintf(f, "\n");
+    }
+}
