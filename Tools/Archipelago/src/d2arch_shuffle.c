@@ -81,6 +81,166 @@ typedef struct {
 static MonCosmeticBackup g_monBackup[MAX_SHUFFLE_MON];
 static int g_monBackupCount = 0;
 
+/* 1.9.2 — Monster shuffle BAN list. Verified 2026-05-02 against
+ * MonStats.txt + SuperUniques.txt for D2 1.10f. Source:
+ * Research/CHECK_SOURCES_MONSTER_AUDIT_2026-05-02.md
+ *
+ * These rows MUST NEVER appear as either origIdx OR replIdx in a
+ * SWAP entry. Categories covered:
+ *   - Spawners (their AI generates more units): maggot families,
+ *     fallen/fetish shamans, crow/sucker nests, sarcophagi,
+ *     minionspawners, evilhuts, evilholes, cantors, baalhighpriest
+ *   - Quest bosses: Andariel/Duriel/Mephisto/Diablo/Baal + clones,
+ *     Council, Ancients, Cow King, Smith, Hephasto, Nihlathak,
+ *     Council Members, baal subjects
+ *   - Special-AI / terrain-bound: drowned (water-only), gloams
+ *     (indoor), tentacles, traps, turrets, hydras, catapults,
+ *     barricades
+ *   - Player pet / summon AI rows: golems, valkyrie, sentries,
+ *     druid totems/pets
+ *   - NPCs / vendors / dummies / unused placeholder rows
+ *
+ * Pre-1.9.2 the safety lived in the data the shuffle presets were
+ * generated from; this runtime check is belt-and-suspenders so the
+ * presets can be regenerated more aggressively in the future without
+ * risking quest softlocks. */
+static const int g_shuffleBannedIdx[] = {
+    /* Spawner pillars: Sand Maggot family */
+    68, 69, 70, 71, 72,                         /* adults */
+    180, 181, 182, 183, 184,                    /* babies */
+    190, 191, 192, 193, 194,                    /* eggs */
+    284, 285, 286, 287, 288,                    /* queens */
+    679, 680, 681,                              /* extra hell-tier maggots */
+
+    /* Spawner pillars: shamans + fetish shamans */
+    58, 59, 60, 61, 62,                         /* fallenshaman1-5 */
+    645, 646, 647,                              /* hell-tier fallenshaman */
+    278, 279, 280, 281, 282,                    /* fetishshaman1-5 */
+    662, 663, 664,                              /* hell-tier fetishshaman */
+
+    /* Spawner pillars: nests / sarcophagi / minion spawners */
+    206, 207, 208, 209,                         /* crownest 1-4 */
+    334, 335, 336, 337,                         /* suckernest 1-4 */
+    228,                                        /* sarcophagus (mummy generator) */
+    484, 485, 486, 487, 488, 489, 490, 491,     /* minionspawner 1-8 */
+    528,                                        /* evilhut */
+    321, 322, 323, 324, 325,                    /* evilhole 1-5 (Den of Evil) */
+    238, 239, 240, 241,                         /* cantor 1-4 */
+    557,                                        /* baalhighpriest */
+    673, 674,                                   /* hell-tier cantors */
+
+    /* Quest bosses + scripted SU hosts */
+    156, 211, 242, 243,                         /* Andariel/Duriel/Mephisto/Diablo */
+    333,                                        /* diabloclone (Uber D) */
+    256,                                        /* izual */
+    250,                                        /* summoner */
+    229,                                        /* radament */
+    267,                                        /* bloodraven */
+    365,                                        /* griswold */
+    402,                                        /* smith */
+    409,                                        /* hephasto */
+    526,                                        /* nihlathakboss */
+    540, 541, 542,                              /* ancientbarb 1-3 (Ancients) */
+    543, 544, 559, 545, 570,                    /* baal forms + taunt + clone */
+    562, 563, 564, 565, 566,                    /* baal tentacles */
+    571, 572, 573,                              /* baal minions (throne adds) */
+    345, 346, 347,                              /* councilmember 1-3 (Travincal) */
+    391,                                        /* hellbovine (Cow Level + Cow King base) */
+    537, 538, 539,                              /* ancient statues */
+    366,                                        /* compellingorb (Anya quest) */
+    704, 705, 706, 707, 708, 709,               /* 1.9.0 custom uber rows */
+    558,                                        /* venomlord (Baal subject 5) */
+
+    /* Special-terrain / pet AI / scripted-only rows */
+    8,                                          /* zombie4 (Drowned Carcass) */
+    118, 119, 120, 121,                         /* willowisp 1-4 (Gloams) */
+    258, 259, 260,                              /* tentacle limbs */
+    261, 262, 263,                              /* tentacle heads */
+    273,                                        /* gargoyletrap */
+    326, 327, 328, 329, 330,                    /* trap-* */
+    354,                                        /* trap-melee */
+    369,                                        /* trap-nova */
+    348, 349, 350, 372,                         /* turrets / firetower */
+    371,                                        /* lightningspire */
+    432, 433, 434, 435, 524, 525,               /* barricades */
+    497, 498, 499, 500,                         /* catapults */
+    516, 517, 518, 519,                         /* catapult spotters */
+    351, 352, 353,                              /* hydra (sorc skill object) */
+    401,                                        /* mephistospirit */
+    332,                                        /* invisospawner */
+    153,                                        /* hellmeteor */
+
+    /* Player pet / summon AI rows */
+    289, 290, 291, 292,                         /* golems */
+    293, 357,                                   /* familiar, valkyrie */
+    363, 364,                                   /* necroskeleton, necromage */
+    410, 411, 412, 413, 414, 415, 416, 417, 418, /* assassin sentries / shadow */
+    419, 420, 421, 422, 423, 424,               /* druid pets/totems */
+    425, 426, 427, 428,                         /* druid plant/bear */
+    429, 430, 431,                              /* eagle/wolf/bear */
+
+    /* NPCs (humans, vendors, hireable, cain variants, tyrael, etc.) */
+    146, 147, 148, 150, 154, 155,               /* cain1, gheed, akara, kashya, charsi, warriv1 */
+    175, 176, 177, 178,                         /* warriv2, atma, drognan, fara */
+    195, 196, 197, 198, 199, 200,               /* act2 male/female/child + greiz/elzix/geglash */
+    201, 202, 203, 204, 205,                    /* jerhyn, lysander, act2guard1, vendors */
+    210,                                        /* meshif1 */
+    244, 245, 246,                              /* cain2,3,4 */
+    251, 252, 253, 254, 255,                    /* tyrael1, asheara, hratli, alkor, ormus */
+    257,                                        /* halbu */
+    264, 265, 266,                              /* meshif2, cain5, navi */
+    270, 271, 272,                              /* rogue2, roguehire, rogue3 */
+    294, 296, 297,                              /* act3 male/female, natalya */
+    331,                                        /* act2guard2 (Kaelan) */
+    338,                                        /* act2hire */
+    358, 359,                                   /* act2guard3, act3hire */
+    367, 368,                                   /* tyrael2, darkwanderer */
+    405,                                        /* jamella */
+    406, 407, 408,                              /* izualghost, fetish11, malachai */
+    511, 512, 513, 514, 515,                    /* larzuk, drehya, malah, nihlathak (town), qual-kehk */
+    520, 521,                                   /* cain6, tyrael3 */
+    522, 523,                                   /* act5barb1, act5barb2 */
+    527,                                        /* drehyaiced */
+    534, 535, 536,                              /* act5pow, act5barb3, act5barb4 */
+    560, 561,                                   /* act5hire1, act5hire2 */
+    567, 568, 569,                              /* injuredbarb1-3 */
+
+    /* Animal / decoration / dummy rows */
+    149, 151, 152, 157, 158, 159,               /* chicken, rat, rogue1, bird1, bird2, bat */
+    179,                                        /* cow */
+    185,                                        /* camel */
+    227,                                        /* maggot */
+    268, 269,                                   /* bug, scorpion */
+    283,                                        /* larva */
+    318, 319, 320,                              /* snake, parrot, fish */
+    339,                                        /* minispider */
+    370,                                        /* spiritmummy */
+    392, 393,                                   /* window1, window2 */
+    340, 341, 342, 343, 344,                    /* boneprison/bonewall */
+    355,                                        /* seventombs */
+    356,                                        /* dopplezon */
+    450, 451, 452,                              /* wolfrider1-3 (unused) */
+    545,                                        /* baaltaunt */
+    556,                                        /* bunny */
+    574,                                        /* worldstoneeffect */
+
+    /* Unused placeholder rows (BaseId = "unused") */
+    34, 35, 36, 37,                             /* gorgon1-4 */
+    106, 107, 108, 109,                         /* chaoshorde1-4 */
+    217, 218, 219, 220, 221,                    /* darkguard1-5 */
+    222, 223, 224, 225, 226,                    /* bloodmage1-5 */
+    230, 231, 232, 233,                         /* firebeast/iceglobe/lightningbeast/poisonorb */
+};
+#define SHUFFLE_BANNED_COUNT \
+    ((int)(sizeof(g_shuffleBannedIdx) / sizeof(g_shuffleBannedIdx[0])))
+
+static BOOL IsShuffleBanned(int idx) {
+    for (int i = 0; i < SHUFFLE_BANNED_COUNT; i++) {
+        if (g_shuffleBannedIdx[i] == idx) return TRUE;
+    }
+    return FALSE;
+}
+
 static void ApplyMonsterShuffle(DWORD seed) {
     DWORD dt = GetSgptDT();
     if (!dt) { Log("SHUFFLE: no sgptDataTables\n"); return; }
@@ -129,6 +289,7 @@ static void ApplyMonsterShuffle(DWORD seed) {
      * We only use origIdx and replIdx: memcpy replacement's record over original,
      * then restore the ORIGINAL monster's stats (HP, dmg, AC, level, exp, resists, align). */
     int swapCount = 0;
+    int swapsSkippedByBan = 0;
     char line[1024];
     while (fgets(line, sizeof(line), fp)) {
         if (strncmp(line, "SWAP ", 5) != 0) continue;
@@ -138,6 +299,15 @@ static void ApplyMonsterShuffle(DWORD seed) {
         if (origIdx < 0 || origIdx >= monCount) continue;
         if (replIdx < 0 || replIdx >= monCount) continue;
         if (origIdx == replIdx) continue;
+
+        /* 1.9.2 — runtime ban filter. Quest bosses, spawners, NPCs,
+         * special-AI rows, pets and unused placeholders MUST never be
+         * swapped (in either direction) or they break quests / spawn
+         * scripted units in wrong zones / crash the game. */
+        if (IsShuffleBanned(origIdx) || IsShuffleBanned(replIdx)) {
+            swapsSkippedByBan++;
+            continue;
+        }
 
         BYTE* origRec = (BYTE*)(pMonArr + origIdx * MON_RECORD_SIZE);
         BYTE* replRec = (BYTE*)(pMonArr + replIdx * MON_RECORD_SIZE);
@@ -183,8 +353,8 @@ static void ApplyMonsterShuffle(DWORD seed) {
 
     VirtualProtect((void*)pMonArr, monCount * MON_RECORD_SIZE, oldProt, &oldProt);
     g_shuffleApplied = TRUE;
-    Log("MONSTER SHUFFLE: preset %02d applied %d swaps (seed=%u)\n",
-        presetNum, swapCount, seed);
+    Log("MONSTER SHUFFLE: preset %02d applied %d swaps (seed=%u, %d skipped by ban list of %d)\n",
+        presetNum, swapCount, seed, swapsSkippedByBan, SHUFFLE_BANNED_COUNT);
 }
 
 static void UndoMonsterShuffle(void) {
