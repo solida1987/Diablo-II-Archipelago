@@ -139,10 +139,12 @@ class Diablo2ArchipelagoWorld(World):
         Normal-difficulty quest locations only. The 110 collection
         locations are added separately at the end of this function.
         """
-        goal = self.options.goal.value  # 0-3
+        goal = self.options.goal.value  # 0-4
         max_act = 5                     # always full game
         if goal == 3:
             num_difficulties = 1        # Collection mode: Normal-only quest locations
+        elif goal == 4:
+            num_difficulties = 3        # Custom: generate full pool, DLL filters at runtime
         else:
             num_difficulties = goal + 1 # 1, 2, or 3
 
@@ -398,9 +400,12 @@ class Diablo2ArchipelagoWorld(World):
         zone_keys_in_pool = []
         if zone_locking:
             # Goal=3 (Collection) treats as Normal-only for AP fill purposes.
+            # Goal=4 (Custom) generates full pool — DLL filters by required targets.
             goal_val = self.options.goal.value
             if goal_val == 3:
                 num_difficulties = 1
+            elif goal_val == 4:
+                num_difficulties = 3
             else:
                 num_difficulties = goal_val + 1  # 0-2 -> 1-3 diffs
             for ap_id, name, act, classification in GATE_KEY_ITEMS:
@@ -695,6 +700,12 @@ class Diablo2ArchipelagoWorld(World):
             "collection_specials_mask":    _build_coll_mask("collect_special_", self.options, 0,  10, _kind="special"),
             "collection_target_gems":      self.options.collection_target_gems.value,
             "collection_gold_target":      self.options.collection_gold_target.value,
+            # 1.9.2 — Custom goal (only meaningful when goal=4 / custom).
+            # Empty CSV + 0 gold = trivially complete = falls back to
+            # Full Normal in the DLL completion check.
+            "custom_goal_gold_target":     self.options.custom_goal_gold_target.value,
+            "custom_goal_targets_csv":     ",".join(sorted(
+                self.options.custom_goal_targets.value)),
             "death_link":        self.options.death_link.value,
             # Quest toggles
             "quest_story":            1,  # always ON — engine-required

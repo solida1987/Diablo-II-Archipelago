@@ -318,6 +318,7 @@ static void ProcessPendingGameTick(void) {
         extern void Stats_OnGameTick(void* pPlayerUnit);
         extern void Extra_PollMerc(void* pPlayer);  /* 1.9.2 Cat 2 */
         extern void Extra_PollNpcDialogue(void* pPlayer); /* 1.9.2 Cat 4 */
+        extern void CustomGoal_PollBulkTargets(void); /* 1.9.2 custom goal */
         if (fnGetPlayer) {
             void* pCliPlayer = NULL;
             __try { pCliPlayer = fnGetPlayer(); } __except(1) {}
@@ -326,6 +327,7 @@ static void ProcessPendingGameTick(void) {
                 Stats_OnGameTick(pCliPlayer);  /* 1.9.0 — playtime + death-edge */
                 Extra_PollMerc(pCliPlayer);    /* 1.9.2 — merc hire/resurrect/level */
                 Extra_PollNpcDialogue(pCliPlayer); /* 1.9.2 — NPC near + stationary */
+                CustomGoal_PollBulkTargets();  /* 1.9.2 — custom goal bulk completions */
             }
         }
     }
@@ -1780,6 +1782,11 @@ static void OnQuestComplete(Quest* quest) {
             if (actIdx >= 0) {
                 Stats_OnActComplete(diff, actIdx);
                 Log("STATS: Act %d cleared on diff=%d\n", actIdx + 1, diff);
+                /* 1.9.2 — Custom goal act-boss target. actIdx 0..4
+                 * matches Andariel/Duriel/Mephisto/Diablo/Baal which
+                 * is exactly what CustomGoal_OnActBossKilled expects. */
+                extern void CustomGoal_OnActBossKilled(int bossIdx, int diff);
+                CustomGoal_OnActBossKilled(actIdx, diff);
             }
         }
     }
@@ -2084,6 +2091,24 @@ static void ProcessDeferredQuests(void) {
                 Log("AP GOAL COMPLETE: collection targets all met\n");
             }
         }
+
+        /* 1.9.2 — Goal=4 (Custom) win-condition check. Mirrors the
+         * Collection branch above. CustomGoal_IsComplete walks the
+         * required-vs-fired bitmap + checks lifetime gold against
+         * the user-set target. */
+        if (g_apConnected && !g_apGoalComplete && g_apGoal == 4) {
+            extern BOOL CustomGoal_IsComplete(void);
+            if (CustomGoal_IsComplete()) {
+                g_apGoalComplete = TRUE;
+                char dir4[MAX_PATH], gpath[MAX_PATH];
+                GetArchDir(dir4, MAX_PATH);
+                sprintf(gpath, "%sap_goal.dat", dir4);
+                FILE* gf = fopen(gpath, "w");
+                if (gf) { fprintf(gf, "goal=complete\nsource=custom\n"); fclose(gf); }
+                ShowNotify("CUSTOM GOAL COMPLETE!");
+                Log("AP GOAL COMPLETE: all custom-goal targets met + gold target reached\n");
+            }
+        }
     }
 }
 
@@ -2223,6 +2248,14 @@ static void ScanMonsters(void) {
                                         if (hcIdx == 39) {
                                             extern void Extra_OnCowKingKilled(int diff);
                                             Extra_OnCowKingKilled(g_currentDifficulty);
+                                            extern void CustomGoal_OnCowKingKilled(int diff);
+                                            CustomGoal_OnCowKingKilled(g_currentDifficulty);
+                                        }
+                                        /* 1.9.2 — Custom goal super-unique targets.
+                                         * Bishibosh / Corpsefire / Rakanishu / etc. */
+                                        {
+                                            extern void CustomGoal_OnSuperUniqueKilled(int hcIdx);
+                                            CustomGoal_OnSuperUniqueKilled((int)hcIdx);
                                         }
                                         BOOL matched = FALSE;
                                         for (int a2 = 0; a2 < 5; a2++)

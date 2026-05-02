@@ -376,6 +376,12 @@ static void SaveStateFile(void) {
         Extra_SaveToFile(f);
     }
 
+    /* 1.9.2 — Custom goal state (only writes if goal=custom is active). */
+    {
+        extern void CustomGoal_SaveToFile(FILE* f);
+        CustomGoal_SaveToFile(f);
+    }
+
     fclose(f);
     Log("SaveStateFile: saved to %s\n", path);
 }
@@ -687,6 +693,13 @@ static void LoadChecks(void) {
             if (strncmp(line, "extra_", 6) == 0) {
                 extern void Extra_LoadLine(const char* line);
                 Extra_LoadLine(line);
+            }
+
+            /* 1.9.2 NEW: custom goal state (cgt_active / cgt_gold /
+             * cgt_required / cgt_fired). */
+            if (strncmp(line, "cgt_", 4) == 0) {
+                extern void CustomGoal_LoadLine(const char* line);
+                CustomGoal_LoadLine(line);
             }
         }
     }
@@ -1806,6 +1819,15 @@ static void OnCharacterLoad(void) {
     {
         extern void Extra_ResetState(void);
         Extra_ResetState();
+    }
+
+    /* 1.9.2 — clear custom goal state. Required + fired bitmaps are
+     * reset to zero; LoadStateFile / AP slot_data parse will repopulate
+     * required if goal=custom. fired bitmap is per-character so a fresh
+     * char starts with nothing fired. */
+    {
+        extern void CustomGoal_ResetState(void);
+        CustomGoal_ResetState();
     }
 
     Log("Global state cleared for new character load\n");

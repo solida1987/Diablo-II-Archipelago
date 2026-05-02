@@ -11,7 +11,7 @@ internal balance knobs:
 """
 from dataclasses import dataclass
 
-from Options import Choice, Range, Toggle, DeathLink, PerGameCommonOptions, OptionGroup
+from Options import Choice, Range, Toggle, DeathLink, PerGameCommonOptions, OptionGroup, OptionSet
 
 
 # ============================================================
@@ -53,13 +53,119 @@ class Goal(Choice):
                     threshold. Difficulty progression is OPTIONAL in
                     this mode; you win the moment your collection
                     targets are satisfied.
+    Custom:         build your own win condition — pick any
+                    combination of the 50+ targets in the
+                    `custom_goal_targets` option below (act bosses,
+                    super-uniques, bulk completions, etc.) and an
+                    optional `custom_goal_gold_target`. The goal
+                    completes when ALL selected targets are met AND
+                    your lifetime gold reaches the (optional) gold
+                    target. AP-only — standalone defaults to
+                    Full Normal.
     """
     display_name = "Goal"
     option_full_normal = 0
     option_full_nightmare = 1
     option_full_hell = 2
     option_collection = 3
+    option_custom = 4
     default = 0
+
+
+# ============================================================
+# Custom Goal sub-targets (only meaningful when Goal=Custom).
+# AP-side only — standalone players can't access these via the
+# title-screen UI and the DLL falls back to Full Normal if
+# goal=custom is loaded without target data.
+# ============================================================
+
+class CustomGoalGoldTarget(Range):
+    """[Goal=Custom only] Optional lifetime-gold threshold added on
+    top of the selected custom_goal_targets. 0 = no gold requirement.
+    Same monotonic lifetime gold counter the Collection goal uses
+    (gold pickup + quest rewards, excludes vendor sales)."""
+    display_name = "Custom Goal: Gold Target"
+    range_start = 0
+    range_end = 100000000
+    default = 0
+
+
+class CustomGoalTargets(OptionSet):
+    """[Goal=Custom only] Pick any combination of the targets below.
+    The goal completes when ALL selected targets have been satisfied
+    AND the gold target (if set) has been reached. Empty set + zero
+    gold = trivially complete = falls back to Full Normal behaviour.
+
+    Targets are grouped by category; you can mix freely:
+
+    Act bosses (per difficulty, 15):
+      kill_andariel_normal, kill_andariel_nightmare, kill_andariel_hell,
+      kill_duriel_normal,   kill_duriel_nightmare,   kill_duriel_hell,
+      kill_mephisto_normal, kill_mephisto_nightmare, kill_mephisto_hell,
+      kill_diablo_normal,   kill_diablo_nightmare,   kill_diablo_hell,
+      kill_baal_normal,     kill_baal_nightmare,     kill_baal_hell
+
+    Cow King (per difficulty, 3):
+      kill_cow_king_normal, kill_cow_king_nightmare, kill_cow_king_hell
+
+    Pandemonium event ubers (4):
+      kill_uber_mephisto, kill_uber_diablo, kill_uber_baal,
+      hellfire_torch_complete
+
+    Famous Super-Uniques (10):
+      kill_bishibosh, kill_corpsefire, kill_rakanishu, kill_griswold,
+      kill_pindleskin, kill_nihlathak_su, kill_summoner, kill_radament,
+      kill_izual, kill_council
+
+    Quest-category bulk completions (8):
+      all_quests_normal, all_quests_nightmare, all_quests_hell,
+      all_hunting_quests, all_kill_zone_quests, all_exploration_quests,
+      all_waypoints, all_level_milestones
+
+    Bonus-check bulk completions (6, 1.9.0):
+      all_shrines, all_urns, all_barrels, all_chests,
+      all_set_pickups, all_gold_milestones
+
+    Extra-check bulk completions (6, 1.9.2):
+      all_cow_level_checks, all_merc_milestones, all_hellforge_runes,
+      all_npc_dialogue, all_runeword_crafting, all_cube_recipes
+
+    Collection bulk completions (5):
+      all_set_pieces, all_runes, all_gems, all_specials,
+      complete_collection
+    """
+    display_name = "Custom Goal: Targets"
+    valid_keys = frozenset([
+        # A. Act Bosses × difficulty (15)
+        "kill_andariel_normal", "kill_andariel_nightmare", "kill_andariel_hell",
+        "kill_duriel_normal",   "kill_duriel_nightmare",   "kill_duriel_hell",
+        "kill_mephisto_normal", "kill_mephisto_nightmare", "kill_mephisto_hell",
+        "kill_diablo_normal",   "kill_diablo_nightmare",   "kill_diablo_hell",
+        "kill_baal_normal",     "kill_baal_nightmare",     "kill_baal_hell",
+        # B. Cow King (3)
+        "kill_cow_king_normal", "kill_cow_king_nightmare", "kill_cow_king_hell",
+        # C. Pandemonium ubers (4)
+        "kill_uber_mephisto", "kill_uber_diablo", "kill_uber_baal",
+        "hellfire_torch_complete",
+        # D. Famous Super-Uniques (10)
+        "kill_bishibosh", "kill_corpsefire", "kill_rakanishu", "kill_griswold",
+        "kill_pindleskin", "kill_nihlathak_su", "kill_summoner",
+        "kill_radament", "kill_izual", "kill_council",
+        # E. Quest bulk (8)
+        "all_quests_normal", "all_quests_nightmare", "all_quests_hell",
+        "all_hunting_quests", "all_kill_zone_quests",
+        "all_exploration_quests", "all_waypoints", "all_level_milestones",
+        # F. Bonus-check bulk (6)
+        "all_shrines", "all_urns", "all_barrels", "all_chests",
+        "all_set_pickups", "all_gold_milestones",
+        # G. Extra-check bulk (6)
+        "all_cow_level_checks", "all_merc_milestones", "all_hellforge_runes",
+        "all_npc_dialogue", "all_runeword_crafting", "all_cube_recipes",
+        # H. Collection bulk (5)
+        "all_set_pieces", "all_runes", "all_gems", "all_specials",
+        "complete_collection",
+    ])
+    default = frozenset()
 
 
 # ============================================================
@@ -531,6 +637,9 @@ _FIELDS = [
     # Gems-as-a-whole + gold target (granular per-item toggles below)
     ("collection_target_gems",  CollectionTargetGems),
     ("collection_gold_target",  CollectionGoldTarget),
+    # Custom goal sub-targets (only meaningful when goal=custom)
+    ("custom_goal_gold_target", CustomGoalGoldTarget),
+    ("custom_goal_targets",     CustomGoalTargets),
     # Quest toggles (story is always ON internally — engine-required)
     ("quest_hunting",          QuestHunting),
     ("quest_kill_zones",       QuestKillZones),
@@ -611,6 +720,8 @@ OPTION_GROUPS = [
         Goal,
         CollectionTargetGems,
         CollectionGoldTarget,
+        CustomGoalGoldTarget,
+        CustomGoalTargets,
     ]),
     OptionGroup("Quest Categories", [
         QuestHunting,

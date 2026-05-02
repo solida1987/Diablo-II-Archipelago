@@ -749,6 +749,38 @@ static void LoadAPSettings(void) {
                 g_collGoalOverridePresent = TRUE;
             }
         }
+        /* 1.9.2 — Custom goal slot_data: gold target + targets CSV.
+         * Sent by apworld fill_slot_data when goal=4 (custom). Both
+         * keys are stashed; the final ParseTargetsCSV call wires them
+         * together. The parser is a no-op at runtime when g_apGoal != 4
+         * (the completion check in d2arch_gameloop.c gates on goal). */
+        {
+            static uint64_t s_cgGold = 0;
+            static char     s_cgCsv[1024] = "";
+            static int      s_cgGoldSeen = 0, s_cgCsvSeen = 0;
+            unsigned long long tmpGold2 = 0;
+            if (sscanf(line, "custom_goal_gold_target=%llu", &tmpGold2) == 1) {
+                s_cgGold = (uint64_t)tmpGold2;
+                s_cgGoldSeen = 1;
+            }
+            if (strncmp(line, "custom_goal_targets_csv=", 24) == 0) {
+                strncpy(s_cgCsv, line + 24, sizeof(s_cgCsv) - 1);
+                s_cgCsv[sizeof(s_cgCsv) - 1] = 0;
+                /* Trim trailing newline if present */
+                size_t L = strlen(s_cgCsv);
+                while (L > 0 && (s_cgCsv[L-1] == '\n' || s_cgCsv[L-1] == '\r')) {
+                    s_cgCsv[--L] = 0;
+                }
+                s_cgCsvSeen = 1;
+            }
+            /* When BOTH keys have been seen, commit to the parser.
+             * Either order works — both keys can be re-applied any
+             * number of times (idempotent). */
+            if (s_cgGoldSeen && s_cgCsvSeen) {
+                extern void CustomGoal_ParseTargetsCSV(const char* csv, uint64_t goldTarget);
+                CustomGoal_ParseTargetsCSV(s_cgCsv, s_cgGold);
+            }
+        }
         if (sscanf(line, "xp_multiplier=%d", &ival) == 1) {
             g_xpMultiplier = ival;
             if (g_xpMultiplier < 1) g_xpMultiplier = 1;

@@ -77,6 +77,11 @@
                                    detection entry points visible to
                                    gameloop.c / save.c / ap.c / stats.c /
                                    editor.c which all #include after this. */
+#include "d2arch_customgoal.c"  /* 1.9.2 NEW: AP-side custom goal
+                                   (52-target OptionSet, AND completion).
+                                   Must come AFTER bonuschecks.c +
+                                   extrachecks.c since CustomGoal_PollBulkTargets
+                                   externs Bonus_/Extra_ accessors. */
 #include "d2arch_hooks.c"       /* 1.9.0 NEW: D2Game detours that drive
                                    item-use + object-interact counters in
                                    stats.c. Must come AFTER stats.c so

@@ -501,6 +501,14 @@ void Stats_OnItemPickedUp(int quality, int slotIdx) {
     if (slotIdx >= 160 && slotIdx < 195) g_charStats.gemsPickedUp++;
 }
 
+/* 1.9.2 — accessor for d2arch_customgoal.c which is included BEFORE
+ * stats.c in the unity build (so it can't reach g_charStats directly
+ * via struct member access). Returns the same lifetime gold counter
+ * the F1 Collection page uses for the gold-target check. */
+uint64_t g_charStats_lifetimeGold(void) {
+    return g_charStats.goldCollected;
+}
+
 void Stats_OnCharacterChange(void) {
     s_playtimeLastTickMs = 0;       /* reset wall-clock anchor */
     s_lastPlayerMode     = 0xFFFFFFFFu;
