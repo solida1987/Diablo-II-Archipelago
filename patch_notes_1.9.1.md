@@ -58,6 +58,30 @@ not Resurrected). Windows 10/11 with the .NET 8 Runtime.
 
 ## Bug fixes
 
+- **Native-class skill animations restored.** Previous releases blanket-
+  rewrote every class-specific animation (Smite's shield bash, Whirlwind
+  spin, Rabies/Hunger werewolf bite, Amazon javelin throw, Dragon Talon
+  kick) to the cast pose to avoid softlocks when those skills were used
+  by a different class via the cross-class pool. The side-effect was
+  that the NATIVE class also lost its proper animation, and several
+  skills broke functionally:
+  - Whirlwind only hit once, looked like Barbarian was just shouting
+  - Leap Attack didn't move the character at all (movement softlock,
+    occasional crash on game exit)
+  - Double Throw fired only one projectile
+  - Dragon Claw only hit once
+  - Blade Fury / Fists of Fire / Blades of Ice / Claws of Thunder
+    couldn't chain charge-up moves
+  - Smite played the cast pose instead of shield bash
+  - Druid Rabies/Hunger didn't bite in werewolf/werebear form
+  - Amazon javelins (Poison/Lightning/Plague/Lightning Fury) didn't throw
+
+  The fix restores each native owner's vanilla animation when that
+  character loads, while keeping a safe per-frame-event-driven Attack 1
+  fallback for cross-class casters of the same skill — so Whirlwind on
+  a Sorceress now does a single melee swing per click (functional, not
+  spinning) instead of softlocking the game.
+
 - **8 endgame runewords had their aura silently broken.** The D2R
   2.4 / 2.6 backports were authored using numeric skill IDs that
   pointed to the wrong skill — e.g. Infinity's "Conviction aura

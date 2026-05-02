@@ -1667,6 +1667,15 @@ static void OnCharacterLoad(void) {
     /* 1.9.0: same isolation requirement for entrance shuffle. */
     UndoEntranceShuffle();
 
+    /* 1.9.1 — re-apply per-class skill animations. The boot patch puts every
+     * class-specific animation (S1-S4 / SQ / TH / KK) on a safe-for-anyone A1
+     * fallback so the global skill table is cross-class playable. Here we
+     * walk the cached vanilla anims and restore the originals for skills
+     * whose native class is THIS character — Smite gets its shield bash,
+     * Whirlwind spins, Rabies bites in werewolf form, javelins throw,
+     * Dragon Talon kicks. Non-native skills keep the A1 fallback. */
+    Skilltree_OnCharacterLoadHook();
+
     /* 1.9.0: Move any legacy per-char files from Archipelago/ into Save/
      * BEFORE CleanupOrphanedSaves runs, so files belonging to existing
      * characters get relocated rather than deleted as orphans. */
