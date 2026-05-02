@@ -891,41 +891,115 @@ static int Extra_HcIdxToNpcIdx(int hcIdx) {
 }
 
 /* Per-tick NPC dialogue poll. Called from gameloop.c game-tick block
- * right after Extra_PollMerc. Edge-detects "the NPC dialogue unit just
- * changed" and fires the matching slot.
+ * right after Extra_PollMerc.
  *
- * Strategy: D2Client GetUIVar(0x06) returns the currently-talked-to
- * NPC unit pointer (or 0 when no NPC menu is open). When the value
- * transitions from any state to a NEW non-zero unit, we walk the
- * unit struct to read its MonStats hcIdx and look up the npc index.
- * Defensive __try/__except guards every dereference because UIVar
- * semantics across vanilla D2 / D2MOO can vary slightly. */
+ * 1.9.2 DIAGNOSTIC PASS — UIVar 0x06 didn't trigger NPC checks in
+ * the user's session, so this version polls a WIDE range of UIVars
+ * (0x01..0x0F) and logs everything that changes. The first time any
+ * UIVar transitions from 0 to non-zero with a value that walks
+ * cleanly as a unit pointer (pUnit+0x14 -> pMonsterData -> +0x26 =
+ * hcIdx readable), we fire on it. Telemetry is rate-limited via a
+ * per-UIVar last-value cache so we don't spam the log.
+ *
+ * Output to look for in d2arch_log.txt when player talks to an NPC:
+ *   "NPC POLL: UIVar 0x?? changed 0 -> 0x????????"
+ *   "NPC POLL: ... walked unit ok, txtId=?, hcIdx=?, mapped npcIdx=?"
+ *   "NPC FIRE: hcIdx=? -> npcIdx=? (NPC name)"
+ * If no log lines appear when talking to an NPC, GetUIVar isn't
+ * resolved or no UIVar in 0x01..0x0F holds the NPC unit. */
 void Extra_PollNpcDialogue(void* pPlayerUnit) {
+    /* Heartbeat — log once every ~5000 calls (≈83 sec at 60fps) so
+     * we know the per-tick poll is actually running. If you grep
+     * "NPC HEARTBEAT" in d2arch_log.txt and see entries, the poll
+     * loop is alive. If not, the gameloop tick isn't reaching us. */
+    static unsigned s_heartbeatCount = 0;
+    if ((++s_heartbeatCount % 5000) == 1) {
+        Log("NPC HEARTBEAT: poll #%u, EX_NPC enabled=%d, pPlayer=%p\n",
+            s_heartbeatCount, (int)g_extraEnabled[EX_NPC],
+            (void*)pPlayerUnit);
+    }
+
     if (!g_extraEnabled[EX_NPC]) return;
     (void)pPlayerUnit;
     extern DWORD (*g_fnGetUIVar)(DWORD);
+
+    /* Diagnostic gate — log GetUIVar resolver state ONCE so we know
+     * whether the function pointer was actually wired by InitAPI. */
+    static int s_loggedInit = 0;
+    if (!s_loggedInit) {
+        s_loggedInit = 1;
+        Log("NPC POLL: g_fnGetUIVar=%p (NULL means D2Client GetUIVar "
+            "wasn't resolved — no NPC detection possible)\n",
+            (void*)g_fnGetUIVar);
+    }
     if (!g_fnGetUIVar) return;
 
-    DWORD pNpcUnit = 0;
-    __try { pNpcUnit = g_fnGetUIVar(0x06); }
-    __except(EXCEPTION_EXECUTE_HANDLER) { return; }
+    /* Poll UIVars 0x01..0x0F. Cache last value per slot. Log
+     * transitions. When a slot's value looks like a unit pointer
+     * (>= 0x100000 typical D2 heap range) AND walks cleanly to a
+     * monster data + hcIdx, we treat it as the NPC dialogue target. */
+    static DWORD s_lastVal[0x10] = {0};
+    static int   s_logCount = 0;     /* throttle: only first 200 transitions */
+    BOOL anyHit = FALSE;
 
-    static DWORD s_lastNpcUnit = 0;
-    if (pNpcUnit == s_lastNpcUnit) return;     /* no edge */
-    s_lastNpcUnit = pNpcUnit;
-    if (pNpcUnit == 0) return;                 /* dialogue closed */
-    if (pNpcUnit < 0x1000) return;             /* not a pointer (UIVar can return small flags) */
+    for (DWORD vi = 0x01; vi < 0x10; vi++) {
+        DWORD val = 0;
+        __try { val = g_fnGetUIVar(vi); }
+        __except(EXCEPTION_EXECUTE_HANDLER) { continue; }
 
-    int hcIdx = 0;
-    __try {
-        DWORD pMonData = *(DWORD*)((BYTE*)pNpcUnit + 0x14);
-        if (!pMonData) return;
-        hcIdx = (int)*(WORD*)((BYTE*)pMonData + 0x26);
-    } __except(EXCEPTION_EXECUTE_HANDLER) { return; }
+        if (val == s_lastVal[vi]) continue;     /* no change */
+        DWORD prev = s_lastVal[vi];
+        s_lastVal[vi] = val;
 
-    int npcIdx = Extra_HcIdxToNpcIdx(hcIdx);
-    if (npcIdx < 0) return;       /* unmapped NPC (e.g. Cain pre-rescue child) */
-    Extra_OnNpcDialogue(npcIdx, g_currentDifficulty);
+        if (s_logCount < 200) {
+            s_logCount++;
+            Log("NPC POLL: UIVar 0x%02X changed 0x%08X -> 0x%08X\n",
+                vi, prev, val);
+        }
+
+        if (val < 0x100000) continue;           /* not a heap pointer */
+
+        /* Try to walk it as a unit. */
+        int txtId = -1; int hcIdx = -1; int unitType = -1;
+        __try {
+            unitType = (int)*(DWORD*)((BYTE*)val + 0x00);
+            txtId    = (int)*(DWORD*)((BYTE*)val + 0x04);
+            DWORD pMonData = *(DWORD*)((BYTE*)val + 0x14);
+            if (pMonData) {
+                hcIdx = (int)*(WORD*)((BYTE*)pMonData + 0x26);
+            }
+        } __except(EXCEPTION_EXECUTE_HANDLER) {
+            if (s_logCount < 200) {
+                Log("NPC POLL:   UIVar 0x%02X val=0x%08X — exception walking as unit\n",
+                    vi, val);
+            }
+            continue;
+        }
+
+        if (s_logCount < 200) {
+            Log("NPC POLL:   UIVar 0x%02X val=0x%08X type=%d txtId=%d hcIdx=%d\n",
+                vi, val, unitType, txtId, hcIdx);
+        }
+
+        /* hcIdx -1 means walk failed (no MonsterData). type 1 = MONSTER
+         * (which NPCs technically are). Try to map regardless of type
+         * so we capture all possibilities. */
+        if (hcIdx < 0) continue;
+        int npcIdx = Extra_HcIdxToNpcIdx(hcIdx);
+        if (npcIdx < 0) {
+            if (s_logCount < 200) {
+                Log("NPC POLL:     hcIdx=%d not in NPC mapping table — ignored\n",
+                    hcIdx);
+            }
+            continue;
+        }
+        Log("NPC FIRE: UIVar 0x%02X hcIdx=%d -> npcIdx=%d (%s)\n",
+            vi, hcIdx, npcIdx, EXTRA_NPC_NAMES[npcIdx]);
+        Extra_OnNpcDialogue(npcIdx, g_currentDifficulty);
+        anyHit = TRUE;
+    }
+
+    (void)anyHit;
 }
 
 void Extra_OnNpcDialogue(int npcIdx, int diff) {
