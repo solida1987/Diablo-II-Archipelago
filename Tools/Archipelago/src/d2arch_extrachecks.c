@@ -925,9 +925,16 @@ static int Extra_HcIdxToNpcIdx(int hcIdx) {
  * function offsets, just struct-field reads we already do elsewhere
  * in the codebase. */
 
-#define NPC_NEAR_TILES        2       /* tiles between player and NPC for "near" */
-#define NPC_STATIONARY_TICKS  20      /* throttled ticks (10th-tick poll) so
-                                       * 20 = ~3.3s of actual standing-near */
+#define NPC_NEAR_TILES        4       /* tiles between player and NPC for "near"
+                                       * (4 covers the click-NPC-from-distance
+                                       * case where player walks up but stops
+                                       * before reaching melee range) */
+#define NPC_STATIONARY_TICKS  6       /* throttled ticks (10th-tick poll) so
+                                       * 6 = ~1.0s of actual standing-near.
+                                       * Lowered from 20 for reliable firing —
+                                       * dialogue popup typically appears within
+                                       * 0.5s of clicking, so 1s captures it
+                                       * even on slow clicks. */
 
 void Extra_PollNpcDialogue(void* pPlayerUnit) {
     /* Heartbeat — log once every ~5000 calls (≈83 sec at 60fps) so
@@ -964,21 +971,15 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
     } __except(EXCEPTION_EXECUTE_HANDLER) { return; }
     if (!pRoom) return;
 
-    /* Edge-detect player movement: when player position changes,
-     * reset the "near for N ticks" counter for every NPC. */
-    static int s_lastPlayerX = -1, s_lastPlayerY = -1;
-    BOOL playerMoved = (playerX != s_lastPlayerX || playerY != s_lastPlayerY);
-    s_lastPlayerX = playerX;
-    s_lastPlayerY = playerY;
-
-    /* Per-NPC "ticks near and stationary" counter. Index = npcIdx 0..26.
-     * Reset when player moves; bumped each tick the NPC is within
-     * NPC_NEAR_TILES of the player. When it crosses
-     * NPC_STATIONARY_TICKS, fire the slot once. */
+    /* 1.9.2 — Per-NPC "ticks near" counter. Index = npcIdx 0..26.
+     * Bumped each throttled tick the NPC is within NPC_NEAR_TILES of
+     * the player. When it crosses NPC_STATIONARY_TICKS, fire the
+     * slot once. Counter does NOT reset on player movement — that
+     * was too strict (player walking up to NPC reset the counter
+     * each tick). The fired-bitmap dedup in Extra_FireApLocation
+     * prevents duplicate fires even if player stays near long
+     * enough to bump the counter to a huge number. */
     static int s_nearTicks[27] = {0};
-    if (playerMoved) {
-        for (int i = 0; i < 27; i++) s_nearTicks[i] = 0;
-    }
 
     /* Walk nearby rooms (current + adjacent) looking for NPC units. */
     DWORD rooms[21];

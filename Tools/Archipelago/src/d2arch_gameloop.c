@@ -325,7 +325,7 @@ static void ProcessPendingGameTick(void) {
                 Coll_OnGameTick(pCliPlayer);
                 Stats_OnGameTick(pCliPlayer);  /* 1.9.0 — playtime + death-edge */
                 Extra_PollMerc(pCliPlayer);    /* 1.9.2 — merc hire/resurrect/level */
-                Extra_PollNpcDialogue(pCliPlayer); /* 1.9.2 — NPC dialogue start */
+                Extra_PollNpcDialogue(pCliPlayer); /* 1.9.2 — NPC near + stationary */
             }
         }
     }
