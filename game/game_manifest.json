@@ -1,6 +1,6 @@
 {
-  "version": "Beta-1.9.0",
-  "version_display": "Beta-1.9.0",
+  "version": "Beta-1.9.1",
+  "version_display": "Beta 1.9.1",
   "file_count": 892,
   "files": [
     {
@@ -450,8 +450,8 @@
     },
     {
       "path": "Archipelago/news.txt",
-      "sha256": "d304e15552ebc4feb3de6468ae2111b8a98ae823e0c819d735f4476ff9d828d0",
-      "size": 27835
+      "sha256": "a323e13aaff79f4b19195066713ac9c1bec7ec8b1d0101be21ca79547b9753be",
+      "size": 30058
     },
     {
       "path": "Archipelago/shuffle_presets/shuffle_preset_01.dat",
@@ -670,7 +670,7 @@
     },
     {
       "path": "Archipelago/version.dat",
-      "sha256": "9e77f7480dbf3c93708551a08a076d9f0fc2c7e7f2c942e2fa38e1c31dbb68dd",
+      "sha256": "e5b4dd42bf0881e2ace558b8f2f7010214c411b4440bee846b9ec57b1faefff5",
       "size": 10
     },
     {
@@ -690,13 +690,13 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "777632a3f4f6ff52c31c4d1c434ebdb6819ebb285749f51b5bffa7ba0b53af89",
+      "sha256": "0e908ac0ecf9295e5bed986796acfbd3715f217577c1ea2c05ad3cf86a6b2ba3",
       "size": 121856
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "ec1443e99b3c35f9f5c52fb6548311568bf57a75da8177b6f9dcf7ebc06231a3",
-      "size": 631808
+      "sha256": "1380fbf4f25da4c7cdd6481f28b0002b14fd3eaba02a4f5f4d2e684618357a8b",
+      "size": 644096
     },
     {
       "path": "D2Client.dll",
@@ -1140,7 +1140,7 @@
     },
     {
       "path": "data/global/excel/Missiles.txt",
-      "sha256": "f903fd04f61aa676585d54bc2f98c3e5a42328188318ce15b9671e85609ec0ae",
+      "sha256": "299ec31cce39c3a6d7065b70538e260f31fca922221acd1d1ffd4cec048f6722",
       "size": 192971
     },
     {
@@ -1385,8 +1385,8 @@
     },
     {
       "path": "data/global/excel/Runes.txt",
-      "sha256": "5d0d9a5c77a614c90c1678eab7a8fd30f9e95724439098eb40e466c50efa20c0",
-      "size": 20991
+      "sha256": "6df2de27b029100ce9d07d7898cc5ede6dc5f8de93e720c453b95e6386c66ac0",
+      "size": 21007
     },
     {
       "path": "data/global/excel/setitems.bin",
@@ -4405,8 +4405,8 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "ec1443e99b3c35f9f5c52fb6548311568bf57a75da8177b6f9dcf7ebc06231a3",
-      "size": 631808
+      "sha256": "1380fbf4f25da4c7cdd6481f28b0002b14fd3eaba02a4f5f4d2e684618357a8b",
+      "size": 644096
     },
     {
       "path": "patch/D2Common.dll.disabled",
