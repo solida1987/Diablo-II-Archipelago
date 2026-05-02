@@ -181,7 +181,12 @@ static DWORD __declspec(naked) __fastcall CallGetUIVar(DWORD varno) {
         jmp g_getUIVarAddr  /* jump to D2Client GetUIVar */
     }
 }
-static DWORD (*g_fnGetUIVar)(DWORD) = NULL;
+/* 1.9.2 fix: must be __fastcall to match the CallGetUIVar trampoline
+ * (which reads varno from ECX and jumps to D2Client GetUIVar). The
+ * previous default-cdecl typing meant callers pushed varno on the
+ * stack — ECX was uninitialised garbage — so D2's GetUIVar always
+ * returned 0. Caught by NPC dialogue diagnostic in 1.9.2. */
+static DWORD (__fastcall *g_fnGetUIVar)(DWORD) = NULL;
 static GetUnitStat_t  fnGetStat  = NULL;
 static SetUnitStat_t  fnSetStat  = NULL;
 static AddUnitStat_t  fnAddStat  = NULL;  /* ordinal 10518 — REAL stat add with callbacks */

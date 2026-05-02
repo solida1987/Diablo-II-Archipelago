@@ -782,7 +782,9 @@ static void InitAPI(void) {
 
         /* Resolve D2Client GetUIVar function for panel state queries */
         g_getUIVarAddr = g_d2clientBase + 0xBE400;
-        g_fnGetUIVar = (DWORD(*)(DWORD))CallGetUIVar;
+        /* 1.9.2 fix: cast must include __fastcall so call sites use
+         * the right convention (CallGetUIVar trampoline reads ECX). */
+        g_fnGetUIVar = (DWORD(__fastcall *)(DWORD))CallGetUIVar;
         Log("SKILL TREE: GetUIVar at %08X\n", g_getUIVarAddr);
     }
 

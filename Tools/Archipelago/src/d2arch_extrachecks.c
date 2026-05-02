@@ -921,7 +921,7 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
 
     if (!g_extraEnabled[EX_NPC]) return;
     (void)pPlayerUnit;
-    extern DWORD (*g_fnGetUIVar)(DWORD);
+    extern DWORD (__fastcall *g_fnGetUIVar)(DWORD);
 
     /* Diagnostic gate — log GetUIVar resolver state ONCE so we know
      * whether the function pointer was actually wired by InitAPI. */
