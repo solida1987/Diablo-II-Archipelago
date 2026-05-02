@@ -147,7 +147,13 @@ static void* g_btnConnectBtn = NULL;
 #define CLASS_BTN_END 8
 
 /* Track our created buttons for cleanup */
-#define MAX_TITLE_BTNS 64
+/* 1.9.2 — bumped from 64 to 96. The 6 new extra-check toggles
+ * (Cow / Merc / HF+Runes / NPC / Runeword / Cube) push the cumulative
+ * button count over 64, which silently dropped the last buttons
+ * created (Zone Locking + the 5 quest toggles Hunting/KillZn/Explore/
+ * Waypnt/Levels) because CreateToggleBtnWFC bails out at the cap.
+ * 96 leaves comfortable headroom for future categories. */
+#define MAX_TITLE_BTNS 96
 static void* g_titleBtns[MAX_TITLE_BTNS] = {0};
 static int*  g_titleBtnVals[MAX_TITLE_BTNS] = {0}; /* pointer to the setting value */
 static const wchar_t* g_titleBtnLabels[MAX_TITLE_BTNS] = {0};
