@@ -313,6 +313,32 @@ static void Editor_RenderOverviewPage(int mx, int my, BOOL clicked) {
         }
     }
 
+    /* 1.9.2 — EXTRA CHECKS section. Six independent toggles surfacing
+     * cow / merc / Hellforge+High runes / NPC dialogue / runeword
+     * crafting / cube recipes. Single header with 6 rows beneath
+     * (saves ~120 px vs. one header per category). */
+    {
+        extern BOOL Extra_IsCategoryEnabled(int cat);
+        extern int  Extra_GetSlotCount(int cat);
+        extern int  Extra_CountFiredCategory(int cat);
+        BOOL anyExtra = FALSE;
+        for (int c = 0; c < 6; c++) if (Extra_IsCategoryEnabled(c)) { anyExtra = TRUE; break; }
+        if (anyExtra) {
+            OV_HEADER(lx, ly, L"EXTRA CHECKS");
+            static const wchar_t* exNames[6] = {
+                L"Cow Level", L"Mercenary", L"HF + Runes",
+                L"NPC Talk",  L"Runewords", L"Cube Recipes"
+            };
+            for (int c = 0; c < 6; c++) {
+                if (!Extra_IsCategoryEnabled(c)) continue;
+                int got = Extra_CountFiredCategory(c);
+                int max = Extra_GetSlotCount(c);
+                OV_ROW(lx, ly, exNames[c], got, max, 0);
+                totalDone += got; totalAll += max;
+            }
+        }
+    }
+
     /* ---- RIGHT PAGE: Collection / Zones / Totals ---- */
     int rx = s_rpX, ry = s_rpY;
 
@@ -2113,6 +2139,26 @@ static void RenderEditor(void) {
                     wsprintfW(wb, L"%s: %d / %d", bxNames[5], got, gmMax);
                     fnText(wb, s_itLogBodyX, ry, 0, 0); ry += s_itLogRowH;
                     doneTotal += got; allTotal += gmMax;
+                }
+
+                /* 1.9.2 — extra-check categories appended to the same
+                 * Logbook section. */
+                {
+                    extern BOOL Extra_IsCategoryEnabled(int cat);
+                    extern int  Extra_GetSlotCount(int cat);
+                    extern int  Extra_CountFiredCategory(int cat);
+                    static const wchar_t* exNames[6] = {
+                        L"Cow Level",  L"Mercenary",   L"HF + Runes",
+                        L"NPC Talk",   L"Runewords",   L"Cube Recipes"
+                    };
+                    for (int c = 0; c < 6; c++) {
+                        if (!Extra_IsCategoryEnabled(c)) continue;
+                        int got = Extra_CountFiredCategory(c);
+                        int max = Extra_GetSlotCount(c);
+                        wsprintfW(wb, L"%s: %d / %d", exNames[c], got, max);
+                        fnText(wb, s_itLogBodyX, ry, 0, 0); ry += s_itLogRowH;
+                        doneTotal += got; allTotal += max;
+                    }
                 }
 
                 /* Combined total + status. Reset Points removed — shown

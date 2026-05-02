@@ -56,6 +56,13 @@ static int ts_CheckBarrels        = 0;
 static int ts_CheckChests         = 0;
 static int ts_CheckSetPickups     = 0;
 static int ts_CheckGoldMilestones = 0;
+/* 1.9.2 — Extra check toggles (default 0 = OFF) */
+static int ts_CheckCowLevel        = 0;
+static int ts_CheckMercMilestones  = 0;
+static int ts_CheckHellforgeRunes  = 0;
+static int ts_CheckNpcDialogue     = 0;
+static int ts_CheckRunewordCrafting= 0;
+static int ts_CheckCubeRecipes     = 0;
 /* 1.8.0: game mode dropdown removed — replaced by two independent ON/OFF toggles */
 static int ts_SkillHuntingOn, ts_ZoneLockingOn;
 
@@ -211,6 +218,13 @@ static void TitleSettings_Load(void) {
     ts_CheckChests         = GetPrivateProfileIntA("settings", "CheckChests",         0, ts_iniPath);
     ts_CheckSetPickups     = GetPrivateProfileIntA("settings", "CheckSetPickups",     0, ts_iniPath);
     ts_CheckGoldMilestones = GetPrivateProfileIntA("settings", "CheckGoldMilestones", 0, ts_iniPath);
+    /* 1.9.2 — extra check toggles (default 0 = OFF) */
+    ts_CheckCowLevel         = GetPrivateProfileIntA("settings", "CheckCowLevel",         0, ts_iniPath);
+    ts_CheckMercMilestones   = GetPrivateProfileIntA("settings", "CheckMercMilestones",   0, ts_iniPath);
+    ts_CheckHellforgeRunes   = GetPrivateProfileIntA("settings", "CheckHellforgeRunes",   0, ts_iniPath);
+    ts_CheckNpcDialogue      = GetPrivateProfileIntA("settings", "CheckNpcDialogue",      0, ts_iniPath);
+    ts_CheckRunewordCrafting = GetPrivateProfileIntA("settings", "CheckRunewordCrafting", 0, ts_iniPath);
+    ts_CheckCubeRecipes      = GetPrivateProfileIntA("settings", "CheckCubeRecipes",      0, ts_iniPath);
     /* 1.9.0 — Collection-goal sub-targets (only effective when Goal=15 / Collection) */
     ts_CollGoalSets     = GetPrivateProfileIntA("settings", "CollGoalSets",     1, ts_iniPath);
     ts_CollGoalRunes    = GetPrivateProfileIntA("settings", "CollGoalRunes",    1, ts_iniPath);
@@ -253,6 +267,13 @@ static void TitleSettings_Save(void) {
     SAVE_INT("settings", "CheckChests",         ts_CheckChests);
     SAVE_INT("settings", "CheckSetPickups",     ts_CheckSetPickups);
     SAVE_INT("settings", "CheckGoldMilestones", ts_CheckGoldMilestones);
+    /* 1.9.2 — extra check toggles */
+    SAVE_INT("settings", "CheckCowLevel",         ts_CheckCowLevel);
+    SAVE_INT("settings", "CheckMercMilestones",   ts_CheckMercMilestones);
+    SAVE_INT("settings", "CheckHellforgeRunes",   ts_CheckHellforgeRunes);
+    SAVE_INT("settings", "CheckNpcDialogue",      ts_CheckNpcDialogue);
+    SAVE_INT("settings", "CheckRunewordCrafting", ts_CheckRunewordCrafting);
+    SAVE_INT("settings", "CheckCubeRecipes",      ts_CheckCubeRecipes);
     SAVE_INT("settings", "CollGoalSets",     ts_CollGoalSets);     /* 1.9.0 */
     SAVE_INT("settings", "CollGoalRunes",    ts_CollGoalRunes);    /* 1.9.0 */
     SAVE_INT("settings", "CollGoalGems",     ts_CollGoalGems);     /* 1.9.0 */
@@ -652,6 +673,41 @@ static void TitleSettings_CreateButtons(void) {
         sx = GetPrivateProfileIntA("layout", "GoldMSX", bonusBaseX, ts_iniPath);
         sy = GetPrivateProfileIntA("layout", "GoldMSY", bonusBaseY + 5 * bonusSp, ts_iniPath);
         CreateToggleBtn(sx, sy, L"Gold MS", &ts_CheckGoldMilestones);
+    }
+
+    /* 1.9.2 — Extra check toggles. Default placement is one column to
+     * the right of the Bonus column. INI section [layout] keys:
+     *   CowX/Y, MercX/Y, HFRunesX/Y, NpcX/Y, RunewordX/Y, CubeX/Y
+     * (or shared ExtraX/Y/ExtraSpacing for the master fallback). */
+    {
+        int extraBaseX = GetPrivateProfileIntA("layout", "ExtraX", col2 + 280, ts_iniPath);
+        int extraBaseY = GetPrivateProfileIntA("layout", "ExtraY", shuffleY,   ts_iniPath);
+        int extraSp    = GetPrivateProfileIntA("layout", "ExtraSpacing", sp,   ts_iniPath);
+
+        int sx, sy;
+        sx = GetPrivateProfileIntA("layout", "CowX", extraBaseX, ts_iniPath);
+        sy = GetPrivateProfileIntA("layout", "CowY", extraBaseY + 0 * extraSp, ts_iniPath);
+        CreateToggleBtn(sx, sy, L"Cow Lvl", &ts_CheckCowLevel);
+
+        sx = GetPrivateProfileIntA("layout", "MercX", extraBaseX, ts_iniPath);
+        sy = GetPrivateProfileIntA("layout", "MercY", extraBaseY + 1 * extraSp, ts_iniPath);
+        CreateToggleBtn(sx, sy, L"Merc", &ts_CheckMercMilestones);
+
+        sx = GetPrivateProfileIntA("layout", "HFRunesX", extraBaseX, ts_iniPath);
+        sy = GetPrivateProfileIntA("layout", "HFRunesY", extraBaseY + 2 * extraSp, ts_iniPath);
+        CreateToggleBtn(sx, sy, L"HF+Runes", &ts_CheckHellforgeRunes);
+
+        sx = GetPrivateProfileIntA("layout", "NpcX", extraBaseX, ts_iniPath);
+        sy = GetPrivateProfileIntA("layout", "NpcY", extraBaseY + 3 * extraSp, ts_iniPath);
+        CreateToggleBtn(sx, sy, L"NPC Talk", &ts_CheckNpcDialogue);
+
+        sx = GetPrivateProfileIntA("layout", "RunewordX", extraBaseX, ts_iniPath);
+        sy = GetPrivateProfileIntA("layout", "RunewordY", extraBaseY + 4 * extraSp, ts_iniPath);
+        CreateToggleBtn(sx, sy, L"Runeword", &ts_CheckRunewordCrafting);
+
+        sx = GetPrivateProfileIntA("layout", "CubeX", extraBaseX, ts_iniPath);
+        sy = GetPrivateProfileIntA("layout", "CubeY", extraBaseY + 5 * extraSp, ts_iniPath);
+        CreateToggleBtn(sx, sy, L"Cube", &ts_CheckCubeRecipes);
     }
     /* 1.9.0 — Collection-goal sub-target toggles. Placed in their own
      * column (CollX, CollY) under the right-side quest-toggle stack.

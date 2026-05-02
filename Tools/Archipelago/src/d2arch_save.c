@@ -370,6 +370,12 @@ static void SaveStateFile(void) {
         Bonus_SaveToFile(f);
     }
 
+    /* 1.9.2 — Extra check toggles + counters + fired bitmap. */
+    {
+        extern void Extra_SaveToFile(FILE* f);
+        Extra_SaveToFile(f);
+    }
+
     fclose(f);
     Log("SaveStateFile: saved to %s\n", path);
 }
@@ -438,6 +444,18 @@ static void WriteChecksFile(void) {
         int it = 0, apId;
         while ((apId = Bonus_NextFiredApId(&it)) >= 0) {
             int check_n = apId - 42000;  /* LOCATION_BASE */
+            fprintf(f, "check=%d\n", check_n);
+        }
+    }
+    /* 1.9.2 — Extra check categories (Cow expansion / Merc /
+     * Hellforge+High runes / NPC dialogue / Runeword / Cube). Same
+     * encoding pattern as Bonus checks: apId - LOCATION_BASE. Range
+     * covers 65300..65799 (293 slots active, 207 reserved). */
+    {
+        extern int Extra_NextFiredApId(int* iterState);
+        int it = 0, apId;
+        while ((apId = Extra_NextFiredApId(&it)) >= 0) {
+            int check_n = apId - 42000;
             fprintf(f, "check=%d\n", check_n);
         }
     }
@@ -663,6 +681,12 @@ static void LoadChecks(void) {
             if (strncmp(line, "bonus_", 6) == 0) {
                 extern void Bonus_LoadLine(const char* line);
                 Bonus_LoadLine(line);
+            }
+
+            /* 1.9.2 NEW: extra check toggles + counters + fired bitmap */
+            if (strncmp(line, "extra_", 6) == 0) {
+                extern void Extra_LoadLine(const char* line);
+                Extra_LoadLine(line);
             }
         }
     }
@@ -1772,6 +1796,16 @@ static void OnCharacterLoad(void) {
     {
         extern void Bonus_ResetState(void);
         Bonus_ResetState();
+    }
+
+    /* 1.9.2 — clear extra check state so the new character starts fresh.
+     * LoadStateFile (via Extra_LoadLine) will repopulate counters and
+     * fired bitmap if a per-char state file exists. Toggles are
+     * re-applied either from slot_data (AP mode) or d2arch.ini
+     * defaults (standalone). */
+    {
+        extern void Extra_ResetState(void);
+        Extra_ResetState();
     }
 
     Log("Global state cleared for new character load\n");

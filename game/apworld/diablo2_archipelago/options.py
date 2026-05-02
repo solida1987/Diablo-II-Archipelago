@@ -435,6 +435,84 @@ class CheckGoldMilestones(Toggle):
 
 
 # ============================================================
+# 1.9.2 — Six new check categories on top of the bonus checks above.
+# Each is an independent opt-in toggle. AP location ranges (per
+# DLL d2arch_extrachecks.c):
+#   Cow Level expansion       65300-65308   (9 slots)
+#   Mercenary milestones      65310-65315   (6 slots)
+#   Hellforge + High runes    65320-65331   (12 slots)
+#   Per-NPC dialogue          65400-65480   (81 slots)
+#   Runeword crafting         65500-65549   (50 slots)
+#   Cube recipes              65600-65734   (135 slots)
+# ============================================================
+
+class CheckCowLevel(Toggle):
+    """
+    Cow Level expansion: 9 AP locations covering first entry per
+    difficulty (3), Cow King kills per difficulty (3), and lifetime
+    cow-kill milestones at 100/500/1000 (3). Great if your goal
+    includes farming the Moo Moo Farm.
+    """
+    display_name = "Check Cow Level"
+    default = False
+
+
+class CheckMercMilestones(Toggle):
+    """
+    Mercenary milestones: 6 AP locations covering first hire,
+    5/10/25/50 lifetime resurrections, and reaching merc level 30+.
+    Encourages keeping a merc alive across the campaign.
+    """
+    display_name = "Check Merc Milestones"
+    default = False
+
+
+class CheckHellforgeRunes(Toggle):
+    """
+    Hellforge + High Runes: 12 AP locations covering Hellforge use
+    per difficulty (3) and first pickup of each high-rune tier
+    (Pul-Gul, Vex-Ber, Jah-Zod) per difficulty (9). Pure
+    progression encouragement for endgame rune farming.
+    """
+    display_name = "Check Hellforge & High Runes"
+    default = False
+
+
+class CheckNpcDialogue(Toggle):
+    """
+    Per-NPC dialogue: 81 AP locations covering first dialogue with
+    each major NPC across all 3 difficulties. 1.9.2 ships the
+    apworld locations and AP wiring; the in-game DLL detection hook
+    lands in 1.9.3 (until then the slots can be unlocked via the
+    AP server's /release command if you want to test the placement).
+    """
+    display_name = "Check NPC Dialogue"
+    default = False
+
+
+class CheckRunewordCrafting(Toggle):
+    """
+    Runeword crafting: 50 AP locations covering the first time you
+    create each runeword. 1.9.2 ships the apworld locations and AP
+    wiring; in-game detection hangs off the existing Coll_ProcessItem
+    runeword-flag transition and is finalized in 1.9.3.
+    """
+    display_name = "Check Runeword Crafting"
+    default = False
+
+
+class CheckCubeRecipes(Toggle):
+    """
+    Horadric cube recipe completions: 135 AP locations covering the
+    first successful completion of each cube recipe. 1.9.2 ships the
+    apworld locations and AP wiring; the cube-state diff detection
+    lands in 1.9.3.
+    """
+    display_name = "Check Cube Recipes"
+    default = False
+
+
+# ============================================================
 # Combined Options Dataclass
 # ============================================================
 
@@ -483,6 +561,13 @@ _FIELDS = [
     ("check_chests",           CheckChests),
     ("check_set_pickups",      CheckSetPickups),
     ("check_gold_milestones",  CheckGoldMilestones),
+    # Extra check categories (1.9.2 — opt-in)
+    ("check_cow_level",         CheckCowLevel),
+    ("check_merc_milestones",   CheckMercMilestones),
+    ("check_hellforge_runes",   CheckHellforgeRunes),
+    ("check_npc_dialogue",      CheckNpcDialogue),
+    ("check_runeword_crafting", CheckRunewordCrafting),
+    ("check_cube_recipes",      CheckCubeRecipes),
     # DeathLink
     ("death_link",             DeathLink),
 ]

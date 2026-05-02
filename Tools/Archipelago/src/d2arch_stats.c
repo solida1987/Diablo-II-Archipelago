@@ -439,6 +439,15 @@ void Stats_OnPandemoniumRunComplete(void) {
 void Stats_OnAreaEnter(int newAreaId) {
     if (newAreaId == 39) g_charStats.cowLevelEntries++;
     else if (newAreaId == 38) g_charStats.tristramVisits++;
+    /* 1.9.2: Extra check Cat 1 — first cow-level entry per difficulty.
+     * Forward-declared because d2arch_extrachecks.c is included AFTER
+     * d2arch_stats.c in the unity build. Idempotent inside the callee
+     * (bitmap dedup) so safe to call on every entry. */
+    if (newAreaId == 39) {
+        extern void Extra_OnCowLevelEnter(int diff);
+        extern int  g_currentDifficulty;
+        Extra_OnCowLevelEnter(g_currentDifficulty);
+    }
 }
 
 /* Fired when an item's IFLAG_RUNEWORD bit transitions 0→1 — i.e. the

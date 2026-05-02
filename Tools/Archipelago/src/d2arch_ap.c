@@ -577,6 +577,17 @@ static void LoadAPSettings(void) {
             extern void Bonus_ApplyToggles(BOOL,BOOL,BOOL,BOOL,BOOL,BOOL);
             Bonus_ApplyToggles(shr, urn, bar, chs, set, gold);
         }
+        /* 1.9.2 — Extra check toggles for standalone */
+        {
+            BOOL cow  = GetPrivateProfileIntA("settings", "CheckCowLevel",         0, iniPath) != 0;
+            BOOL merc = GetPrivateProfileIntA("settings", "CheckMercMilestones",   0, iniPath) != 0;
+            BOOL hf   = GetPrivateProfileIntA("settings", "CheckHellforgeRunes",   0, iniPath) != 0;
+            BOOL npc  = GetPrivateProfileIntA("settings", "CheckNpcDialogue",      0, iniPath) != 0;
+            BOOL rw   = GetPrivateProfileIntA("settings", "CheckRunewordCrafting", 0, iniPath) != 0;
+            BOOL cube = GetPrivateProfileIntA("settings", "CheckCubeRecipes",      0, iniPath) != 0;
+            extern void Extra_ApplyToggles(BOOL,BOOL,BOOL,BOOL,BOOL,BOOL);
+            Extra_ApplyToggles(cow, merc, hf, npc, rw, cube);
+        }
         Log("INI settings: goal=%d mode=%d monshuffle=%d bossshuffle=%d xp=%dx pool=%d classFilter=%d\n",
             g_apGoal, g_skillHuntingOn, g_monsterShuffleEnabled, g_bossShuffleEnabled, g_xpMultiplier, g_apSkillPoolSize, g_classFilter);
         return;
@@ -655,6 +666,24 @@ static void LoadAPSettings(void) {
                 extern void Bonus_ApplyToggles(BOOL,BOOL,BOOL,BOOL,BOOL,BOOL);
                 Bonus_ApplyToggles(s_chShr!=0, s_chUrn!=0, s_chBar!=0,
                                    s_chCh!=0,  s_chSet!=0, s_chGold!=0);
+            }
+        }
+        /* 1.9.2 — Extra check toggles (Cow / Merc / Hellforge+High runes /
+         * NPC dialogue / Runeword crafting / Cube recipes). Same parse
+         * pattern as Bonus toggles. */
+        {
+            static int s_xCow=0, s_xMerc=0, s_xHF=0, s_xNpc=0, s_xRw=0, s_xCube=0;
+            static int s_anyExtraSeen=0;
+            if (sscanf(line, "check_cow_level=%d",       &ival) == 1) { s_xCow  = ival; s_anyExtraSeen=1; }
+            if (sscanf(line, "check_merc_milestones=%d", &ival) == 1) { s_xMerc = ival; s_anyExtraSeen=1; }
+            if (sscanf(line, "check_hellforge_runes=%d", &ival) == 1) { s_xHF   = ival; s_anyExtraSeen=1; }
+            if (sscanf(line, "check_npc_dialogue=%d",    &ival) == 1) { s_xNpc  = ival; s_anyExtraSeen=1; }
+            if (sscanf(line, "check_runeword_crafting=%d", &ival) == 1) { s_xRw   = ival; s_anyExtraSeen=1; }
+            if (sscanf(line, "check_cube_recipes=%d",    &ival) == 1) { s_xCube = ival; s_anyExtraSeen=1; }
+            if (s_anyExtraSeen) {
+                extern void Extra_ApplyToggles(BOOL,BOOL,BOOL,BOOL,BOOL,BOOL);
+                Extra_ApplyToggles(s_xCow!=0, s_xMerc!=0, s_xHF!=0,
+                                   s_xNpc!=0, s_xRw!=0,   s_xCube!=0);
             }
         }
         /* 1.9.0 — Collection-goal sub-targets. Only applied when g_apGoal==3.
@@ -1190,13 +1219,28 @@ static void PollAPUnlocks(void) {
              * counters reflect the AP-server view (not just physical
              * triggers in-game).
              *
-             * Bonus loc range: 60000..65999. */
-            if (unlockLoc >= 60000 && unlockLoc < 66000 &&
+             * Bonus loc range: 60000..65299 (1.9.2 split — was 65999). */
+            if (unlockLoc >= 60000 && unlockLoc < 65300 &&
                 unlockSender[0] != 0 && g_apSlot[0] != 0 &&
                 _stricmp(unlockSender, g_apSlot) == 0) {
                 extern BOOL Bonus_OnAPItemReceived(int apId);
                 if (Bonus_OnAPItemReceived(unlockLoc)) {
                     Log("AP BONUS-TRACKED: loc=%d (item=%d)\n", unlockLoc, apId);
+                }
+            }
+
+            /* 1.9.2 — Extra check auto-track. When a self-released
+             * cow / merc / hellforge / NPC / runeword / cube check
+             * comes back, mark the corresponding fired bit so the F1
+             * Overview / Logbook counters match the AP-server view.
+             *
+             * Extra loc range: 65300..65799. */
+            if (unlockLoc >= 65300 && unlockLoc < 65800 &&
+                unlockSender[0] != 0 && g_apSlot[0] != 0 &&
+                _stricmp(unlockSender, g_apSlot) == 0) {
+                extern BOOL Extra_OnAPItemReceived(int apId);
+                if (Extra_OnAPItemReceived(unlockLoc)) {
+                    Log("AP EXTRA-TRACKED: loc=%d (item=%d)\n", unlockLoc, apId);
                 }
             }
 

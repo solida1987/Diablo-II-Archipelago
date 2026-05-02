@@ -1506,6 +1506,21 @@ static void Coll_ProcessItem(void* pItem, BOOL requireLegit) {
         }
     }
     Coll_MarkSlotCollected(slotIdx);
+
+    /* 1.9.2 Extra check Cat 3 — High-rune pickup detection.
+     * Rune slots are 32..64 (r01..r33). High runes are r21..r33 (Pul+).
+     * Extra_OnHighRunePickup is dedup-protected internally (bitmap
+     * fire-once per tier×difficulty), so calling on every observed
+     * rune is safe. Forward-decl because extrachecks.c is included
+     * after collections.c in the unity build. */
+    if (slotIdx >= COLL_SLOT_RUNES_BASE && slotIdx < COLL_SLOT_GEMS_BASE) {
+        int runeIdx = slotIdx - COLL_SLOT_RUNES_BASE + 1;  /* 1..33 = r01..r33 */
+        if (runeIdx >= 21) {
+            extern void Extra_OnHighRunePickup(int runeIdx, int diff);
+            extern int  g_currentDifficulty;
+            Extra_OnHighRunePickup(runeIdx, g_currentDifficulty);
+        }
+    }
 }
 
 /* 1.9.0 — STK sidecar scan. Walks the per-character + account-wide

@@ -448,7 +448,13 @@ static int __fastcall OperateHandlerHook(void* pGame, void* pPlayer,
                         case 42: /* SanctuaryTome (Anya) */
                         case 45: /* SewerLever (Travincal) */
                         case 48: /* TrappedSoul (Anya alt) */
-                        case 49: /* HellForge */
+                        case 49: /* HellForge — also fires 1.9.2 Cat 3 */
+                            {
+                                extern void Extra_OnHellforgeUsed(int diff);
+                                Extra_OnHellforgeUsed(g_currentDifficulty);
+                            }
+                            g_charStats.questObjectsInteracted++;
+                            break;
                         case 52: case 54: case 55: case 56: /* DiabloSeals */
                         case 53: /* CompellingOrb */
                         case 61: /* HarrogathMainGate */

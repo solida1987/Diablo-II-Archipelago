@@ -66,6 +66,17 @@
                                    accessors) and BEFORE hooks.c (which
                                    calls Bonus_OnXBroken from the existing
                                    object-interact dispatch). */
+#include "d2arch_extrachecks.c" /* 1.9.2 NEW: Six new check categories
+                                   (Cow expansion / Merc milestones /
+                                   Hellforge+High runes / Per-NPC dialogue /
+                                   Runeword crafting / Cube recipes).
+                                   Mirrors bonuschecks.c structure. Must
+                                   come AFTER bonuschecks.c so the
+                                   include-order placement (between
+                                   bonuschecks.c and hooks.c) keeps the
+                                   detection entry points visible to
+                                   gameloop.c / save.c / ap.c / stats.c /
+                                   editor.c which all #include after this. */
 #include "d2arch_hooks.c"       /* 1.9.0 NEW: D2Game detours that drive
                                    item-use + object-interact counters in
                                    stats.c. Must come AFTER stats.c so

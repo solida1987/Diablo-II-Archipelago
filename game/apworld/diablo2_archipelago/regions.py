@@ -451,7 +451,9 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
         # Place each non-gate location in open_region with access rule
         # derived from zone → (act, region_num)
         from BaseClasses import LocationProgressType
-        ZL_BONUS_TYPES = ("bonus_object", "bonus_gold", "bonus_setpickup")
+        ZL_BONUS_TYPES = ("bonus_object", "bonus_gold", "bonus_setpickup",
+                          "extra_cow", "extra_merc", "extra_hfrunes",
+                          "extra_npc", "extra_runeword", "extra_cube")
         for quest_id, loc_name, quest_type, classification, loc_id, diff in active_locations:
             if quest_type == "gate":
                 continue  # already placed by _build_gate_region_tree
@@ -642,7 +644,9 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
     # progression items would soft-lock multiworld players. Filler-only
     # items at these slots are harmless if never collected.
     from BaseClasses import LocationProgressType
-    BONUS_TYPES = ("bonus_object", "bonus_gold", "bonus_setpickup")
+    BONUS_TYPES = ("bonus_object", "bonus_gold", "bonus_setpickup",
+                   "extra_cow", "extra_merc", "extra_hfrunes",
+                   "extra_npc", "extra_runeword", "extra_cube")
     for quest_id, loc_name, quest_type, classification, loc_id, diff in active_locations:
         act_num = _quest_id_to_act(quest_id)
         if act_num in act_regions:

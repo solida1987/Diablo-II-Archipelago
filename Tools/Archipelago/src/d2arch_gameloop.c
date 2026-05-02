@@ -316,12 +316,14 @@ static void ProcessPendingGameTick(void) {
         extern void* (__stdcall *fnGetPlayer)(void);
         extern void Coll_OnGameTick(void* pPlayerUnit);
         extern void Stats_OnGameTick(void* pPlayerUnit);
+        extern void Extra_PollMerc(void* pPlayer);  /* 1.9.2 Cat 2 */
         if (fnGetPlayer) {
             void* pCliPlayer = NULL;
             __try { pCliPlayer = fnGetPlayer(); } __except(1) {}
             if (pCliPlayer) {
                 Coll_OnGameTick(pCliPlayer);
                 Stats_OnGameTick(pCliPlayer);  /* 1.9.0 — playtime + death-edge */
+                Extra_PollMerc(pCliPlayer);    /* 1.9.2 — merc hire/resurrect/level */
             }
         }
     }
@@ -2150,6 +2152,15 @@ static void ScanMonsters(void) {
                                                     currentArea, g_currentDifficulty);
                             }
 
+                            /* 1.9.2 Extra check Cat 1 — Hell Bovine lifetime counter.
+                                * Every cow kill (regular OR Cow King) bumps the counter
+                                * which fires the 100/500/1000 milestones. Idempotent
+                                * dedup via the bitmap inside Extra_OnCowKilled. */
+                            if (txtId == 391) {
+                                extern void Extra_OnCowKilled(void);
+                                Extra_OnCowKilled();
+                            }
+
                             if (IsTrackedBoss(txtId)) {
                                 Log("BOSS KILLED: txt=%d\n", txtId);
                                 for (int a = 0; a < 5; a++)
@@ -2171,6 +2182,13 @@ static void ScanMonsters(void) {
                                     if (typeFlag & 0x02) { /* MONTYPEFLAG_SUPERUNIQUE */
                                         WORD hcIdx = *(WORD*)(pMonData + 0x26);
                                         Log("SUPERUNIQUE KILLED: hcIdx=%d txtId=%d typeFlag=0x%02X area=%d\n", hcIdx, txtId, typeFlag, currentArea);
+                                        /* 1.9.2 Extra check Cat 1 — Cow King kill per difficulty.
+                                         * SU row 39 = "The Cow King". Forward-decl because
+                                         * d2arch_extrachecks.c is included after gameloop.c. */
+                                        if (hcIdx == 39) {
+                                            extern void Extra_OnCowKingKilled(int diff);
+                                            Extra_OnCowKingKilled(g_currentDifficulty);
+                                        }
                                         BOOL matched = FALSE;
                                         for (int a2 = 0; a2 < 5; a2++)
                                             for (int q2 = 0; q2 < g_acts[a2].num; q2++) {

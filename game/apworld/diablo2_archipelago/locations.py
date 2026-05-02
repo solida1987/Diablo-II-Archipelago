@@ -455,6 +455,82 @@ for i, gold in enumerate(GOLD_MILESTONE_HELL):
 for i in range(127):
     location_table[f"Set Pickup #{i + 1}"] = BONUS_BASE_SETPICK + i
 
+
+# ============================================================
+# 1.9.2 — Six new check categories on top of the bonus checks above.
+# Layout (must match DLL d2arch_extrachecks.c EXTRA_BASE_*):
+#   65300-65302  Cow Level entry × diff           (3)
+#   65303-65305  Cow King kill × diff             (3)
+#   65306-65308  Cow lifetime milestones (100/500/1000) (3)
+#   65310        Merc first hire                  (1)
+#   65311-65314  Merc resurrects (5/10/25/50)     (4)
+#   65315        Merc reaches level 30+           (1)
+#   65320-65322  Hellforge use × diff             (3)
+#   65323-65331  High rune (Pul-Gul/Vex-Ber/Jah-Zod) × diff (9)
+#   65400-65480  NPC dialogue (27 NPCs × 3 diff)  (81)
+#   65500-65549  Runeword craft (50 RWs)          (50)
+#   65600-65734  Cube recipe (135 recipes)        (135)
+# Total: 293 new locations (293 active, headroom to 65799).
+# ============================================================
+
+EXTRA_BASE_COW       = 65300
+EXTRA_BASE_MERC      = 65310
+EXTRA_BASE_HFRUNES   = 65320
+EXTRA_BASE_NPC       = 65400
+EXTRA_BASE_RUNEWORD  = 65500
+EXTRA_BASE_CUBE      = 65600
+
+# Cow level expansion (9 slots)
+for d in range(3):
+    location_table[f"Cow Level Entry{DIFF_LABEL[d]}"]  = EXTRA_BASE_COW + 0 + d
+for d in range(3):
+    location_table[f"Cow King Killed{DIFF_LABEL[d]}"]  = EXTRA_BASE_COW + 3 + d
+for i, n in enumerate([100, 500, 1000]):
+    location_table[f"Cow Kills: {n:,}"]                 = EXTRA_BASE_COW + 6 + i
+
+# Mercenary milestones (6 slots)
+location_table["First Mercenary Hired"] = EXTRA_BASE_MERC + 0
+for i, n in enumerate([5, 10, 25, 50]):
+    location_table[f"Merc Resurrects: {n}"] = EXTRA_BASE_MERC + 1 + i
+location_table["Mercenary Reaches Level 30"] = EXTRA_BASE_MERC + 5
+
+# Hellforge + High runes (12 slots)
+for d in range(3):
+    location_table[f"Hellforge Used{DIFF_LABEL[d]}"] = EXTRA_BASE_HFRUNES + 0 + d
+EXTRA_HF_RUNE_TIERS = [("Pul-Gul", "Pul-Gul"),
+                       ("Vex-Ber", "Vex-Ber"),
+                       ("Jah-Zod", "Jah-Zod")]
+for tier_idx, (name_short, name_full) in enumerate(EXTRA_HF_RUNE_TIERS):
+    for d in range(3):
+        loc_id = EXTRA_BASE_HFRUNES + 3 + tier_idx * 3 + d
+        location_table[f"High Rune {name_full}{DIFF_LABEL[d]}"] = loc_id
+
+# NPC dialogue (27 NPCs × 3 diff = 81 slots)
+EXTRA_NPC_NAMES = [
+    "Akara", "Charsi", "Gheed", "Kashya", "Warriv (A1)", "Cain (A1)",
+    "Atma", "Drognan", "Elzix", "Fara", "Greiz", "Lysander", "Meshif (A2)", "Jerhyn",
+    "Alkor", "Asheara", "Hratli", "Ormus", "Cain (A3)",
+    "Tyrael", "Halbu", "Jamella",
+    "Anya", "Larzuk", "Malah", "Nihlathak", "Qual-Kehk",
+]
+assert len(EXTRA_NPC_NAMES) == 27
+for npc_idx, npc_name in enumerate(EXTRA_NPC_NAMES):
+    for d in range(3):
+        loc_id = EXTRA_BASE_NPC + npc_idx * 3 + d
+        location_table[f"NPC Dialogue: {npc_name}{DIFF_LABEL[d]}"] = loc_id
+
+# Runeword crafting (50 slots) — 1.9.2 uses generic numbered names
+# until the 1.9.3 runeword-table mapping ships, at which point the
+# names will be replaced with the actual runeword names. Slot indices
+# are stable across versions so existing seeds aren't invalidated.
+for i in range(50):
+    location_table[f"Runeword Crafted #{i + 1}"] = EXTRA_BASE_RUNEWORD + i
+
+# Cube recipes (135 slots) — 1.9.2 uses generic numbered names until
+# the 1.9.3 CubeMain.txt mapping ships.
+for i in range(135):
+    location_table[f"Cube Recipe #{i + 1}"] = EXTRA_BASE_CUBE + i
+
 # Reverse lookup: ap_id -> name
 location_id_to_name: dict[int, str] = {v: k for k, v in location_table.items()}
 

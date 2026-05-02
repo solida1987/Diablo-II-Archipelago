@@ -279,6 +279,81 @@ class Diablo2ArchipelagoWorld(World):
                 active.append((-(ap_id), f"Set Pickup #{i + 1}",
                                "bonus_setpickup", ItemClassification.filler, ap_id, 0))
 
+        # ============================================================
+        # 1.9.2 — Six new check categories (Cow / Merc / HF+Runes /
+        # NPC / Runeword / Cube). All filler; the DLL's standalone
+        # reward path falls back to flat 1000 gold per slot.
+        # ============================================================
+
+        # Cow Level expansion (9 slots)
+        if self.options.check_cow_level.value:
+            from .locations import EXTRA_BASE_COW
+            for d in range(num_difficulties):
+                ap_id = EXTRA_BASE_COW + 0 + d
+                active.append((-(ap_id), f"Cow Level Entry{DIFF_LABEL[d]}",
+                               "extra_cow", ItemClassification.filler, ap_id, d))
+            for d in range(num_difficulties):
+                ap_id = EXTRA_BASE_COW + 3 + d
+                active.append((-(ap_id), f"Cow King Killed{DIFF_LABEL[d]}",
+                               "extra_cow", ItemClassification.filler, ap_id, d))
+            for i, n in enumerate([100, 500, 1000]):
+                ap_id = EXTRA_BASE_COW + 6 + i
+                active.append((-(ap_id), f"Cow Kills: {n:,}",
+                               "extra_cow", ItemClassification.filler, ap_id, 0))
+
+        # Mercenary milestones (6 slots — single-difficulty, lifetime)
+        if self.options.check_merc_milestones.value:
+            from .locations import EXTRA_BASE_MERC
+            ap_id = EXTRA_BASE_MERC + 0
+            active.append((-(ap_id), "First Mercenary Hired",
+                           "extra_merc", ItemClassification.filler, ap_id, 0))
+            for i, n in enumerate([5, 10, 25, 50]):
+                ap_id = EXTRA_BASE_MERC + 1 + i
+                active.append((-(ap_id), f"Merc Resurrects: {n}",
+                               "extra_merc", ItemClassification.filler, ap_id, 0))
+            ap_id = EXTRA_BASE_MERC + 5
+            active.append((-(ap_id), "Mercenary Reaches Level 30",
+                           "extra_merc", ItemClassification.filler, ap_id, 0))
+
+        # Hellforge + High runes (12 slots)
+        if self.options.check_hellforge_runes.value:
+            from .locations import EXTRA_BASE_HFRUNES
+            for d in range(num_difficulties):
+                ap_id = EXTRA_BASE_HFRUNES + 0 + d
+                active.append((-(ap_id), f"Hellforge Used{DIFF_LABEL[d]}",
+                               "extra_hfrunes", ItemClassification.filler, ap_id, d))
+            tier_names = ["Pul-Gul", "Vex-Ber", "Jah-Zod"]
+            for tier_idx, tname in enumerate(tier_names):
+                for d in range(num_difficulties):
+                    ap_id = EXTRA_BASE_HFRUNES + 3 + tier_idx * 3 + d
+                    active.append((-(ap_id), f"High Rune {tname}{DIFF_LABEL[d]}",
+                                   "extra_hfrunes", ItemClassification.filler, ap_id, d))
+
+        # NPC dialogue (81 slots — 27 NPCs × 3 diff)
+        if self.options.check_npc_dialogue.value:
+            from .locations import EXTRA_BASE_NPC, EXTRA_NPC_NAMES
+            for npc_idx, npc_name in enumerate(EXTRA_NPC_NAMES):
+                for d in range(num_difficulties):
+                    ap_id = EXTRA_BASE_NPC + npc_idx * 3 + d
+                    active.append((-(ap_id), f"NPC Dialogue: {npc_name}{DIFF_LABEL[d]}",
+                                   "extra_npc", ItemClassification.filler, ap_id, d))
+
+        # Runeword crafting (50 slots)
+        if self.options.check_runeword_crafting.value:
+            from .locations import EXTRA_BASE_RUNEWORD
+            for i in range(50):
+                ap_id = EXTRA_BASE_RUNEWORD + i
+                active.append((-(ap_id), f"Runeword Crafted #{i + 1}",
+                               "extra_runeword", ItemClassification.filler, ap_id, 0))
+
+        # Cube recipes (135 slots)
+        if self.options.check_cube_recipes.value:
+            from .locations import EXTRA_BASE_CUBE
+            for i in range(135):
+                ap_id = EXTRA_BASE_CUBE + i
+                active.append((-(ap_id), f"Cube Recipe #{i + 1}",
+                               "extra_cube", ItemClassification.filler, ap_id, 0))
+
         return active
 
     def create_regions(self) -> None:
@@ -633,6 +708,17 @@ class Diablo2ArchipelagoWorld(World):
             "check_chests":          self.options.check_chests.value,
             "check_set_pickups":     self.options.check_set_pickups.value,
             "check_gold_milestones": self.options.check_gold_milestones.value,
+            # 1.9.2: Six new check categories on top of bonus checks.
+            # See locations.py EXTRA_BASE_* and the DLL's
+            # d2arch_extrachecks.c module. Categories 4-6 (NPC/RW/Cube)
+            # ship apworld locations + AP self-release wiring in 1.9.2;
+            # DLL detection hooks land in 1.9.3.
+            "check_cow_level":         self.options.check_cow_level.value,
+            "check_merc_milestones":   self.options.check_merc_milestones.value,
+            "check_hellforge_runes":   self.options.check_hellforge_runes.value,
+            "check_npc_dialogue":      self.options.check_npc_dialogue.value,
+            "check_runeword_crafting": self.options.check_runeword_crafting.value,
+            "check_cube_recipes":      self.options.check_cube_recipes.value,
             # 1.8.0 — Gate preloads (auto-generated per slot in generate_early)
             "act1_preload_normal":    self.preloads[(1, 0)],
             "act1_preload_nightmare": self.preloads[(1, 1)],
