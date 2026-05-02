@@ -11,7 +11,7 @@ internal balance knobs:
 """
 from dataclasses import dataclass
 
-from Options import Choice, Range, Toggle, DeathLink, PerGameCommonOptions
+from Options import Choice, Range, Toggle, DeathLink, PerGameCommonOptions, OptionGroup
 
 
 # ============================================================
@@ -587,3 +587,85 @@ Diablo2ArchipelagoOptions = make_dataclass(
     _FIELDS,
     bases=(PerGameCommonOptions,),
 )
+
+
+# ============================================================
+# 1.9.2 — Option Groups for the Archipelago Options Creator UI
+#
+# Groups the ~150 options into 13 logical categories so the
+# Options Creator can render them as expandable sections instead
+# of one giant flat list. Long-tail Collection groups (32 sets +
+# 33 runes + 10 specials) are collapsed-by-default to keep the
+# panel compact for the average user.
+#
+# Imported and bound to Diablo2ArchipelagoWorld.option_groups
+# in __init__.py so the World class controls the rendering.
+# ============================================================
+
+OPTION_GROUPS = [
+    OptionGroup("Game Mode", [
+        SkillHunting,
+        ZoneLocking,
+    ]),
+    OptionGroup("Goal & Win Condition", [
+        Goal,
+        CollectionTargetGems,
+        CollectionGoldTarget,
+    ]),
+    OptionGroup("Quest Categories", [
+        QuestHunting,
+        QuestKillZones,
+        QuestExploration,
+        QuestWaypoints,
+        QuestLevelMilestones,
+    ]),
+    OptionGroup("Skill Class Filter", [
+        SkillClassFilter,
+        IncludeAmazon,
+        IncludeSorceress,
+        IncludeNecromancer,
+        IncludePaladin,
+        IncludeBarbarian,
+        IncludeDruid,
+        IncludeAssassin,
+    ]),
+    OptionGroup("Difficulty & XP", [
+        XPMultiplier,
+    ]),
+    OptionGroup("Shuffles", [
+        MonsterShuffle,
+        BossShuffle,
+        EntranceShuffle,
+    ]),
+    OptionGroup("Filler Items", [
+        TrapsEnabled,
+    ]),
+    OptionGroup("Bonus Checks (1.9.0 — opt-in)", [
+        CheckShrines,
+        CheckUrns,
+        CheckBarrels,
+        CheckChests,
+        CheckSetPickups,
+        CheckGoldMilestones,
+    ]),
+    OptionGroup("Extra Checks (1.9.2 — opt-in)", [
+        CheckCowLevel,
+        CheckMercMilestones,
+        CheckHellforgeRunes,
+        CheckNpcDialogue,
+        CheckRunewordCrafting,
+        CheckCubeRecipes,
+    ]),
+    OptionGroup("Collection — Sets (32 individual toggles)",
+                _COLL_SET_CLASSES,
+                start_collapsed=True),
+    OptionGroup("Collection — Runes (33 individual toggles)",
+                _COLL_RUNE_CLASSES,
+                start_collapsed=True),
+    OptionGroup("Collection — Specials (10 individual toggles)",
+                _COLL_SPECIAL_CLASSES,
+                start_collapsed=True),
+    OptionGroup("Multiworld", [
+        DeathLink,
+    ]),
+]

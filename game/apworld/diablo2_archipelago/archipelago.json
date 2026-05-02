@@ -1,6 +1,9 @@
 {
     "game": "Diablo II Archipelago",
-    "creator": "D2Arch Team",
-    "filler_item_name": "Gold Bundle (Small)",
-    "compatible_version": "0.5.0"
+    "authors": ["D2Arch Team"],
+    "world_version": "1.9.2",
+    "minimum_ap_version": "0.5.0",
+    "compatible_version": 7,
+    "version": 7,
+    "filler_item_name": "Gold Bundle (Small)"
 }

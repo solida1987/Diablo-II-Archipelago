@@ -22,6 +22,7 @@ from .locations import (
 )
 from .options import (
     Diablo2ArchipelagoOptions,
+    OPTION_GROUPS,
     _COLL_SETS, _COLL_RUNES, _COLL_SPECIALS,
 )
 from .locations import COLL_LOCATIONS, COLL_LOC_BASE
@@ -61,6 +62,10 @@ def _build_coll_mask(field_prefix, opts, lo, hi, _kind="set"):
 
 class Diablo2ArchipelagoWebWorld(WebWorld):
     theme = "dirt"
+    # 1.9.2 — Some AP versions look for option_groups on WebWorld
+    # instead of World. Mirror it here too so the Options Creator
+    # picks it up regardless of AP framework version.
+    option_groups = OPTION_GROUPS
     tutorials = [
         Tutorial(
             "Diablo II Archipelago Setup Guide",
@@ -84,6 +89,13 @@ class Diablo2ArchipelagoWorld(World):
     web = Diablo2ArchipelagoWebWorld()
     options_dataclass = Diablo2ArchipelagoOptions
     options: Diablo2ArchipelagoOptions
+
+    # 1.9.2 — option_groups categorises ~150 options into 13 logical
+    # sections so the Archipelago Options Creator (and YAML template
+    # generator) can render them as expandable categories instead of
+    # one giant flat list under "Game Options". Defined in options.py
+    # at the bottom of the file (after every option class is in scope).
+    option_groups = OPTION_GROUPS
 
     topology_present = True
     # 1.9.2: bumped from 2 to 3 because we added 293 new locations
