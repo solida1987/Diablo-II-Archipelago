@@ -1,5 +1,5 @@
 name: D2_Custom_Goal
-description: Test 21 — Custom goal with Hell bosses + cow king + bulk completions
+description: Test 21 — Custom goal with Hell bosses + cow king + bulk completions (1.9.2 individual toggles format)
 game: Diablo II Archipelago
 Diablo II Archipelago:
   progression_balancing: 50
@@ -8,16 +8,16 @@ Diablo II Archipelago:
   zone_locking: false
   goal: custom
   custom_goal_gold_target: 5000000
-  custom_goal_targets:
-    - kill_andariel_hell
-    - kill_duriel_hell
-    - kill_mephisto_hell
-    - kill_diablo_hell
-    - kill_baal_hell
-    - kill_cow_king_hell
-    - hellfire_torch_complete
-    - all_runeword_crafting
-    - all_cube_recipes
+  # Individual checkbox toggles (1.9.2 format — replaces old OptionSet)
+  custom_goal_kill_andariel_hell: true
+  custom_goal_kill_duriel_hell: true
+  custom_goal_kill_mephisto_hell: true
+  custom_goal_kill_diablo_hell: true
+  custom_goal_kill_baal_hell: true
+  custom_goal_kill_cow_king_hell: true
+  custom_goal_hellfire_torch_complete: true
+  custom_goal_all_runeword_crafting: true
+  custom_goal_all_cube_recipes: true
   quest_hunting: true
   quest_kill_zones: true
   quest_exploration: true

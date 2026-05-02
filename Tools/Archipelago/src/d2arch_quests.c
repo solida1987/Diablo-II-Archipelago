@@ -1282,6 +1282,13 @@ static void Quests_WriteSpoilerFile(void) {
     extern void Extra_AppendSpoilerToFile(FILE* f);
     Extra_AppendSpoilerToFile(f);
 
+    /* 1.9.2 — Append Custom Goal section ONLY when goal=4 (custom).
+     * Lists every required target (from CSV parse) + current fired
+     * status, plus the gold target. Lets the standalone player see
+     * exactly what they need to complete to win. */
+    extern void CustomGoal_AppendSpoilerToFile(FILE* f);
+    CustomGoal_AppendSpoilerToFile(f);
+
     /* 1.9.2 — Grand total footer. Sums every check category that the
      * F1 Overview page displays so the spoiler footer matches the
      * in-game "Total Checks" line exactly. The Overview includes:

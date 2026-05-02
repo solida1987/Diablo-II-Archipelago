@@ -45,31 +45,33 @@ class Goal(Choice):
     """
     Determines what condition you must satisfy to win.
 
-    Full Normal:    beat Baal on Normal.
-    Full Nightmare: beat Baal on Normal AND Nightmare.
-    Full Hell:      beat Baal on Normal, Nightmare, AND Hell.
-    Collection:     fill the F1 Collection book — every targeted set,
-                    rune, gem, special item, and (optionally) a gold
-                    threshold. Difficulty progression is OPTIONAL in
-                    this mode; you win the moment your collection
-                    targets are satisfied.
-    Custom:         build your own win condition — pick any
-                    combination of the 50+ targets in the
-                    `custom_goal_targets` option below (act bosses,
-                    super-uniques, bulk completions, etc.) and an
-                    optional `custom_goal_gold_target`. The goal
-                    completes when ALL selected targets are met AND
-                    your lifetime gold reaches the (optional) gold
-                    target. AP-only — standalone defaults to
-                    Full Normal.
+    Full Normal:     beat Baal on Normal.
+    Full Nightmare:  beat Baal on Normal AND Nightmare.
+    Full Hell:       beat Baal on Normal, Nightmare, AND Hell.
+    Gold Collection: simple lifetime-gold goal. Win when your
+                     character's lifetime gold reaches the value set
+                     in 'Collection: Gold Target'. No other constraints.
+    Custom:          build your own win condition with checkboxes.
+                     Toggle on any combination of the 50+ Custom Goal
+                     options below (subsystems, act bosses, specific
+                     kills, bulk checks) and an optional
+                     custom_goal_gold_target. Goal completes when ALL
+                     selected items are achieved AND lifetime gold
+                     reaches the gold target. AP-only — standalone
+                     defaults to Full Normal.
     """
     display_name = "Goal"
     option_full_normal = 0
     option_full_nightmare = 1
     option_full_hell = 2
-    option_collection = 3
+    option_gold_collection = 3
     option_custom = 4
     default = 0
+    # 1.9.2: 'collection' alias keeps older YAMLs working — was the
+    # original 1.9.0 name for value 3, now relabelled gold_collection
+    # since the F1 Collection book is no longer a hard requirement
+    # (gold target is the only criterion).
+    aliases = {"collection": 3}
 
 
 # ============================================================
@@ -81,91 +83,134 @@ class Goal(Choice):
 
 class CustomGoalGoldTarget(Range):
     """[Goal=Custom only] Optional lifetime-gold threshold added on
-    top of the selected custom_goal_targets. 0 = no gold requirement.
-    Same monotonic lifetime gold counter the Collection goal uses
-    (gold pickup + quest rewards, excludes vendor sales)."""
+    top of every other selected Custom Goal target. 0 = no gold
+    requirement. Same monotonic lifetime gold counter the Gold
+    Collection goal uses (pickup + quest rewards, excludes vendor
+    sales)."""
     display_name = "Custom Goal: Gold Target"
     range_start = 0
     range_end = 100000000
     default = 0
 
 
-class CustomGoalTargets(OptionSet):
-    """[Goal=Custom only] Pick any combination of the targets below.
-    The goal completes when ALL selected targets have been satisfied
-    AND the gold target (if set) has been reached. Empty set + zero
-    gold = trivially complete = falls back to Full Normal behaviour.
+# ============================================================
+# Custom Goal toggles — built via factory so the 50+ individual
+# Toggle classes don't bloat this file with manual decls. Each is
+# a standalone Toggle the player ticks ON/OFF in the Options
+# Creator. CSV is built from the on-toggles in fill_slot_data and
+# sent to the DLL as `custom_goal_targets_csv` (DLL parser unchanged).
+# ============================================================
 
-    Targets are grouped by category; you can mix freely:
+def _make_custom_goal_toggle(field_name, display, doc):
+    """Factory — produces a fresh Toggle subclass with given attrs."""
+    cls = type(
+        f"CustomGoal_{field_name}",
+        (Toggle,),
+        {
+            "__doc__": doc,
+            "display_name": display,
+            "default": False,
+        }
+    )
+    return cls
 
-    Act bosses (per difficulty, 15):
-      kill_andariel_normal, kill_andariel_nightmare, kill_andariel_hell,
-      kill_duriel_normal,   kill_duriel_nightmare,   kill_duriel_hell,
-      kill_mephisto_normal, kill_mephisto_nightmare, kill_mephisto_hell,
-      kill_diablo_normal,   kill_diablo_nightmare,   kill_diablo_hell,
-      kill_baal_normal,     kill_baal_nightmare,     kill_baal_hell
 
-    Cow King (per difficulty, 3):
-      kill_cow_king_normal, kill_cow_king_nightmare, kill_cow_king_hell
+# (csv_token, field_name, display_name, docstring) tuples — order
+# defines OPTION_GROUPS ordering and CSV emission ordering.
+_CUSTOM_GOAL_DEFS = [
+    # ============= A. BULK SUBSYSTEM INCLUDES =============
+    ("subsystem_skill_hunting",     "custom_goal_subsystem_skill_hunting",
+     "[Custom] Subsystem: Skill Hunting",
+     "[Goal=Custom] Win requires unlocking every skill in your seeded skill pool (up to 210)."),
+    ("subsystem_collection",        "custom_goal_subsystem_collection",
+     "[Custom] Subsystem: Collection",
+     "[Goal=Custom] Win requires the F1 Collection book to be complete according to the existing Collection — Sets/Runes/Gems/Specials toggles. Mix of items required is configured in those collection groups."),
+    ("subsystem_hunt_quests",       "custom_goal_subsystem_hunt_quests",
+     "[Custom] Subsystem: All Hunting Quests",
+     "[Goal=Custom] Win requires all 'Hunt: <SuperUnique>' quests across all 3 difficulties (~42 quests)."),
+    ("subsystem_kill_zone_quests",  "custom_goal_subsystem_kill_zone_quests",
+     "[Custom] Subsystem: All Kill-Zone Quests",
+     "[Goal=Custom] Win requires all 'Kill all monsters in <area>' quests across all 3 difficulties."),
+    ("subsystem_exploration_quests","custom_goal_subsystem_exploration_quests",
+     "[Custom] Subsystem: All Exploration Quests",
+     "[Goal=Custom] Win requires all 'Reach <area>' exploration quests across all 3 difficulties."),
+    ("subsystem_waypoints",         "custom_goal_subsystem_waypoints",
+     "[Custom] Subsystem: All Waypoints",
+     "[Goal=Custom] Win requires activating every waypoint across all 3 difficulties (~38 waypoints × 3 = 114)."),
+    ("subsystem_level_milestones",  "custom_goal_subsystem_level_milestones",
+     "[Custom] Subsystem: All Level Milestones",
+     "[Goal=Custom] Win requires reaching every level milestone (5/10/15/.../99) across all 3 difficulties."),
+    ("subsystem_story_normal",      "custom_goal_subsystem_story_normal",
+     "[Custom] Subsystem: All Story Quests Normal",
+     "[Goal=Custom] Win requires every story quest (Den of Evil, Sisters Burial, ..., Eve of Destruction) on Normal."),
+    ("subsystem_story_nightmare",   "custom_goal_subsystem_story_nightmare",
+     "[Custom] Subsystem: All Story Quests Nightmare",
+     "[Goal=Custom] Win requires every story quest on Nightmare."),
+    ("subsystem_story_hell",        "custom_goal_subsystem_story_hell",
+     "[Custom] Subsystem: All Story Quests Hell",
+     "[Goal=Custom] Win requires every story quest on Hell."),
 
-    Pandemonium event ubers (4):
-      kill_uber_mephisto, kill_uber_diablo, kill_uber_baal,
-      hellfire_torch_complete
+    # ============= B. ACT BOSSES × DIFFICULTY (15) =============
+    ("kill_andariel_normal",    "custom_goal_kill_andariel_normal",    "[Custom] Kill: Andariel (Normal)",    "[Goal=Custom] Win requires killing Andariel on Normal."),
+    ("kill_andariel_nightmare", "custom_goal_kill_andariel_nightmare", "[Custom] Kill: Andariel (Nightmare)", "[Goal=Custom] Win requires killing Andariel on Nightmare."),
+    ("kill_andariel_hell",      "custom_goal_kill_andariel_hell",      "[Custom] Kill: Andariel (Hell)",      "[Goal=Custom] Win requires killing Andariel on Hell."),
+    ("kill_duriel_normal",      "custom_goal_kill_duriel_normal",      "[Custom] Kill: Duriel (Normal)",      "[Goal=Custom] Win requires killing Duriel on Normal."),
+    ("kill_duriel_nightmare",   "custom_goal_kill_duriel_nightmare",   "[Custom] Kill: Duriel (Nightmare)",   "[Goal=Custom] Win requires killing Duriel on Nightmare."),
+    ("kill_duriel_hell",        "custom_goal_kill_duriel_hell",        "[Custom] Kill: Duriel (Hell)",        "[Goal=Custom] Win requires killing Duriel on Hell."),
+    ("kill_mephisto_normal",    "custom_goal_kill_mephisto_normal",    "[Custom] Kill: Mephisto (Normal)",    "[Goal=Custom] Win requires killing Mephisto on Normal."),
+    ("kill_mephisto_nightmare", "custom_goal_kill_mephisto_nightmare", "[Custom] Kill: Mephisto (Nightmare)", "[Goal=Custom] Win requires killing Mephisto on Nightmare."),
+    ("kill_mephisto_hell",      "custom_goal_kill_mephisto_hell",      "[Custom] Kill: Mephisto (Hell)",      "[Goal=Custom] Win requires killing Mephisto on Hell."),
+    ("kill_diablo_normal",      "custom_goal_kill_diablo_normal",      "[Custom] Kill: Diablo (Normal)",      "[Goal=Custom] Win requires killing Diablo on Normal."),
+    ("kill_diablo_nightmare",   "custom_goal_kill_diablo_nightmare",   "[Custom] Kill: Diablo (Nightmare)",   "[Goal=Custom] Win requires killing Diablo on Nightmare."),
+    ("kill_diablo_hell",        "custom_goal_kill_diablo_hell",        "[Custom] Kill: Diablo (Hell)",        "[Goal=Custom] Win requires killing Diablo on Hell."),
+    ("kill_baal_normal",        "custom_goal_kill_baal_normal",        "[Custom] Kill: Baal (Normal)",        "[Goal=Custom] Win requires killing Baal on Normal."),
+    ("kill_baal_nightmare",     "custom_goal_kill_baal_nightmare",     "[Custom] Kill: Baal (Nightmare)",     "[Goal=Custom] Win requires killing Baal on Nightmare."),
+    ("kill_baal_hell",          "custom_goal_kill_baal_hell",          "[Custom] Kill: Baal (Hell)",          "[Goal=Custom] Win requires killing Baal on Hell."),
 
-    Famous Super-Uniques (10):
-      kill_bishibosh, kill_corpsefire, kill_rakanishu, kill_griswold,
-      kill_pindleskin, kill_nihlathak_su, kill_summoner, kill_radament,
-      kill_izual, kill_council
+    # ============= C. COW KING × DIFFICULTY (3) =============
+    ("kill_cow_king_normal",    "custom_goal_kill_cow_king_normal",    "[Custom] Kill: Cow King (Normal)",    "[Goal=Custom] Win requires killing The Cow King on Normal in the Moo Moo Farm."),
+    ("kill_cow_king_nightmare", "custom_goal_kill_cow_king_nightmare", "[Custom] Kill: Cow King (Nightmare)", "[Goal=Custom] Win requires killing The Cow King on Nightmare."),
+    ("kill_cow_king_hell",      "custom_goal_kill_cow_king_hell",      "[Custom] Kill: Cow King (Hell)",      "[Goal=Custom] Win requires killing The Cow King on Hell."),
 
-    Quest-category bulk completions (8):
-      all_quests_normal, all_quests_nightmare, all_quests_hell,
-      all_hunting_quests, all_kill_zone_quests, all_exploration_quests,
-      all_waypoints, all_level_milestones
+    # ============= D. PANDEMONIUM EVENT (4) =============
+    ("kill_uber_mephisto",      "custom_goal_kill_uber_mephisto",      "[Custom] Kill: Uber Mephisto",        "[Goal=Custom] Win requires killing Uber Mephisto in the Furnace of Pain (Pandemonium event)."),
+    ("kill_uber_diablo",        "custom_goal_kill_uber_diablo",        "[Custom] Kill: Uber Diablo",          "[Goal=Custom] Win requires killing Uber Diablo in the Forgotten Sands (Pandemonium event)."),
+    ("kill_uber_baal",          "custom_goal_kill_uber_baal",          "[Custom] Kill: Uber Baal",            "[Goal=Custom] Win requires killing Uber Baal in the Matron's Den (Pandemonium event)."),
+    ("hellfire_torch_complete", "custom_goal_hellfire_torch_complete", "[Custom] Pandemonium: Full Run",      "[Goal=Custom] Win requires completing one full Pandemonium event (all 3 ubers + Hellfire Torch drop)."),
 
-    Bonus-check bulk completions (6, 1.9.0):
-      all_shrines, all_urns, all_barrels, all_chests,
-      all_set_pickups, all_gold_milestones
+    # ============= E. FAMOUS SUPER-UNIQUES (10) =============
+    ("kill_bishibosh",          "custom_goal_kill_bishibosh",          "[Custom] Kill: Bishibosh",            "[Goal=Custom] Win requires killing Bishibosh (Cold Plains super-unique)."),
+    ("kill_corpsefire",         "custom_goal_kill_corpsefire",         "[Custom] Kill: Corpsefire",           "[Goal=Custom] Win requires killing Corpsefire (Den of Evil super-unique)."),
+    ("kill_rakanishu",          "custom_goal_kill_rakanishu",          "[Custom] Kill: Rakanishu",            "[Goal=Custom] Win requires killing Rakanishu (Stony Field super-unique)."),
+    ("kill_griswold",           "custom_goal_kill_griswold",           "[Custom] Kill: Griswold",             "[Goal=Custom] Win requires killing Griswold (Tristram super-unique)."),
+    ("kill_pindleskin",         "custom_goal_kill_pindleskin",         "[Custom] Kill: Pindleskin",           "[Goal=Custom] Win requires killing Pindleskin (Nihlathak's Temple super-unique)."),
+    ("kill_nihlathak_su",       "custom_goal_kill_nihlathak_su",       "[Custom] Kill: Nihlathak (boss)",     "[Goal=Custom] Win requires killing Nihlathak the boss (Halls of Vaught)."),
+    ("kill_summoner",           "custom_goal_kill_summoner",           "[Custom] Kill: The Summoner",         "[Goal=Custom] Win requires killing The Summoner (Arcane Sanctuary)."),
+    ("kill_radament",           "custom_goal_kill_radament",           "[Custom] Kill: Radament",             "[Goal=Custom] Win requires killing Radament (Sewers Level 3)."),
+    ("kill_izual",              "custom_goal_kill_izual",              "[Custom] Kill: Izual",                "[Goal=Custom] Win requires killing Izual (Plains of Despair)."),
+    ("kill_council",            "custom_goal_kill_council",            "[Custom] Kill: Council Member",       "[Goal=Custom] Win requires killing one of the High Council members (Travincal)."),
 
-    Extra-check bulk completions (6, 1.9.2):
-      all_cow_level_checks, all_merc_milestones, all_hellforge_runes,
-      all_npc_dialogue, all_runeword_crafting, all_cube_recipes
+    # ============= F. BULK BONUS CHECKS (6) =============
+    ("all_shrines",             "custom_goal_all_shrines",             "[Custom] All Shrines fired",          "[Goal=Custom] Win requires firing every shrine bonus check (50/diff × 3 diff = 150). Requires check_shrines=true."),
+    ("all_urns",                "custom_goal_all_urns",                "[Custom] All Urns fired",             "[Goal=Custom] Win requires firing every urn bonus check (100/diff × 3 = 300). Requires check_urns=true."),
+    ("all_barrels",             "custom_goal_all_barrels",             "[Custom] All Barrels fired",          "[Goal=Custom] Win requires firing every barrel bonus check. Requires check_barrels=true."),
+    ("all_chests",              "custom_goal_all_chests",              "[Custom] All Chests fired",           "[Goal=Custom] Win requires firing every chest bonus check. Requires check_chests=true."),
+    ("all_set_pickups",         "custom_goal_all_set_pickups",         "[Custom] All Set Pickups",            "[Goal=Custom] Win requires picking up every unique set piece (127 total). Requires check_set_pickups=true."),
+    ("all_gold_milestones",     "custom_goal_all_gold_milestones",     "[Custom] All Gold Milestones",        "[Goal=Custom] Win requires hitting every lifetime-gold milestone (17 total). Requires check_gold_milestones=true."),
 
-    Collection bulk completions (5):
-      all_set_pieces, all_runes, all_gems, all_specials,
-      complete_collection
-    """
-    display_name = "Custom Goal: Targets"
-    valid_keys = frozenset([
-        # A. Act Bosses × difficulty (15)
-        "kill_andariel_normal", "kill_andariel_nightmare", "kill_andariel_hell",
-        "kill_duriel_normal",   "kill_duriel_nightmare",   "kill_duriel_hell",
-        "kill_mephisto_normal", "kill_mephisto_nightmare", "kill_mephisto_hell",
-        "kill_diablo_normal",   "kill_diablo_nightmare",   "kill_diablo_hell",
-        "kill_baal_normal",     "kill_baal_nightmare",     "kill_baal_hell",
-        # B. Cow King (3)
-        "kill_cow_king_normal", "kill_cow_king_nightmare", "kill_cow_king_hell",
-        # C. Pandemonium ubers (4)
-        "kill_uber_mephisto", "kill_uber_diablo", "kill_uber_baal",
-        "hellfire_torch_complete",
-        # D. Famous Super-Uniques (10)
-        "kill_bishibosh", "kill_corpsefire", "kill_rakanishu", "kill_griswold",
-        "kill_pindleskin", "kill_nihlathak_su", "kill_summoner",
-        "kill_radament", "kill_izual", "kill_council",
-        # E. Quest bulk (8)
-        "all_quests_normal", "all_quests_nightmare", "all_quests_hell",
-        "all_hunting_quests", "all_kill_zone_quests",
-        "all_exploration_quests", "all_waypoints", "all_level_milestones",
-        # F. Bonus-check bulk (6)
-        "all_shrines", "all_urns", "all_barrels", "all_chests",
-        "all_set_pickups", "all_gold_milestones",
-        # G. Extra-check bulk (6)
-        "all_cow_level_checks", "all_merc_milestones", "all_hellforge_runes",
-        "all_npc_dialogue", "all_runeword_crafting", "all_cube_recipes",
-        # H. Collection bulk (5)
-        "all_set_pieces", "all_runes", "all_gems", "all_specials",
-        "complete_collection",
-    ])
-    default = frozenset()
+    # ============= G. BULK EXTRA CHECKS (6) =============
+    ("all_cow_level_checks",    "custom_goal_all_cow_level_checks",    "[Custom] All Cow Level Checks",       "[Goal=Custom] Win requires firing all 9 cow-level extra checks. Requires check_cow_level=true."),
+    ("all_merc_milestones",     "custom_goal_all_merc_milestones",     "[Custom] All Merc Milestones",        "[Goal=Custom] Win requires firing all 6 merc milestone checks. Requires check_merc_milestones=true."),
+    ("all_hellforge_runes",     "custom_goal_all_hellforge_runes",     "[Custom] All Hellforge & High Runes", "[Goal=Custom] Win requires firing all 12 Hellforge+High Rune checks. Requires check_hellforge_runes=true."),
+    ("all_npc_dialogue",        "custom_goal_all_npc_dialogue",        "[Custom] All NPC Dialogue Checks",    "[Goal=Custom] Win requires firing all 81 NPC dialogue checks (27 NPCs × 3 diff). Requires check_npc_dialogue=true."),
+    ("all_runeword_crafting",   "custom_goal_all_runeword_crafting",   "[Custom] All Runeword Crafting",      "[Goal=Custom] Win requires crafting 50 runewords. Requires check_runeword_crafting=true."),
+    ("all_cube_recipes",        "custom_goal_all_cube_recipes",        "[Custom] All Cube Recipes",           "[Goal=Custom] Win requires completing 135 successful cube transmutes. Requires check_cube_recipes=true."),
+]
+
+_CUSTOM_GOAL_CLASSES = [
+    _make_custom_goal_toggle(field, display, doc)
+    for (csv_tok, field, display, doc) in _CUSTOM_GOAL_DEFS
+]
 
 
 # ============================================================
@@ -173,26 +218,26 @@ class CustomGoalTargets(OptionSet):
 # ============================================================
 
 class CollectionTargetGems(Toggle):
-    """[Goal=Collection only] Require all 35 gems (7 colors × 5
-    grades, Chipped..Perfect) to be collected once on this character.
-    Note: gems do NOT have per-item granularity — it's all 35 or none.
-    Each individual gem pickup still counts as an AP location check
-    when this toggle is ON."""
+    """Whether all 35 gems (7 colors × 5 grades, Chipped..Perfect)
+    count toward F1 Collection book completion + Custom Goal's
+    'include collection' option. Each individual gem pickup still
+    fires an AP check when this toggle is ON. Moved out of Goal &
+    Win Condition in 1.9.2 — now lives under Collection — Gems."""
     display_name = "Collection: Gems"
     default = True
 
 
 class CollectionGoldTarget(Range):
-    """[Goal=Collection only] Optional lifetime-gold threshold for
-    the Collection goal. 0 = no gold target. The lifetime gold
-    counter on the F1 Collection page is monotonic (never decreases)
-    and tracks gold pickup + quest rewards (excluding vendor sales).
-    Set this to require, e.g., 1,000,000 gold collected as part of
-    the goal."""
-    display_name = "Collection: Gold Target"
+    """[Goal=Gold Collection only] Lifetime-gold threshold the
+    character must reach to win. Lifetime-gold counter on the F1
+    Collection page is monotonic (never decreases) and tracks gold
+    pickup + quest rewards (excludes vendor sales). 0 = trivially
+    complete (don't pick Gold Collection in that case — pick a real
+    Goal instead)."""
+    display_name = "Gold Collection: Target"
     range_start = 0
     range_end = 100000000
-    default = 0
+    default = 1000000
 
 
 # ============================================================
@@ -639,7 +684,6 @@ _FIELDS = [
     ("collection_gold_target",  CollectionGoldTarget),
     # Custom goal sub-targets (only meaningful when goal=custom)
     ("custom_goal_gold_target", CustomGoalGoldTarget),
-    ("custom_goal_targets",     CustomGoalTargets),
     # Quest toggles (story is always ON internally — engine-required)
     ("quest_hunting",          QuestHunting),
     ("quest_kill_zones",       QuestKillZones),
@@ -691,6 +735,13 @@ _FIELDS += [(f"collect_rune_{name}", cls)
 _FIELDS += [(field, cls) for (field, _disp), (_cn, cls)
             in zip(_COLL_SPECIALS, _COLL_SPECIAL_CLASSES)]
 
+# 1.9.2 — 54 individual Custom Goal toggles (replaces the old
+# CustomGoalTargets OptionSet). Each appears as a dedicated checkbox
+# in the Options Creator under the four Custom Goal groups below.
+_FIELDS += [(field, cls)
+            for (csv_tok, field, _disp, _doc), cls
+            in zip(_CUSTOM_GOAL_DEFS, _CUSTOM_GOAL_CLASSES)]
+
 Diablo2ArchipelagoOptions = make_dataclass(
     'Diablo2ArchipelagoOptions',
     _FIELDS,
@@ -718,10 +769,8 @@ OPTION_GROUPS = [
     ]),
     OptionGroup("Goal & Win Condition", [
         Goal,
-        CollectionTargetGems,
         CollectionGoldTarget,
         CustomGoalGoldTarget,
-        CustomGoalTargets,
     ]),
     OptionGroup("Quest Categories", [
         QuestHunting,
@@ -771,8 +820,37 @@ OPTION_GROUPS = [
     OptionGroup("Collection — Runes (33 individual toggles)",
                 _COLL_RUNE_CLASSES,
                 start_collapsed=True),
+    OptionGroup("Collection — Gems",
+                [CollectionTargetGems],
+                start_collapsed=True),
     OptionGroup("Collection — Specials (10 individual toggles)",
                 _COLL_SPECIAL_CLASSES,
+                start_collapsed=True),
+    # 1.9.2 — Custom Goal target groups. The 54 toggles ship as four
+    # collapsed-by-default sections so they don't overwhelm the UI for
+    # players using a non-Custom Goal. Slice indices match the section
+    # boundaries in _CUSTOM_GOAL_DEFS:
+    #   [0..10)  = subsystems (10)
+    #   [10..25) = act bosses (15)
+    #   [25..28) = cow king (3)
+    #   [28..32) = pandemonium (4)
+    #   [32..42) = super-uniques (10)
+    #   [42..48) = bulk bonus checks (6)
+    #   [48..54) = bulk extra checks (6)
+    OptionGroup("Custom Goal — Subsystems (when Goal=Custom)",
+                _CUSTOM_GOAL_CLASSES[0:10],
+                start_collapsed=True),
+    OptionGroup("Custom Goal — Act Boss Kills (when Goal=Custom)",
+                _CUSTOM_GOAL_CLASSES[10:25],
+                start_collapsed=True),
+    OptionGroup("Custom Goal — Cow King + Pandemonium Ubers (when Goal=Custom)",
+                _CUSTOM_GOAL_CLASSES[25:32],
+                start_collapsed=True),
+    OptionGroup("Custom Goal — Famous Super-Uniques (when Goal=Custom)",
+                _CUSTOM_GOAL_CLASSES[32:42],
+                start_collapsed=True),
+    OptionGroup("Custom Goal — Bulk Object/Check Targets (when Goal=Custom)",
+                _CUSTOM_GOAL_CLASSES[42:54],
                 start_collapsed=True),
     OptionGroup("Multiworld", [
         DeathLink,

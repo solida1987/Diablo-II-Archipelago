@@ -1,0 +1,100 @@
+name: D2_Custom_Kitchen
+description: Test 24 — Custom goal MAX (every checkbox on, every diff, every subsystem) + 100M gold + zone locking + all bonus/extras
+game: Diablo II Archipelago
+Diablo II Archipelago:
+  progression_balancing: 50
+  accessibility: full
+  skill_hunting: true
+  zone_locking: true
+  goal: custom
+  custom_goal_gold_target: 100000000
+  # ALL subsystems
+  custom_goal_subsystem_skill_hunting: true
+  custom_goal_subsystem_collection: true
+  custom_goal_subsystem_hunt_quests: true
+  custom_goal_subsystem_kill_zone_quests: true
+  custom_goal_subsystem_exploration_quests: true
+  custom_goal_subsystem_waypoints: true
+  custom_goal_subsystem_level_milestones: true
+  custom_goal_subsystem_story_normal: true
+  custom_goal_subsystem_story_nightmare: true
+  custom_goal_subsystem_story_hell: true
+  # ALL act bosses (15)
+  custom_goal_kill_andariel_normal: true
+  custom_goal_kill_andariel_nightmare: true
+  custom_goal_kill_andariel_hell: true
+  custom_goal_kill_duriel_normal: true
+  custom_goal_kill_duriel_nightmare: true
+  custom_goal_kill_duriel_hell: true
+  custom_goal_kill_mephisto_normal: true
+  custom_goal_kill_mephisto_nightmare: true
+  custom_goal_kill_mephisto_hell: true
+  custom_goal_kill_diablo_normal: true
+  custom_goal_kill_diablo_nightmare: true
+  custom_goal_kill_diablo_hell: true
+  custom_goal_kill_baal_normal: true
+  custom_goal_kill_baal_nightmare: true
+  custom_goal_kill_baal_hell: true
+  # Cow King + Pandemonium
+  custom_goal_kill_cow_king_normal: true
+  custom_goal_kill_cow_king_nightmare: true
+  custom_goal_kill_cow_king_hell: true
+  custom_goal_kill_uber_mephisto: true
+  custom_goal_kill_uber_diablo: true
+  custom_goal_kill_uber_baal: true
+  custom_goal_hellfire_torch_complete: true
+  # All super-uniques
+  custom_goal_kill_bishibosh: true
+  custom_goal_kill_corpsefire: true
+  custom_goal_kill_rakanishu: true
+  custom_goal_kill_griswold: true
+  custom_goal_kill_pindleskin: true
+  custom_goal_kill_nihlathak_su: true
+  custom_goal_kill_summoner: true
+  custom_goal_kill_radament: true
+  custom_goal_kill_izual: true
+  custom_goal_kill_council: true
+  # All bulk bonus/extras
+  custom_goal_all_shrines: true
+  custom_goal_all_urns: true
+  custom_goal_all_barrels: true
+  custom_goal_all_chests: true
+  custom_goal_all_set_pickups: true
+  custom_goal_all_gold_milestones: true
+  custom_goal_all_cow_level_checks: true
+  custom_goal_all_merc_milestones: true
+  custom_goal_all_hellforge_runes: true
+  custom_goal_all_npc_dialogue: true
+  custom_goal_all_runeword_crafting: true
+  custom_goal_all_cube_recipes: true
+  # Quest types + bonus + extra checks (all on)
+  quest_hunting: true
+  quest_kill_zones: true
+  quest_exploration: true
+  quest_waypoints: true
+  quest_level_milestones: true
+  skill_class_filter: all_classes
+  include_amazon: true
+  include_sorceress: true
+  include_necromancer: true
+  include_paladin: true
+  include_barbarian: true
+  include_druid: true
+  include_assassin: true
+  xp_multiplier: 1
+  monster_shuffle: false
+  boss_shuffle: false
+  traps_enabled: true
+  death_link: false
+  check_shrines: true
+  check_urns: true
+  check_barrels: true
+  check_chests: true
+  check_set_pickups: true
+  check_gold_milestones: true
+  check_cow_level: true
+  check_merc_milestones: true
+  check_hellforge_runes: true
+  check_npc_dialogue: true
+  check_runeword_crafting: true
+  check_cube_recipes: true

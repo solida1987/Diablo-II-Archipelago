@@ -24,6 +24,7 @@ from .options import (
     Diablo2ArchipelagoOptions,
     OPTION_GROUPS,
     _COLL_SETS, _COLL_RUNES, _COLL_SPECIALS,
+    _CUSTOM_GOAL_DEFS,
 )
 from .locations import COLL_LOCATIONS, COLL_LOC_BASE
 from .regions import create_regions
@@ -701,11 +702,17 @@ class Diablo2ArchipelagoWorld(World):
             "collection_target_gems":      self.options.collection_target_gems.value,
             "collection_gold_target":      self.options.collection_gold_target.value,
             # 1.9.2 — Custom goal (only meaningful when goal=4 / custom).
-            # Empty CSV + 0 gold = trivially complete = falls back to
-            # Full Normal in the DLL completion check.
+            # CSV is built from the 54 individual Custom Goal Toggle
+            # options (one per target/subsystem). Empty CSV + 0 gold =
+            # trivially complete = falls back to Full Normal in the
+            # DLL completion check. CSV ordering matches _CUSTOM_GOAL_DEFS
+            # so the DLL parser sees a stable token order.
             "custom_goal_gold_target":     self.options.custom_goal_gold_target.value,
-            "custom_goal_targets_csv":     ",".join(sorted(
-                self.options.custom_goal_targets.value)),
+            "custom_goal_targets_csv":     ",".join(
+                csv_tok
+                for (csv_tok, field, _disp, _doc) in _CUSTOM_GOAL_DEFS
+                if hasattr(self.options, field) and getattr(self.options, field).value
+            ),
             "death_link":        self.options.death_link.value,
             # Quest toggles
             "quest_story":            1,  # always ON — engine-required

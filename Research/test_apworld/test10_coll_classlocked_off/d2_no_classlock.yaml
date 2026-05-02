@@ -1,0 +1,37 @@
+name: D2_NoClassLock
+description: Test 10 — Collection goal, no class-locked sets
+game: Diablo II Archipelago
+Diablo II Archipelago:
+  progression_balancing: 50
+  accessibility: full
+  skill_hunting: true
+  zone_locking: false
+  goal: gold_collection
+  quest_hunting: true
+  quest_kill_zones: true
+  quest_exploration: true
+  quest_waypoints: true
+  quest_level_milestones: true
+  skill_class_filter: all_classes
+  include_amazon: true
+  include_sorceress: true
+  include_necromancer: true
+  include_paladin: true
+  include_barbarian: true
+  include_druid: true
+  include_assassin: true
+  xp_multiplier: 1
+  monster_shuffle: false
+  boss_shuffle: false
+  traps_enabled: true
+  death_link: false
+  collection_target_gems: true
+  collection_gold_target: 1000000
+  # Disable 7 class-locked LoD sets
+  collect_set_natalyas: false
+  collect_set_aldurs: false
+  collect_set_immortal: false
+  collect_set_talrasha: false
+  collect_set_griswolds: false
+  collect_set_trangouls: false
+  collect_set_mavinas: false

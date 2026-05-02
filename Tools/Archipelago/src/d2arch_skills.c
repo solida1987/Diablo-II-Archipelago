@@ -330,6 +330,18 @@ static void InitSkillPool(DWORD seed) {
     Log("Skill pool initialized: seed=%u, %d skills (%d unlocked)\n", seed, g_poolCount, NUM_STARTING);
 }
 
+/* 1.9.2 — Accessors for d2arch_customgoal.c (which is included
+ * earlier in the unity build than skills.c so it can't reach the
+ * static globals directly). */
+int Skills_GetPoolCount(void) { return g_poolCount; }
+int Skills_GetUnlockedCount(void) {
+    int n = 0;
+    for (int i = 0; i < g_poolCount; i++) {
+        if (g_pool[i].unlocked) n++;
+    }
+    return n;
+}
+
 /* 1.8.0: class id (from player unit dwClassId) -> skill DB class code. */
 static const char* ClassIdToCode(int classId) {
     switch (classId) {

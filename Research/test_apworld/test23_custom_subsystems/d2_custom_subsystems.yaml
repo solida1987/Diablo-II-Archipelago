@@ -1,0 +1,32 @@
+name: D2_Custom_Subsystems
+description: Test 23 — Custom goal using only subsystem includes (skill hunting + collection + hunt quests)
+game: Diablo II Archipelago
+Diablo II Archipelago:
+  progression_balancing: 50
+  accessibility: full
+  skill_hunting: true
+  zone_locking: false
+  goal: custom
+  custom_goal_gold_target: 0
+  # Subsystem-only goal: complete skill pool + collection + all hunt quests
+  custom_goal_subsystem_skill_hunting: true
+  custom_goal_subsystem_collection: true
+  custom_goal_subsystem_hunt_quests: true
+  quest_hunting: true
+  quest_kill_zones: true
+  quest_exploration: true
+  quest_waypoints: true
+  quest_level_milestones: true
+  skill_class_filter: all_classes
+  include_amazon: true
+  include_sorceress: true
+  include_necromancer: true
+  include_paladin: true
+  include_barbarian: true
+  include_druid: true
+  include_assassin: true
+  xp_multiplier: 1
+  monster_shuffle: false
+  boss_shuffle: false
+  traps_enabled: true
+  death_link: false

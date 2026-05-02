@@ -426,12 +426,15 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
     player = world.player
     zone_locking = bool(world.options.zone_locking.value)
 
-    goal = world.options.goal.value    # 0-3: difficulty scope or collection
+    goal = world.options.goal.value    # 0-4: scope, gold_collection, or custom
     max_act = 5                         # always full game
-    # 1.9.0 — Goal=3 (Collection) treats as Normal-only for region/fill
-    # purposes. DLL handles the actual goal-complete condition at runtime.
+    # 1.9.0 — Goal=3 (Gold Collection) treats as Normal-only for region/fill.
+    # 1.9.2 — Goal=4 (Custom) generates full pool — DLL filters at runtime.
+    # DLL handles the actual goal-complete condition at runtime in both cases.
     if goal == 3:
         num_diffs = 1
+    elif goal == 4:
+        num_diffs = 3
     else:
         num_diffs = goal + 1            # 1, 2, or 3
 
