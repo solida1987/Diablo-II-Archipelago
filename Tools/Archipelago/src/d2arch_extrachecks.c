@@ -369,6 +369,16 @@ int Extra_GetSlotCount(int cat) {
     }
 }
 
+/* 1.9.2 — Total enabled extra-check slot count for spoiler footer
+ * grand total. Sums every slot across enabled categories. */
+int Extra_GetTotalEnabledSlots(void) {
+    int total = 0;
+    for (int c = 0; c < EX_TOGGLE_COUNT; c++) {
+        if (g_extraEnabled[c]) total += Extra_GetSlotCount(c);
+    }
+    return total;
+}
+
 /* Count fired bits within a sub-range — used by F1 Overview /
  * Logbook to render "X / Y" progress per category. */
 int Extra_CountFiredInRange(int apIdLo, int apIdHi) {

@@ -640,6 +640,20 @@ static void Bonus_FormatReward(int off, char* out, int outSize) {
     out[outSize - 1] = 0;
 }
 
+/* 1.9.2 — Total enabled bonus-check slot count for spoiler footer
+ * grand total. Counts every slot across enabled categories regardless
+ * of difficulty (full lifetime potential). */
+int Bonus_GetTotalEnabledSlots(void) {
+    int total = 0;
+    if (g_bonusEnabled[BX_SHRINE]) total += BONUS_QUOTA_SHRINE * 3;
+    if (g_bonusEnabled[BX_URN])    total += BONUS_QUOTA_URN    * 3;
+    if (g_bonusEnabled[BX_BARREL]) total += BONUS_QUOTA_BARREL * 3;
+    if (g_bonusEnabled[BX_CHEST])  total += BONUS_QUOTA_CHEST  * 3;
+    if (g_bonusEnabled[BX_SET_PICKUP]) total += BONUS_NUM_SETPIECES;
+    if (g_bonusEnabled[BX_GOLD_MS])    total += BONUS_NUM_GOLDMS_TOTAL;
+    return total;
+}
+
 void Bonus_AppendSpoilerToFile(FILE* f) {
     if (!f) return;
     if (!g_bonusState.rewardsRolled) return;

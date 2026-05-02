@@ -1264,10 +1264,28 @@ static void Quests_WriteSpoilerFile(void) {
     /* 1.9.2 — Append extra check rewards section if any extra categories
      * are enabled. Includes cow level (9), merc milestones (6), Hellforge
      * + high runes (12), NPC dialogue (81), runeword crafting (50), cube
-     * recipes (135). All flat 1000 gold per fire (per-slot pre-rolling
-     * lands in 1.9.3). */
+     * recipes (135). */
     extern void Extra_AppendSpoilerToFile(FILE* f);
     Extra_AppendSpoilerToFile(f);
+
+    /* 1.9.2 — Grand total footer. Sums quest checks (already
+     * computed above as 'tot') + every enabled bonus + every enabled
+     * extra slot, so the user sees one clear number for "how many
+     * total checks does this character have access to". */
+    extern int Bonus_GetTotalEnabledSlots(void);
+    extern int Extra_GetTotalEnabledSlots(void);
+    int bonusTot = Bonus_GetTotalEnabledSlots();
+    int extraTot = Extra_GetTotalEnabledSlots();
+    int grandTot = tot + bonusTot + extraTot;
+    fprintf(f, "\n================ Grand Total ================\n\n");
+    fprintf(f, "  Quest checks            : %d\n", tot);
+    if (bonusTot > 0)
+        fprintf(f, "  Bonus checks (enabled)  : %d\n", bonusTot);
+    if (extraTot > 0)
+        fprintf(f, "  Extra checks (enabled)  : %d\n", extraTot);
+    fprintf(f, "  ----------------------------------------\n");
+    fprintf(f, "  TOTAL CHECKS            : %d\n", grandTot);
+    fprintf(f, "\n");
 
     fclose(f);
     Log("Quests_WriteSpoilerFile: wrote %s\n", path);
