@@ -654,6 +654,34 @@ int Bonus_GetTotalEnabledSlots(void) {
     return total;
 }
 
+/* 1.9.2 — Count pre-rolled rewards across all bonus slots that
+ * belong to ENABLED categories. Used by the spoiler footer's total
+ * reward mix breakdown. Walks the rewardType[] array but only
+ * counts indices in enabled-category sub-ranges. */
+void Bonus_CountRewardsInto(int totals[10]) {
+    if (!totals) return;
+    if (!g_bonusState.rewardsRolled) return;
+    /* Map each apId range to its category enable flag */
+    static const struct { int catIdx; int base; int count; } ranges[] = {
+        { BX_SHRINE, BONUS_BASE_SHRINE, BONUS_QUOTA_SHRINE * 3 },
+        { BX_URN,    BONUS_BASE_URN,    BONUS_QUOTA_URN    * 3 },
+        { BX_BARREL, BONUS_BASE_BARREL, BONUS_QUOTA_BARREL * 3 },
+        { BX_CHEST,  BONUS_BASE_CHEST,  BONUS_QUOTA_CHEST  * 3 },
+        { BX_GOLD_MS, BONUS_BASE_GOLDMS, BONUS_NUM_GOLDMS_TOTAL },
+        { BX_SET_PICKUP, BONUS_BASE_SETPICK, BONUS_NUM_SETPIECES },
+    };
+    for (int r = 0; r < (int)(sizeof(ranges)/sizeof(ranges[0])); r++) {
+        if (!g_bonusEnabled[ranges[r].catIdx]) continue;
+        for (int i = 0; i < ranges[r].count; i++) {
+            int apId = ranges[r].base + i;
+            int off = Bonus_OffsetFromApId(apId);
+            if (off < 0) continue;
+            uint8_t rt = g_bonusState.rewardType[off];
+            if (rt < 10) totals[rt]++;
+        }
+    }
+}
+
 void Bonus_AppendSpoilerToFile(FILE* f) {
     if (!f) return;
     if (!g_bonusState.rewardsRolled) return;

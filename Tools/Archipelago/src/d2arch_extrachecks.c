@@ -379,6 +379,31 @@ int Extra_GetTotalEnabledSlots(void) {
     return total;
 }
 
+/* 1.9.2 — Count pre-rolled rewards across all extra slots that
+ * belong to ENABLED categories. Mirrors Bonus_CountRewardsInto. */
+void Extra_CountRewardsInto(int totals[10]) {
+    if (!totals) return;
+    if (!g_extraState.rewardsRolled) return;
+    static const struct { int catIdx; int base; int count; } ranges[] = {
+        { EX_COW,      EXTRA_BASE_COW,      EXTRA_CT_COW      },
+        { EX_MERC,     EXTRA_BASE_MERC,     EXTRA_CT_MERC     },
+        { EX_HFRUNES,  EXTRA_BASE_HFRUNES,  EXTRA_CT_HFRUNES  },
+        { EX_NPC,      EXTRA_BASE_NPC,      EXTRA_CT_NPC      },
+        { EX_RUNEWORD, EXTRA_BASE_RUNEWORD, EXTRA_CT_RUNEWORD },
+        { EX_CUBE,     EXTRA_BASE_CUBE,     EXTRA_CT_CUBE     },
+    };
+    for (int r = 0; r < (int)(sizeof(ranges)/sizeof(ranges[0])); r++) {
+        if (!g_extraEnabled[ranges[r].catIdx]) continue;
+        for (int i = 0; i < ranges[r].count; i++) {
+            int apId = ranges[r].base + i;
+            int off = Extra_OffsetFromApId(apId);
+            if (off < 0) continue;
+            uint8_t rt = g_extraState.rewardType[off];
+            if (rt < 10) totals[rt]++;
+        }
+    }
+}
+
 /* Count fired bits within a sub-range — used by F1 Overview /
  * Logbook to render "X / Y" progress per category. */
 int Extra_CountFiredInRange(int apIdLo, int apIdHi) {

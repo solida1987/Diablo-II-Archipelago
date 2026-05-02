@@ -1303,6 +1303,54 @@ static void Quests_WriteSpoilerFile(void) {
     fprintf(f, "  TOTAL CHECKS            : %d\n", grandTot);
     fprintf(f, "\n");
 
+    /* 1.9.2 — Total Reward Mix footer. Aggregates the pre-rolled
+     * reward type counts across ALL three reward sources:
+     *   - Quest rewards (already counted above as `totals[]`)
+     *   - Bonus check rewards (per-slot pre-rolled in g_bonusState)
+     *   - Extra check rewards (per-slot pre-rolled in g_extraState)
+     * So the user can see exactly how many gold rewards / stat-point
+     * rewards / charm drops / etc. their entire pool will deliver. */
+    extern void Bonus_CountRewardsInto(int totals[10]);
+    extern void Extra_CountRewardsInto(int totals[10]);
+    int rewardTotals[10];
+    for (int i = 0; i < 10; i++) rewardTotals[i] = totals[i];
+    Bonus_CountRewardsInto(rewardTotals);
+    Extra_CountRewardsInto(rewardTotals);
+
+    /* Skill BR_SKILL is split into "unlock" vs "filler skill point"
+     * for quests (based on quest type + skill_hunting). Bonus + Extra
+     * BR_SKILL are always +1 skill point (filler). Aggregate the
+     * skill-unlock count from the existing quest computation above
+     * (skillUnlocks); the filler skill points = quest skillPoints
+     * + bonus BR_SKILL + extra BR_SKILL. */
+    int totalSkillPoints = skillPoints
+                         + (rewardTotals[REWARD_SKILL] - totals[REWARD_SKILL]);
+    int grandRewardTot = 0;
+    for (int i = 0; i < 10; i++) grandRewardTot += rewardTotals[i];
+    if (g_skillHuntingOn) grandRewardTot += skillUnlocks; /* not in totals[] */
+
+    fprintf(f, "================ Total Reward Mix (all sources) ================\n\n");
+    fprintf(f, "Combined count of pre-rolled rewards across Quests + Bonus +\n");
+    fprintf(f, "Extra check pools. Quest rewards always deliver; Bonus / Extra\n");
+    fprintf(f, "rewards deliver as the matching slot fires (escalating-chance\n");
+    fprintf(f, "for bonus objects; first-trigger for extras).\n\n");
+    if (g_skillHuntingOn)
+        fprintf(f, "  Skill Unlock      : %d\n", skillUnlocks);
+    fprintf(f, "  Gold              : %d\n", rewardTotals[REWARD_GOLD]);
+    fprintf(f, "  Experience        : %d\n", rewardTotals[REWARD_XP]);
+    fprintf(f, "  +5 Stat Points    : %d\n", rewardTotals[REWARD_STAT]);
+    fprintf(f, "  Skill Points      : %d\n", totalSkillPoints);
+    if (g_skillHuntingOn)
+        fprintf(f, "  Reset Points      : %d\n", rewardTotals[REWARD_RESETPT]);
+    fprintf(f, "  Traps (4 variants): %d\n", rewardTotals[REWARD_TRAP]);
+    fprintf(f, "  Boss Loot         : %d\n", rewardTotals[REWARD_LOOT]);
+    fprintf(f, "  Drop: Charm       : %d\n", rewardTotals[REWARD_DROP_CHARM]);
+    fprintf(f, "  Drop: Set Item    : %d\n", rewardTotals[REWARD_DROP_SET]);
+    fprintf(f, "  Drop: Unique      : %d\n", rewardTotals[REWARD_DROP_UNIQUE]);
+    fprintf(f, "  ----------------------\n");
+    fprintf(f, "  TOTAL REWARDS     : %d\n", grandRewardTot);
+    fprintf(f, "\n");
+
     fclose(f);
     Log("Quests_WriteSpoilerFile: wrote %s\n", path);
 }
