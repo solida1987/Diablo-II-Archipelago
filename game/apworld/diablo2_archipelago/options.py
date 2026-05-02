@@ -640,15 +640,13 @@ OPTION_GROUPS = [
     OptionGroup("Filler Items", [
         TrapsEnabled,
     ]),
-    OptionGroup("Bonus Checks (1.9.0 — opt-in)", [
+    OptionGroup("Bonus Checks", [
         CheckShrines,
         CheckUrns,
         CheckBarrels,
         CheckChests,
         CheckSetPickups,
         CheckGoldMilestones,
-    ]),
-    OptionGroup("Extra Checks (1.9.2 — opt-in)", [
         CheckCowLevel,
         CheckMercMilestones,
         CheckHellforgeRunes,
