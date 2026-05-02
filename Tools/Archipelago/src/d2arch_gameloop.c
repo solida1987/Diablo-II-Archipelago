@@ -1863,19 +1863,28 @@ static void ProcessDeferredQuests(void) {
                     if (nextKey >= 0) {
                         UnlockZoneKey(nextKey);
                     } else if (g_skillHuntingOn) {
-                        /* All zones unlocked — give a skill instead */
+                        /* All zones unlocked — give a skill instead.
+                         * 1.9.2 fix: pool-exhaustion fallback to skill point. */
+                        BOOL gaveSkill = FALSE;
                         for (int si = 0; si < g_poolCount; si++) {
                             if (!g_pool[si].unlocked) {
                                 g_pool[si].unlocked = TRUE;
                                 char msg[128];
                                 sprintf(msg, "UNLOCKED: %s", g_skillDB[g_pool[si].dbIndex].name);
                                 ShowNotify(msg);
+                                gaveSkill = TRUE;
                                 break;
                             }
                         }
+                        if (!gaveSkill) {
+                            g_serverPendingSkillPts += 1;
+                            ShowNotify("Reward: 1 Skill Point! (pool exhausted)");
+                        }
                     }
-                    /* If BOTH modes are active, also grant a bonus skill */
+                    /* If BOTH modes are active, also grant a bonus skill.
+                     * 1.9.2 fix: same pool-exhaustion fallback. */
                     if (g_skillHuntingOn) {
+                        BOOL gaveBonus = FALSE;
                         for (int si = 0; si < g_poolCount; si++) {
                             if (!g_pool[si].unlocked) {
                                 g_pool[si].unlocked = TRUE;
@@ -1883,12 +1892,27 @@ static void ProcessDeferredQuests(void) {
                                 sprintf(msg2, "Bonus: %s", g_skillDB[g_pool[si].dbIndex].name);
                                 ShowNotify(msg2);
                                 Log("HYBRID bonus skill: %s\n", g_skillDB[g_pool[si].dbIndex].name);
+                                gaveBonus = TRUE;
                                 break;
                             }
                         }
+                        if (!gaveBonus) {
+                            g_serverPendingSkillPts += 1;
+                            ShowNotify("Bonus: 1 Skill Point! (pool exhausted)");
+                            Log("HYBRID bonus skill: pool exhausted -> +1 Skill Point fallback\n");
+                        }
                     }
                 } else if (g_skillHuntingOn) {
-                    /* Skill Hunting only: progression quests unlock SKILLS */
+                    /* Skill Hunting only: progression quests unlock SKILLS.
+                     * 1.9.2 fix: when the pool is exhausted (210 progression
+                     * quests have already fired), fall back to a Skill Point
+                     * grant so the remaining ~54 progression quests don't
+                     * silently no-op. Previously: for-loop completed without
+                     * matching any un-unlocked skill, the player got nothing.
+                     * AP-mode players were fine because AP fill placed
+                     * filler items at the overflow slots; standalone players
+                     * were silently losing rewards. */
+                    BOOL gaveSkill = FALSE;
                     for (int si = 0; si < g_poolCount; si++) {
                         if (!g_pool[si].unlocked) {
                             g_pool[si].unlocked = TRUE;
@@ -1896,8 +1920,17 @@ static void ProcessDeferredQuests(void) {
                             sprintf(msg, "UNLOCKED: %s", g_skillDB[g_pool[si].dbIndex].name);
                             ShowNotify(msg);
                             Log("AUTO-UNLOCK: %s (skill %d)\n", g_skillDB[g_pool[si].dbIndex].name, g_skillDB[g_pool[si].dbIndex].id);
+                            gaveSkill = TRUE;
                             break;
                         }
+                    }
+                    if (!gaveSkill) {
+                        /* Pool exhausted — grant +1 Skill Point as fallback. */
+                        g_serverPendingSkillPts += 1;
+                        ShowNotify("Reward: 1 Skill Point! (pool exhausted)");
+                        Log("SKILL REWARD: pool exhausted -> +1 Skill Point fallback (pending=%d)\n",
+                            g_serverPendingSkillPts);
+                        ItemLogAddA(2, 2, "+1 Skill Point (pool overflow)", quest->name);
                     }
                 }
             } else {

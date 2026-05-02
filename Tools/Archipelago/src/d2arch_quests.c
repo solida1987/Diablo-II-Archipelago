@@ -1226,8 +1226,22 @@ static void Quests_WriteSpoilerFile(void) {
             }
         }
     }
+    /* 1.9.2 — Cap skillUnlocks at the actual unique-skill pool size.
+     * If progression-quest count > pool size, the overflow slots fall
+     * back to +1 Skill Point at delivery time (gameloop.c pool-exhaustion
+     * fallback added in 1.9.2). The spoiler now shows both numbers
+     * accurately so the user sees how many UNIQUE skills they can
+     * unlock vs how many slots fall through to skill-point overflow. */
+    int skillPoolOverflow = 0;
+    if (g_skillHuntingOn && skillUnlocks > g_poolCount) {
+        skillPoolOverflow = skillUnlocks - g_poolCount;
+        skillUnlocks = g_poolCount;
+    }
     if (g_skillHuntingOn) {
         fprintf(f, "  Skill Unlock      : %d\n", skillUnlocks);
+        if (skillPoolOverflow > 0)
+            fprintf(f, "  Skill Pool Ovrflow: %d (deliver as +1 Skill Point)\n",
+                    skillPoolOverflow);
     }
     fprintf(f, "  Gold              : %d\n", totals[REWARD_GOLD]);
     fprintf(f, "  Experience        : %d\n", totals[REWARD_XP]);
@@ -1321,13 +1335,27 @@ static void Quests_WriteSpoilerFile(void) {
      * for quests (based on quest type + skill_hunting). Bonus + Extra
      * BR_SKILL are always +1 skill point (filler). Aggregate the
      * skill-unlock count from the existing quest computation above
-     * (skillUnlocks); the filler skill points = quest skillPoints
-     * + bonus BR_SKILL + extra BR_SKILL. */
-    int totalSkillPoints = skillPoints
+     * (skillUnlocks, already capped at g_poolCount); the filler skill
+     * points = quest skillPoints + bonus BR_SKILL + extra BR_SKILL +
+     * pool-overflow fallback (quests where pool was exhausted at
+     * delivery time and fell through to +1 Skill Point per 1.9.2 fix). */
+    int totalSkillPoints = skillPoints + skillPoolOverflow
                          + (rewardTotals[REWARD_SKILL] - totals[REWARD_SKILL]);
+    /* Grand reward total = sum of every printed line below. Built
+     * up explicitly to avoid double-counting REWARD_SKILL (which is
+     * already split between skillUnlocks + totalSkillPoints). */
     int grandRewardTot = 0;
-    for (int i = 0; i < 10; i++) grandRewardTot += rewardTotals[i];
-    if (g_skillHuntingOn) grandRewardTot += skillUnlocks; /* not in totals[] */
+    if (g_skillHuntingOn) grandRewardTot += skillUnlocks;
+    grandRewardTot += rewardTotals[REWARD_GOLD];
+    grandRewardTot += rewardTotals[REWARD_XP];
+    grandRewardTot += rewardTotals[REWARD_STAT];
+    grandRewardTot += totalSkillPoints;
+    if (g_skillHuntingOn) grandRewardTot += rewardTotals[REWARD_RESETPT];
+    grandRewardTot += rewardTotals[REWARD_TRAP];
+    grandRewardTot += rewardTotals[REWARD_LOOT];
+    grandRewardTot += rewardTotals[REWARD_DROP_CHARM];
+    grandRewardTot += rewardTotals[REWARD_DROP_SET];
+    grandRewardTot += rewardTotals[REWARD_DROP_UNIQUE];
 
     fprintf(f, "================ Total Reward Mix (all sources) ================\n\n");
     fprintf(f, "Combined count of pre-rolled rewards across Quests + Bonus +\n");
