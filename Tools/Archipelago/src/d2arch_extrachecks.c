@@ -907,11 +907,18 @@ static int Extra_HcIdxToNpcIdx(int hcIdx) {
  *   "NPC FIRE: hcIdx=? -> npcIdx=? (NPC name)"
  * If no log lines appear when talking to an NPC, GetUIVar isn't
  * resolved or no UIVar in 0x01..0x0F holds the NPC unit. */
+/* 1.9.2 — Direct GetUIVar resolver via D2Client ordinal 10059.
+ * Fallback to the hardcoded +0xBE400 offset only if the export is
+ * missing. This is the ROBUST path because the offset can shift
+ * across D2 1.10f sub-versions / cracks while the ordinal is stable.
+ * Also gives us a clean __fastcall typedef matching D2's actual
+ * calling convention. */
+typedef DWORD (__fastcall *Extra_GetUIVar_t)(DWORD varno);
+static Extra_GetUIVar_t s_extraGetUIVar = NULL;
+
 void Extra_PollNpcDialogue(void* pPlayerUnit) {
     /* Heartbeat — log once every ~5000 calls (≈83 sec at 60fps) so
-     * we know the per-tick poll is actually running. If you grep
-     * "NPC HEARTBEAT" in d2arch_log.txt and see entries, the poll
-     * loop is alive. If not, the gameloop tick isn't reaching us. */
+     * we know the per-tick poll is actually running. */
     static unsigned s_heartbeatCount = 0;
     if ((++s_heartbeatCount % 5000) == 1) {
         Log("NPC HEARTBEAT: poll #%u, EX_NPC enabled=%d, pPlayer=%p\n",
@@ -921,28 +928,74 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
 
     if (!g_extraEnabled[EX_NPC]) return;
     (void)pPlayerUnit;
-    extern DWORD (__fastcall *g_fnGetUIVar)(DWORD);
 
-    /* Diagnostic gate — log GetUIVar resolver state ONCE so we know
-     * whether the function pointer was actually wired by InitAPI. */
+    /* Resolve s_extraGetUIVar ONCE — try GetProcAddress on D2Client
+     * ordinal 10059 first (the official GetUIVar export). If that
+     * fails, fall back to the legacy +0xBE400 offset thunk. Log both
+     * addresses so we can compare in the log. */
     static int s_loggedInit = 0;
     if (!s_loggedInit) {
         s_loggedInit = 1;
-        Log("NPC POLL: g_fnGetUIVar=%p (NULL means D2Client GetUIVar "
-            "wasn't resolved — no NPC detection possible)\n",
-            (void*)g_fnGetUIVar);
+        HMODULE hClient = GetModuleHandleA("D2Client.dll");
+        Extra_GetUIVar_t fnExport = NULL;
+        if (hClient) {
+            fnExport = (Extra_GetUIVar_t)GetProcAddress(hClient,
+                                                       (LPCSTR)10059);
+        }
+        extern DWORD (__fastcall *g_fnGetUIVar)(DWORD);
+        Extra_GetUIVar_t fnLegacy = (Extra_GetUIVar_t)g_fnGetUIVar;
+        Log("NPC POLL RESOLVER: D2Client.dll=%p, ord 10059=%p (export), "
+            "legacy thunk=%p\n",
+            (void*)hClient, (void*)fnExport, (void*)fnLegacy);
+        s_extraGetUIVar = fnExport ? fnExport : fnLegacy;
+        Log("NPC POLL RESOLVER: chose %p (%s)\n",
+            (void*)s_extraGetUIVar,
+            fnExport ? "ordinal-export" : "legacy-thunk");
     }
-    if (!g_fnGetUIVar) return;
+    if (!s_extraGetUIVar) return;
+    Extra_GetUIVar_t g_fnGetUIVar = s_extraGetUIVar;  /* shadow */
 
-    /* Poll UIVars 0x01..0x0F. Cache last value per slot. Log
+    /* Poll UIVars 0x00..0x40. Cache last value per slot. Log
      * transitions. When a slot's value looks like a unit pointer
      * (>= 0x100000 typical D2 heap range) AND walks cleanly to a
-     * monster data + hcIdx, we treat it as the NPC dialogue target. */
-    static DWORD s_lastVal[0x10] = {0};
-    static int   s_logCount = 0;     /* throttle: only first 200 transitions */
-    BOOL anyHit = FALSE;
+     * monster data + hcIdx, we treat it as the NPC dialogue target.
+     * Wider range (0x00..0x40) than before since UIVar IDs vary
+     * across D2 1.10f sub-versions. */
+    static DWORD s_lastVal[0x41] = {0};
+    static int   s_logCount = 0;     /* throttle: only first 400 transitions */
 
-    for (DWORD vi = 0x01; vi < 0x10; vi++) {
+    /* Once-per-second snapshot dump (every 60 polls at 60fps) of all
+     * UIVars that are non-zero. This is critical — even if there are
+     * NO transitions, we'll see the steady-state values of any UIVars
+     * that the game keeps populated. If this dump shows EVERY UIVar
+     * is 0, then either GetUIVar is the wrong function or the user
+     * never opened any UI panel. */
+    static unsigned s_snapshotCount = 0;
+    if ((++s_snapshotCount % 60) == 0) {
+        char snap[512]; int sp = 0;
+        sp += _snprintf(snap + sp, sizeof(snap) - sp,
+                        "NPC SNAPSHOT [poll %u]: ", s_snapshotCount);
+        int nonZero = 0;
+        for (DWORD vi = 0x00; vi <= 0x40 && sp < (int)sizeof(snap) - 32; vi++) {
+            DWORD v = 0;
+            __try { v = g_fnGetUIVar(vi); }
+            __except(EXCEPTION_EXECUTE_HANDLER) { continue; }
+            if (v != 0) {
+                sp += _snprintf(snap + sp, sizeof(snap) - sp,
+                                "[0x%02X]=0x%08X ", vi, v);
+                nonZero++;
+            }
+        }
+        if (nonZero == 0) {
+            Log("NPC SNAPSHOT [poll %u]: all 65 UIVars 0x00..0x40 = 0 "
+                "(GetUIVar likely wrong function or no UI panels open)\n",
+                s_snapshotCount);
+        } else {
+            Log("%s [%d non-zero]\n", snap, nonZero);
+        }
+    }
+
+    for (DWORD vi = 0x00; vi <= 0x40; vi++) {
         DWORD val = 0;
         __try { val = g_fnGetUIVar(vi); }
         __except(EXCEPTION_EXECUTE_HANDLER) { continue; }
@@ -951,7 +1004,7 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
         DWORD prev = s_lastVal[vi];
         s_lastVal[vi] = val;
 
-        if (s_logCount < 200) {
+        if (s_logCount < 400) {
             s_logCount++;
             Log("NPC POLL: UIVar 0x%02X changed 0x%08X -> 0x%08X\n",
                 vi, prev, val);
@@ -969,14 +1022,14 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
                 hcIdx = (int)*(WORD*)((BYTE*)pMonData + 0x26);
             }
         } __except(EXCEPTION_EXECUTE_HANDLER) {
-            if (s_logCount < 200) {
+            if (s_logCount < 400) {
                 Log("NPC POLL:   UIVar 0x%02X val=0x%08X — exception walking as unit\n",
                     vi, val);
             }
             continue;
         }
 
-        if (s_logCount < 200) {
+        if (s_logCount < 400) {
             Log("NPC POLL:   UIVar 0x%02X val=0x%08X type=%d txtId=%d hcIdx=%d\n",
                 vi, val, unitType, txtId, hcIdx);
         }
@@ -987,7 +1040,7 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
         if (hcIdx < 0) continue;
         int npcIdx = Extra_HcIdxToNpcIdx(hcIdx);
         if (npcIdx < 0) {
-            if (s_logCount < 200) {
+            if (s_logCount < 400) {
                 Log("NPC POLL:     hcIdx=%d not in NPC mapping table — ignored\n",
                     hcIdx);
             }
@@ -996,10 +1049,7 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
         Log("NPC FIRE: UIVar 0x%02X hcIdx=%d -> npcIdx=%d (%s)\n",
             vi, hcIdx, npcIdx, EXTRA_NPC_NAMES[npcIdx]);
         Extra_OnNpcDialogue(npcIdx, g_currentDifficulty);
-        anyHit = TRUE;
     }
-
-    (void)anyHit;
 }
 
 void Extra_OnNpcDialogue(int npcIdx, int diff) {
