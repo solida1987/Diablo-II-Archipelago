@@ -1,12 +1,9 @@
 # Diablo II Archipelago — Beta 1.9.1
 
-> Dev-only stub. The version stays at 1.9.1 throughout the dev cycle —
-> all fixes accumulate here until the upload day, then the file becomes
-> the public release notes. See `feedback_version_policy.md`.
-
-> Style rule: write entries player-facing — what was broken, what works
-> now, in plain English. No function offsets, no savedLen quibbles, no
-> sidecar migration mechanics. (Those go in commit messages.)
+Released 2026-05-02. Polish pass on top of 1.9.0 — every reported bug
+from the overnight test session is fixed except the skill-text issue
+(deferred — needs MPQ extraction) and the rare skill-points-on-relog
+issue (needs more diagnostic logs from a reproducer).
 
 ---
 
