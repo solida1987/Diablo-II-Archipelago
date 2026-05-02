@@ -448,7 +448,17 @@ static int __fastcall OperateHandlerHook(void* pGame, void* pPlayer,
                         case 42: /* SanctuaryTome (Anya) */
                         case 45: /* SewerLever (Travincal) */
                         case 48: /* TrappedSoul (Anya alt) */
-                        case 49: /* HellForge — also fires 1.9.2 Cat 3 */
+                            g_charStats.questObjectsInteracted++;
+                            break;
+                        case 49: /* HellForge — fires 1.9.2 Cat 3 (Hellforge use)
+                                  * 1.9.2 fix: split out from the cases above so
+                                  * Extra_OnHellforgeUsed only fires for actual
+                                  * Hellforge interactions. The previous version
+                                  * had cases 10..49 all falling through to a
+                                  * shared body that called Extra_OnHellforgeUsed,
+                                  * which made the FIRST quest-object interaction
+                                  * (Cain Gibbet, Charsi imbue, Anya scroll, etc.)
+                                  * falsely fire one Hellforge check. */
                             {
                                 extern void Extra_OnHellforgeUsed(int diff);
                                 Extra_OnHellforgeUsed(g_currentDifficulty);

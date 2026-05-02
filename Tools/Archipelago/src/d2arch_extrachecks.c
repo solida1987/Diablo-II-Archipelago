@@ -431,10 +431,14 @@ void Extra_PollMerc(void* pPlayer) {
     __try {
         unitId = *(int*)((BYTE*)pMerc + 0x0C);    /* dwUnitId */
         mode   = *(int*)((BYTE*)pMerc + 0x5C);    /* current animation mode */
-        /* For monsters/mercs the "level" is in pMerc->pMonsterData->wLevel
-         * but we can also read pStats->wExperience instead. Use the
-         * stat-list for robustness across vanilla / D2MOO. */
-        void* pStatList = *(void**)((BYTE*)pMerc + 0x5C); (void)pStatList;
+        /* 1.9.2 fix: previously read pStatList from offset 0x5C which
+         * is the animation mode (already loaded above), not the stat
+         * list. The bogus pointer was masked by __except so it just
+         * silently returned 0 every tick — the level-30 detection
+         * never tripped, but reading garbage as a pointer is ugly.
+         * StatList is at offset 0x5C+8 = 0x64 in 1.10f, but the
+         * level-stat-12 lookup needs D2Common ord 10527 anyway and
+         * is deferred to 1.9.3. Skip the read entirely until then. */
     } __except(EXCEPTION_EXECUTE_HANDLER) { return; }
 
     /* First hire detection */
@@ -457,27 +461,13 @@ void Extra_PollMerc(void* pPlayer) {
     }
     g_extraState.mercLastUnitId = unitId;
 
-    /* Level-30 detection — best-effort read of merc level via the
-     * stat list. Fail-safe: skip if the structure can't be walked. */
-    if (!g_extraState.mercReached30) {
-        __try {
-            void* pStats = *(void**)((BYTE*)pMerc + 0x5C);
-            if (pStats) {
-                /* StatList layout — wLevel is exposed in vanilla via
-                 * the D2Common StatList accessor, not a direct field
-                 * read. Skip reliable detection here — a follow-up in
-                 * 1.9.3 hooks D2Common ord 10527 (STATLIST_GetStatValue)
-                 * for stat 12 (level). For now only fire when toggle is
-                 * on AND we observe a numerically large value at the
-                 * known offset. Conservative: keep it OFF until verified. */
-                level = 0;
-            }
-        } __except(EXCEPTION_EXECUTE_HANDLER) { level = 0; }
-        if (level >= 30) {
-            g_extraState.mercReached30 = 1;
-            Extra_FireApLocation(EXTRA_MERC_LEVEL30, "Merc Reached Level 30");
-        }
-    }
+    /* Level-30 detection — gated off until 1.9.3 wires D2Common
+     * ord 10527 (STATLIST_GetStatValue) for stat 12 (level). The
+     * direct-field-read approach is unreliable across builds, and
+     * reading a wrong offset as a stat-list pointer is what created
+     * the harmless-but-ugly bug fixed above. Keep the slot reachable
+     * via AP /release until then. */
+    (void)level;
 
     (void)mode;
 }
