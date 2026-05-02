@@ -1628,6 +1628,79 @@ static void ProcessPendingGameTick(void) {
                 }
                 g_cheatSpawnUber = 0;
             }
+
+            /* 1.9.2 — Specific-monster spawn dispatch for the Mons tab in
+             * the Ctrl+V menu. Two independent slots; each spawns one
+             * unit at the player's position + a small offset.
+             *
+             *   g_cheatSpawnSuperUniqueIdx (0..65 valid)
+             *     -> fnSpawnSuperUnique(pGame, pRoom, x, y, suIdx)
+             *     SU rows 66+ are our custom Pandemonium ubers and crash
+             *     the vanilla SU allocator (per d2arch_gameloop.c:1530
+             *     comment). Use g_cheatSpawnUber for those instead.
+             *
+             *   g_cheatSpawnMonsterRowId (MonStats.txt row >= 0)
+             *     -> fnSpawnMonster(pGame, pRoom, x, y, monId, 1, -1, 0)
+             *     Same call shape as the random monster trap path. */
+            if (g_cheatSpawnSuperUniqueIdx >= 0 && g_cachedPGame
+                    && fnSpawnSuperUnique && pCurseTarget) {
+                int suIdx = g_cheatSpawnSuperUniqueIdx;
+                __try {
+                    DWORD pPath = *(DWORD*)((DWORD)pCurseTarget + 0x2C);
+                    if (pPath) {
+                        DWORD pRoom = *(DWORD*)(pPath + 0x1C);
+                        int x = (int)*(unsigned short*)(pPath + 0x02) + 4;
+                        int y = (int)*(unsigned short*)(pPath + 0x06);
+                        if (pRoom) {
+                            void* pMon = NULL;
+                            __try {
+                                pMon = fnSpawnSuperUnique((void*)g_cachedPGame,
+                                                          (void*)pRoom, x, y, suIdx);
+                            } __except(EXCEPTION_EXECUTE_HANDLER) { pMon = NULL; }
+                            Log("CHEAT MONS: SuperUnique idx=%d at (%d,%d) -> pMon=%p\n",
+                                suIdx, x, y, pMon);
+                        } else {
+                            Log("CHEAT MONS: SU spawn skipped, pRoom NULL\n");
+                        }
+                    }
+                } __except(EXCEPTION_EXECUTE_HANDLER) {
+                    Log("CHEAT MONS: SU spawn EXCEPTION (idx=%d)\n", suIdx);
+                }
+                g_cheatSpawnSuperUniqueIdx = -1;
+            }
+
+            if (g_cheatSpawnMonsterRowId >= 0 && g_cachedPGame
+                    && fnSpawnMonster && pCurseTarget) {
+                int monId = g_cheatSpawnMonsterRowId;
+                __try {
+                    DWORD pPath = *(DWORD*)((DWORD)pCurseTarget + 0x2C);
+                    if (pPath) {
+                        DWORD pRoom = *(DWORD*)(pPath + 0x1C);
+                        int x = (int)*(unsigned short*)(pPath + 0x02) + 4;
+                        int y = (int)*(unsigned short*)(pPath + 0x06);
+                        if (pRoom) {
+                            void* pMon = NULL;
+                            __try {
+                                pMon = fnSpawnMonster((void*)g_cachedPGame,
+                                                      (void*)pRoom, x, y,
+                                                      monId, 1, -1, 0);
+                                if (!pMon) {
+                                    pMon = fnSpawnMonster((void*)g_cachedPGame,
+                                                          (void*)pRoom, x, y,
+                                                          monId, 0, 4, 0);
+                                }
+                            } __except(EXCEPTION_EXECUTE_HANDLER) { pMon = NULL; }
+                            Log("CHEAT MONS: Monster row=%d at (%d,%d) -> pMon=%p\n",
+                                monId, x, y, pMon);
+                        } else {
+                            Log("CHEAT MONS: Monster spawn skipped, pRoom NULL\n");
+                        }
+                    }
+                } __except(EXCEPTION_EXECUTE_HANDLER) {
+                    Log("CHEAT MONS: Monster spawn EXCEPTION (row=%d)\n", monId);
+                }
+                g_cheatSpawnMonsterRowId = -1;
+            }
         }
     }
 }

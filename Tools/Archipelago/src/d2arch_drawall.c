@@ -2058,7 +2058,7 @@ static void DrawAll(void) {
         static int s_cheatX = -1, s_cheatY = -1;
         static BOOL s_cheatDrag = FALSE;
         static int s_cheatDragOX = 0, s_cheatDragOY = 0;
-        static int s_activeTab = 0;  /* 0=Char 1=Combat 2=Items 3=Pand 4=Teleport 5=Portals 6=Loot */
+        static int s_activeTab = 0;  /* 0=Char 1=Combat 2=Items 3=Pand 4=Teleport 5=Portals 6=Loot 7=Mons */
         static int s_tpSubTab = 0;   /* Teleport sub-tab: 0=Act1 1=Act2 2=Act3 3=Act4 4=Act5 5=Secrets */
         /* 1.9.1 — Loot tab sub-tab: 0=Sets 1=Uniques 2=Runes 3=Gems 4=Misc.
          * Sets + Uniques pages are scrollable lists (127 / ~385 entries);
@@ -2066,6 +2066,10 @@ static void DrawAll(void) {
         static int s_lootSubTab = 0;
         static int s_lootScrollSet = 0;     /* pixel offset into the Sets list */
         static int s_lootScrollUnique = 0;  /* pixel offset into the Uniques list */
+        /* 1.9.2 — Mons tab sub-tab: 0=SUs 1=Bosses 2=Normal 3=Random. */
+        static int s_monsSubTab = 0;
+        static int s_monsScrollSU = 0;     /* pixel offset into the SU list */
+        static int s_monsScrollNormal = 0; /* pixel offset into the Normal monster list */
 
         #define MK_HDR  1   /* full-width section header */
         #define MK_BTN  2   /* clickable button */
@@ -2428,6 +2432,77 @@ static void DrawAll(void) {
             { MK_BTN, L"Close",               999, NULL },
         };
 
+        /* 1.9.2 — Mons tab. Four sub-tabs:
+         *   0 = SUs    (scrollable list of vanilla SuperUniques 0..65;
+         *               click spawns via fnSpawnSuperUnique)
+         *   1 = Bosses (fixed grid: 5 act bosses + 6 ubers + 2 trios)
+         *   2 = Normal (scrollable list of MonStats.txt rows; click
+         *               spawns via fnSpawnMonster)
+         *   3 = Random (the existing TRAPS section moved from Combat tab —
+         *               random SU spawn + random monster pack spawn)
+         *
+         * SU + Normal lists below are PLACEHOLDER catalogs (a small subset
+         * to validate the system end-to-end). The full catalogs (~66 SUs +
+         * ~250 normal monsters) get filled in once the catalog research
+         * pass completes — see Research/CHECK_SOURCES_MONSTER_AUDIT_*.md */
+
+        /* Mons sub-tab 1 — Bosses. Reuses the existing g_cheatSpawnUber
+         * pipeline for the 6 ubers + 2 trios; the 5 act-boss rows
+         * (Andariel/Duriel/Mephisto/Diablo/Baal) use g_cheatSpawnMonsterRowId
+         * with their MonStats.txt monId (verified against d2arch_gameloop.c
+         * UBER_VANILLA_IDS for Mephisto/Diablo/Baal: 242/243/544; Andariel
+         * is 156, Duriel is 211 in vanilla 1.10f though those rows are
+         * shared with the uber spawn table in our mod). */
+        static const struct CheatCell TAB_MONS_BOSSES[] = {
+            { MK_HDR, L"VANILLA ACT BOSSES",         0, NULL },
+            { MK_BTN, L"Andariel",         700, "Spawning Andariel..." },
+            { MK_BTN, L"Duriel",           701, "Spawning Duriel..." },
+            { MK_BTN, L"Mephisto",         702, "Spawning Mephisto..." },
+            { MK_BTN, L"Diablo",           703, "Spawning Diablo..." },
+            { MK_BTN, L"Baal",             704, "Spawning Baal..." },
+            { MK_HDR, L"PANDEMONIUM UBERS",          0, NULL },
+            { MK_BTN, L"Lilith",           230, "Spawning Lilith..." },
+            { MK_BTN, L"Uber Duriel",      231, "Spawning Uber Duriel..." },
+            { MK_BTN, L"Uber Izual",       232, "Spawning Uber Izual..." },
+            { MK_BTN, L"Uber Mephisto",    233, "Spawning Uber Mephisto..." },
+            { MK_BTN, L"Uber Diablo",      234, "Spawning Uber Diablo..." },
+            { MK_BTN, L"Uber Baal",        235, "Spawning Uber Baal..." },
+            { MK_BTN, L"Mini Trio",        240, "Lilith + Duriel + Izual..." },
+            { MK_BTN, L"Final Trio",       241, "Mephisto + Diablo + Baal..." },
+            { MK_BTN, L"Close",            999, NULL },
+        };
+
+        /* Mons sub-tab 3 — Random. Mirrors the legacy Combat tab TRAPS
+         * section so users have one place for spawn-random-monsters too.
+         * (Combat tab keeps these cells too for backward compat.) */
+        static const struct CheatCell TAB_MONS_RANDOM[] = {
+            { MK_HDR, L"RANDOM SPAWN",               0, NULL },
+            { MK_BTN, L"Random SuperUnique", 110, "Spawning random SU..." },
+            { MK_BTN, L"Random Monsters",    111, "Spawning monster pack..." },
+            { MK_BTN, L"Close",              999, NULL },
+        };
+
+        /* 1.9.2 — Mons full catalog. Generated from
+         * Research/CHECK_SOURCES_MONSTER_AUDIT_2026-05-02.md by
+         * Tools/extract_monster_catalog.py. Re-run that script after any
+         * change to the research markdown.
+         *
+         * MONS_SU_FULL[]      — 66 vanilla SUs (header row 42 stripped).
+         *                       idx is SuperUniques.txt row, passed to
+         *                       fnSpawnSuperUnique.
+         * MONS_NORMAL_FULL[]  — 400 player-killable MonStats rows.
+         *                       idx is MonStats.txt hcIdx, passed to
+         *                       fnSpawnMonster.
+         *
+         * Dispatch handled in d2arch_gameloop.c via the slots
+         * g_cheatSpawnSuperUniqueIdx + g_cheatSpawnMonsterRowId. */
+        struct MonsCatalogEntry { int idx; const char* name; const char* note; };
+        #include "_monster_catalog_generated.h"
+        #define MONS_SU_CATALOG         MONS_SU_FULL
+        #define MONS_SU_CATALOG_LEN     MONS_SU_FULL_LEN
+        #define MONS_NORMAL_CATALOG     MONS_NORMAL_FULL
+        #define MONS_NORMAL_CATALOG_LEN MONS_NORMAL_FULL_LEN
+
         /* Pick active tab's array */
         const struct CheatCell* MENU = TAB_CHARACTER;
         int tabSize = (int)(sizeof(TAB_CHARACTER) / sizeof(TAB_CHARACTER[0]));
@@ -2472,6 +2547,25 @@ static void DrawAll(void) {
                         break;
                 }
                 tabName = L"Loot"; break;
+            case 7:
+                /* 1.9.2 — Mons tab. Sub 0=SUs and 2=Normal are scrollable
+                 * lists; sub 1=Bosses and 3=Random use the static grid
+                 * arrays defined above. */
+                switch (s_monsSubTab) {
+                    case 1: MENU = TAB_MONS_BOSSES;
+                            tabSize = (int)(sizeof(TAB_MONS_BOSSES)/sizeof(TAB_MONS_BOSSES[0]));
+                            break;
+                    case 3: MENU = TAB_MONS_RANDOM;
+                            tabSize = (int)(sizeof(TAB_MONS_RANDOM)/sizeof(TAB_MONS_RANDOM[0]));
+                            break;
+                    default:
+                        /* SUs (0) / Normal (2) — empty stub; scrollable
+                         * lists draw their own content below. */
+                        MENU = NULL;
+                        tabSize = 0;
+                        break;
+                }
+                tabName = L"Mons"; break;
             case 4:
                 /* Pick teleport sub-tab */
                 switch (s_tpSubTab) {
@@ -2515,19 +2609,23 @@ static void DrawAll(void) {
 
         /* 1.9.1 — Loot tab Sets/Uniques use a fixed-height scrollable
          * list area instead of the cell-walk grid. We pick a comfortable
-         * 380px tall content area so ~17 list rows are visible at once. */
+         * 380px tall content area so ~17 list rows are visible at once.
+         * 1.9.2 — Mons tab SUs/Normal sub-tabs use the same layout. */
         const int LOOT_LIST_H = 380;
         const int LOOT_ROW_H  = 22;
         BOOL isLootScrollList =
             (s_activeTab == 6 && (s_lootSubTab == 0 || s_lootSubTab == 1));
+        BOOL isMonsScrollList =
+            (s_activeTab == 7 && (s_monsSubTab == 0 || s_monsSubTab == 2));
+        BOOL isAnyScrollList = isLootScrollList || isMonsScrollList;
 
         /* Walk cells once to compute total height */
         /* Reserve space for tab strip (22 tab + 4 top + 4 bottom = 30).
-         * Plus extra 26 for sub-tab strip when Teleport or Loot tab active. */
+         * Plus extra 26 for sub-tab strip when Teleport / Loot / Mons active. */
         int yWalk = TITLE_H + 30 + PAD;
-        if (s_activeTab == 4 || s_activeTab == 6) yWalk += 26;
+        if (s_activeTab == 4 || s_activeTab == 6 || s_activeTab == 7) yWalk += 26;
         int colCur = 0;
-        if (isLootScrollList) {
+        if (isAnyScrollList) {
             /* Fixed scrollable list height + close-button row. */
             yWalk += LOOT_LIST_H + CELL_GAP + CELL_H + CELL_GAP;
         } else {
@@ -2584,16 +2682,17 @@ static void DrawAll(void) {
         fnFont(0);
         fnText(L"Dev Tools  (Ctrl+V)", cx+cw/2, cy+22, 4, 1);
 
-        /* Tab strip — 7 tabs across top (1.9.1 added Loot for the
-         * per-item spawn pages: Sets / Uniques / Runes / Gems / Misc) */
+        /* Tab strip — 8 tabs across top (1.9.2 added Mons for the
+         * per-monster spawn pages: SUs / Bosses / Normal / Random) */
         {
-            const wchar_t* tabLabels[7] = {
-                L"Char", L"Combat", L"Items", L"Pand", L"Teleport", L"Portals", L"Loot"
+            const wchar_t* tabLabels[8] = {
+                L"Char", L"Combat", L"Items", L"Pand", L"Teleport",
+                L"Portals", L"Loot", L"Mons"
             };
             const int TAB_H = 22;
-            const int tabW = (cw - PAD * 2) / 7;
+            const int tabW = (cw - PAD * 2) / 8;
             int tabY = cy + TITLE_H + 4;
-            for (int t = 0; t < 7; t++) {
+            for (int t = 0; t < 8; t++) {
                 int tx = cx + PAD + t * tabW;
                 BOOL isActive = (t == s_activeTab);
                 BOOL hov = InRect(cmx, cmy, tx, tabY, tabW - 2, TAB_H);
@@ -2618,11 +2717,12 @@ static void DrawAll(void) {
         }
         const int TAB_STRIP_H = 22 + 8;  /* 22 tab + 4 top pad + 4 bottom pad */
 
-        /* Sub-tab strip — only when Teleport (4) or Loot (6) tab is active.
-         * Both reuse the same paint routine; the labels and selected-state
-         * variable are picked from the active top tab. */
+        /* Sub-tab strip — only when Teleport (4), Loot (6), or Mons (7)
+         * tab is active. All three reuse the same paint routine; the
+         * labels and selected-state variable are picked from the active
+         * top tab. */
         int subTabExtraY = 0;
-        if (s_activeTab == 4 || s_activeTab == 6) {
+        if (s_activeTab == 4 || s_activeTab == 6 || s_activeTab == 7) {
             const wchar_t* subLabels[6];
             int subCount;
             int* selectedSub;
@@ -2633,7 +2733,7 @@ static void DrawAll(void) {
                 for (int i = 0; i < 6; i++) subLabels[i] = TP_LABELS[i];
                 subCount = 6;
                 selectedSub = &s_tpSubTab;
-            } else {
+            } else if (s_activeTab == 6) {
                 /* Loot tab — 5 sub-tabs */
                 static const wchar_t* LOOT_LABELS[5] = {
                     L"Sets", L"Uniques", L"Runes", L"Gems", L"Misc"
@@ -2641,6 +2741,14 @@ static void DrawAll(void) {
                 for (int i = 0; i < 5; i++) subLabels[i] = LOOT_LABELS[i];
                 subCount = 5;
                 selectedSub = &s_lootSubTab;
+            } else {
+                /* 1.9.2 Mons tab — 4 sub-tabs */
+                static const wchar_t* MONS_LABELS[4] = {
+                    L"SUs", L"Bosses", L"Normal", L"Random"
+                };
+                for (int i = 0; i < 4; i++) subLabels[i] = MONS_LABELS[i];
+                subCount = 4;
+                selectedSub = &s_monsSubTab;
             }
             const int SUB_TAB_H = 20;
             const int subTabW = (cw - PAD * 2) / subCount;
@@ -2841,6 +2949,152 @@ static void DrawAll(void) {
             if (hovC && !s_cheatDrag && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
                 static DWORD _cc = 0; DWORD _cn = GetTickCount();
                 if (_cn - _cc > 300) { _cc = _cn; g_cheatMenuOpen = FALSE; }
+            }
+
+            goto cheat_menu_done;
+        }
+
+        /* 1.9.2 — Mons SUs / Normal: render a vertical scrollable list.
+         * Same pattern as the Loot Sets/Uniques block above. Each row
+         * is one monster catalog entry; click sets the appropriate
+         * dispatch global which the gameloop tick consumes. */
+        if (isMonsScrollList) {
+            int isSU = (s_monsSubTab == 0);
+            int* scroll = isSU ? &s_monsScrollSU : &s_monsScrollNormal;
+            int totalCount = isSU ? MONS_SU_CATALOG_LEN : MONS_NORMAL_CATALOG_LEN;
+            const struct MonsCatalogEntry* catalog =
+                isSU ? MONS_SU_CATALOG : MONS_NORMAL_CATALOG;
+
+            int listX = cx + PAD;
+            int listW = cw - PAD * 2 - 14;
+            int listY = yCur;
+            int listH = LOOT_LIST_H;
+            int rowH  = LOOT_ROW_H;
+
+            int totalH = totalCount * rowH;
+            int maxScroll = totalH - listH;
+            if (maxScroll < 0) maxScroll = 0;
+
+            if (InRect(cmx, cmy, listX, listY, listW + 14, listH)) {
+                if (g_cheatMenuWheelDelta != 0) {
+                    *scroll -= (g_cheatMenuWheelDelta / 120) * (rowH * 3);
+                    g_cheatMenuWheelDelta = 0;
+                }
+            }
+            if (*scroll < 0) *scroll = 0;
+            if (*scroll > maxScroll) *scroll = maxScroll;
+
+            /* Background */
+            fnRect(listX, listY, listX + listW + 14, listY + listH, 0, 1);
+            fnRect(listX, listY, listX + listW + 14, listY + 1, 7, 1);
+            fnRect(listX, listY + listH - 1, listX + listW + 14, listY + listH, 7, 1);
+            fnRect(listX, listY, listX + 1, listY + listH, 7, 1);
+            fnRect(listX + listW + 13, listY, listX + listW + 14, listY + listH, 7, 1);
+
+            int firstRow = (*scroll) / rowH;
+            int lastRow  = (*scroll + listH) / rowH + 1;
+            if (firstRow < 0) firstRow = 0;
+            if (lastRow > totalCount) lastRow = totalCount;
+
+            for (int r = firstRow; r < lastRow; r++) {
+                int rowY = listY + (r * rowH) - (*scroll);
+                if (rowY + rowH < listY || rowY > listY + listH) continue;
+
+                int drawTop    = (rowY < listY) ? listY : rowY;
+                int drawBottom = (rowY + rowH > listY + listH)
+                                 ? listY + listH : rowY + rowH;
+                if (drawBottom <= drawTop) continue;
+
+                BOOL hov = InRect(cmx, cmy, listX + 2, rowY, listW - 4, rowH)
+                         && (rowY >= listY) && (rowY + rowH <= listY + listH);
+                int fillCol = hov ? 4 : 0;
+                int textCol = hov ? 0 : 7;
+                fnRect(listX + 2, drawTop, listX + listW - 2, drawBottom, fillCol, 1);
+
+                wchar_t wlabel[96];
+                char buf[128];
+                _snprintf(buf, sizeof(buf), "[%4d] %s  -  %s",
+                          catalog[r].idx,
+                          catalog[r].name ? catalog[r].name : "?",
+                          catalog[r].note ? catalog[r].note : "");
+                buf[sizeof(buf) - 1] = 0;
+                if (strlen(buf) > 60) {
+                    buf[57] = '.'; buf[58] = '.'; buf[59] = '.'; buf[60] = 0;
+                }
+                MultiByteToWideChar(CP_ACP, 0, buf, -1, wlabel, 96);
+
+                fnFont(6);
+                fnText(wlabel, listX + 6, rowY + 16, textCol, 0);
+
+                if (hov && !s_cheatDrag && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+                    static DWORD _mlc = 0; DWORD _mln = GetTickCount();
+                    if (_mln - _mlc > 300) {
+                        _mlc = _mln;
+                        if (isSU) {
+                            g_cheatSpawnSuperUniqueIdx = catalog[r].idx;
+                            ShowNotify(catalog[r].name);
+                            Log("CHEAT MONS: queued SU idx=%d (%s)\n",
+                                catalog[r].idx,
+                                catalog[r].name ? catalog[r].name : "?");
+                        } else {
+                            g_cheatSpawnMonsterRowId = catalog[r].idx;
+                            ShowNotify(catalog[r].name);
+                            Log("CHEAT MONS: queued Monster row=%d (%s)\n",
+                                catalog[r].idx,
+                                catalog[r].name ? catalog[r].name : "?");
+                        }
+                    }
+                }
+            }
+
+            /* Scrollbar */
+            int sbX  = listX + listW;
+            int sbX2 = sbX + 12;
+            if (totalH > listH) {
+                fnRect(sbX, listY, sbX2, listY + listH, 0, 1);
+                int thumbH = (listH * listH) / totalH;
+                if (thumbH < 16) thumbH = 16;
+                int thumbY = listY;
+                if (maxScroll > 0)
+                    thumbY = listY + ((*scroll) * (listH - thumbH)) / maxScroll;
+                fnRect(sbX + 1, thumbY, sbX2 - 1, thumbY + thumbH, 7, 1);
+
+                if (InRect(cmx, cmy, sbX, listY, 14, listH)
+                    && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+                    int relY = cmy - listY - thumbH / 2;
+                    if (listH - thumbH > 0) {
+                        *scroll = (relY * maxScroll) / (listH - thumbH);
+                        if (*scroll < 0) *scroll = 0;
+                        if (*scroll > maxScroll) *scroll = maxScroll;
+                    }
+                }
+            }
+
+            wchar_t winfo[64];
+            swprintf(winfo, 64, L"%d entries  -  scroll wheel or drag thumb",
+                     totalCount);
+            fnFont(6);
+            fnText(winfo, listX + listW / 2, listY + listH + 12, 5, 1);
+
+            yCur += listH + CELL_GAP + 12;
+
+            /* Close button */
+            int bx = cx + (cw - CELL_W) / 2;
+            int by = yCur;
+            int bw = CELL_W, bh = CELL_H;
+            BOOL hovC = InRect(cmx, cmy, bx, by, bw, bh);
+            int fillCol = hovC ? 4 : 5;
+            int textCol = hovC ? 0 : 1;
+            fnRect(bx, by, bx + bw, by + bh, fillCol, 1);
+            fnRect(bx, by, bx + bw, by + 1, 7, 1);
+            fnRect(bx, by + bh - 1, bx + bw, by + bh, 7, 1);
+            fnRect(bx, by, bx + 1, by + bh, 7, 1);
+            fnRect(bx + bw - 1, by, bx + bw, by + bh, 7, 1);
+            fnFont(6);
+            fnText(L"Close", bx + bw / 2, by + 18, textCol, 1);
+            if (hovC && !s_cheatDrag && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+                static DWORD _cc2 = 0; DWORD _cn2 = GetTickCount();
+                if (_cn2 - _cc2 > 300) { _cc2 = _cn2; g_cheatMenuOpen = FALSE; }
             }
 
             goto cheat_menu_done;
@@ -3060,6 +3314,23 @@ static void DrawAll(void) {
                                 Log("CHEAT LOOT: misc %s qual=%d lvl=%d queued\n",
                                     code, qual, lvl);
                             }
+                        }
+                        /* 1.9.2 — Mons tab Bosses grid: cmd 700-704 spawn
+                         * vanilla act bosses via fnSpawnMonster with their
+                         * MonStats.txt row IDs. The 6 ubers (cmd 230-235)
+                         * and 2 trios (cmd 240-241) are handled by the
+                         * existing g_cheatSpawnUber dispatch above. */
+                        else if (c >= 700 && c <= 704) {
+                            static const int ACT_BOSS_ROWS[5] = {
+                                156,  /* Andariel */
+                                211,  /* Duriel */
+                                242,  /* Mephisto */
+                                243,  /* Diablo */
+                                544,  /* Baal */
+                            };
+                            g_cheatSpawnMonsterRowId = ACT_BOSS_ROWS[c - 700];
+                            Log("CHEAT MONS: Boss queued row=%d (cmd=%d)\n",
+                                g_cheatSpawnMonsterRowId, c);
                         }
                         else if (c == 999) { g_cheatMenuOpen = FALSE; }
                         if (mc->notify) ShowNotify(mc->notify);

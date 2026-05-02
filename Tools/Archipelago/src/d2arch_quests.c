@@ -106,6 +106,15 @@ static volatile char g_cheatSingleItemCode[8] = "";  /* 3-char code + nul, "" = 
 static volatile BYTE g_cheatSingleItemQuality = 2;   /* 2=normal, 4=magic, 5=set, 7=unique */
 static volatile int  g_cheatSingleItemLvl     = 50;  /* spawn level (use 99 for cm2 unique torch) */
 
+/* 1.9.2 — Specific-monster spawn dispatch for the new Mons tab in the
+ * Ctrl+V menu.  Two slots:
+ *   g_cheatSpawnSuperUniqueIdx — 0..65 (vanilla SU), uses fnSpawnSuperUnique
+ *   g_cheatSpawnMonsterRowId   — MonStats.txt row index, uses fnSpawnMonster
+ * Both spawn one unit at the player's position + small offset, mirroring
+ * the existing g_cheatSpawnUber pipeline. */
+static volatile int g_cheatSpawnSuperUniqueIdx = -1;
+static volatile int g_cheatSpawnMonsterRowId   = -1;
+
 /* Boss loot table TC IDs.
  * 1.7.1: resolved dynamically at boot via ResolveBossLootTCs() by matching the
  * TC name in sgptDataTables->pTreasureClassExTxt. If the name lookup fails
