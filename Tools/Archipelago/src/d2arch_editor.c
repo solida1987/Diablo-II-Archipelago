@@ -2161,6 +2161,47 @@ static void RenderEditor(void) {
                     }
                 }
 
+                /* 1.9.2 — Collection + Zones appended so the Item Log
+                 * "Total Checks" matches the F1 Overview total (which
+                 * already includes both categories). Without these the
+                 * Item Log under-counts by 205 (Collection) + 54
+                 * (Zones × 3 difficulties) = 259, leaving users wondering
+                 * why the two pages disagree. */
+                {
+                    int setsGot   = Coll_CountCollectedInRange(COLL_SLOT_SETS_BASE,
+                                        COLL_SLOT_SETS_BASE + COLL_NUM_SET_PIECES - 1);
+                    int runesGot  = Coll_CountCollectedInRange(COLL_SLOT_RUNES_BASE,
+                                        COLL_SLOT_RUNES_BASE + COLL_NUM_RUNES - 1);
+                    int gemsGot   = Coll_CountCollectedInRange(COLL_SLOT_GEMS_BASE,
+                                        COLL_SLOT_GEMS_BASE + COLL_NUM_GEMS - 1);
+                    int specGot   = Coll_CountCollectedInRange(COLL_SLOT_SPECIALS_BASE,
+                                        COLL_SLOT_SPECIALS_BASE + COLL_NUM_SPECIALS - 1);
+                    int collGot = setsGot + runesGot + gemsGot + specGot;
+                    int collMax = COLL_NUM_SET_PIECES + COLL_NUM_RUNES +
+                                  COLL_NUM_GEMS + COLL_NUM_SPECIALS;
+                    wsprintfW(wb, L"Collection: %d / %d", collGot, collMax);
+                    fnText(wb, s_itLogBodyX, ry, 0, 0); ry += s_itLogRowH;
+                    doneTotal += collGot; allTotal += collMax;
+                }
+                if (g_zoneLockingOn) {
+                    int zoneTotalDone = 0, zoneTotalAll = 0;
+                    int maxAct = GetMaxActForGoal();
+                    for (int d = 0; d <= g_apDiffScope && d < 3; d++) {
+                        for (int act = 1; act <= maxAct; act++) {
+                            int numGates = g_actRegions[act - 1].num_gates;
+                            zoneTotalAll += numGates;
+                            for (int gi = 0; gi < numGates; gi++) {
+                                int slot = GateKey_SlotFromActGate(act, gi);
+                                if (slot >= 0 && g_gateBossKilled[d][slot])
+                                    zoneTotalDone++;
+                            }
+                        }
+                    }
+                    wsprintfW(wb, L"Zones: %d / %d", zoneTotalDone, zoneTotalAll);
+                    fnText(wb, s_itLogBodyX, ry, 0, 0); ry += s_itLogRowH;
+                    doneTotal += zoneTotalDone; allTotal += zoneTotalAll;
+                }
+
                 /* Combined total + status. Reset Points removed — shown
                  * in the Skill Manager panel already, no need to duplicate. */
                 ry += 4;
