@@ -907,14 +907,26 @@ static int Extra_HcIdxToNpcIdx(int hcIdx) {
  *   "NPC FIRE: hcIdx=? -> npcIdx=? (NPC name)"
  * If no log lines appear when talking to an NPC, GetUIVar isn't
  * resolved or no UIVar in 0x01..0x0F holds the NPC unit. */
-/* 1.9.2 — Direct GetUIVar resolver via D2Client ordinal 10059.
- * Fallback to the hardcoded +0xBE400 offset only if the export is
- * missing. This is the ROBUST path because the offset can shift
- * across D2 1.10f sub-versions / cracks while the ordinal is stable.
- * Also gives us a clean __fastcall typedef matching D2's actual
- * calling convention. */
-typedef DWORD (__fastcall *Extra_GetUIVar_t)(DWORD varno);
-static Extra_GetUIVar_t s_extraGetUIVar = NULL;
+/* 1.9.2 — NPC dialogue detection via NEARBY-ROOM SCAN (UIVar approach
+ * abandoned because D2Client ord 10059 returned NULL in the user's
+ * 1.10f build and the legacy +0xBE400 thunk returned 0 for every
+ * possible UIVar id 0x00..0x40 across hundreds of polls).
+ *
+ * New strategy: every game tick, walk the nearby rooms (same pattern
+ * as ScanMonsters in d2arch_gameloop.c) looking for any unit with
+ * type=1 (UNIT_MONSTER) whose hcIdx maps to one of our 27 NPCs.
+ * Track which NPCs have been "near and stationary with the player"
+ * for at least N consecutive ticks — when an NPC stays close while
+ * the player isn't moving, that's our heuristic for "dialogue is
+ * open". Fires the matching slot.
+ *
+ * Heuristic isn't perfect: walking past an NPC and stopping briefly
+ * could fire it. But it's robust — uses no reverse-engineered
+ * function offsets, just struct-field reads we already do elsewhere
+ * in the codebase. */
+
+#define NPC_NEAR_TILES        2       /* tiles between player and NPC for "near" */
+#define NPC_STATIONARY_TICKS  20      /* ticks player must be near + still (~0.3s @ 60fps) */
 
 void Extra_PollNpcDialogue(void* pPlayerUnit) {
     /* Heartbeat — log once every ~5000 calls (≈83 sec at 60fps) so
@@ -927,128 +939,107 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
     }
 
     if (!g_extraEnabled[EX_NPC]) return;
-    (void)pPlayerUnit;
+    if (!pPlayerUnit) return;
 
-    /* Resolve s_extraGetUIVar ONCE — try GetProcAddress on D2Client
-     * ordinal 10059 first (the official GetUIVar export). If that
-     * fails, fall back to the legacy +0xBE400 offset thunk. Log both
-     * addresses so we can compare in the log. */
-    static int s_loggedInit = 0;
-    if (!s_loggedInit) {
-        s_loggedInit = 1;
-        HMODULE hClient = GetModuleHandleA("D2Client.dll");
-        Extra_GetUIVar_t fnExport = NULL;
-        if (hClient) {
-            fnExport = (Extra_GetUIVar_t)GetProcAddress(hClient,
-                                                       (LPCSTR)10059);
-        }
-        extern DWORD (__fastcall *g_fnGetUIVar)(DWORD);
-        Extra_GetUIVar_t fnLegacy = (Extra_GetUIVar_t)g_fnGetUIVar;
-        Log("NPC POLL RESOLVER: D2Client.dll=%p, ord 10059=%p (export), "
-            "legacy thunk=%p\n",
-            (void*)hClient, (void*)fnExport, (void*)fnLegacy);
-        s_extraGetUIVar = fnExport ? fnExport : fnLegacy;
-        Log("NPC POLL RESOLVER: chose %p (%s)\n",
-            (void*)s_extraGetUIVar,
-            fnExport ? "ordinal-export" : "legacy-thunk");
+    /* Read player's pPath -> pRoom -> nearby rooms. Same pattern as
+     * ScanMonsters in gameloop.c. The CLIENT player struct (passed
+     * via pPlayerUnit) has pPath at offset 0x2C. */
+    DWORD pPath = 0, pRoom = 0;
+    int playerX = 0, playerY = 0;
+    __try {
+        pPath = *(DWORD*)((BYTE*)pPlayerUnit + 0x2C);
+        if (!pPath) return;
+        /* Path xPos/yPos are at 0x02 and 0x06 (16-bit each in client) */
+        playerX = (int)*(WORD*)(pPath + 0x02);
+        playerY = (int)*(WORD*)(pPath + 0x06);
+        pRoom   = *(DWORD*)(pPath + 0x1C);
+    } __except(EXCEPTION_EXECUTE_HANDLER) { return; }
+    if (!pRoom) return;
+
+    /* Edge-detect player movement: when player position changes,
+     * reset the "near for N ticks" counter for every NPC. */
+    static int s_lastPlayerX = -1, s_lastPlayerY = -1;
+    BOOL playerMoved = (playerX != s_lastPlayerX || playerY != s_lastPlayerY);
+    s_lastPlayerX = playerX;
+    s_lastPlayerY = playerY;
+
+    /* Per-NPC "ticks near and stationary" counter. Index = npcIdx 0..26.
+     * Reset when player moves; bumped each tick the NPC is within
+     * NPC_NEAR_TILES of the player. When it crosses
+     * NPC_STATIONARY_TICKS, fire the slot once. */
+    static int s_nearTicks[27] = {0};
+    if (playerMoved) {
+        for (int i = 0; i < 27; i++) s_nearTicks[i] = 0;
     }
-    if (!s_extraGetUIVar) return;
-    Extra_GetUIVar_t g_fnGetUIVar = s_extraGetUIVar;  /* shadow */
 
-    /* Poll UIVars 0x00..0x40. Cache last value per slot. Log
-     * transitions. When a slot's value looks like a unit pointer
-     * (>= 0x100000 typical D2 heap range) AND walks cleanly to a
-     * monster data + hcIdx, we treat it as the NPC dialogue target.
-     * Wider range (0x00..0x40) than before since UIVar IDs vary
-     * across D2 1.10f sub-versions. */
-    static DWORD s_lastVal[0x41] = {0};
-    static int   s_logCount = 0;     /* throttle: only first 400 transitions */
-
-    /* Once-per-second snapshot dump (every 60 polls at 60fps) of all
-     * UIVars that are non-zero. This is critical — even if there are
-     * NO transitions, we'll see the steady-state values of any UIVars
-     * that the game keeps populated. If this dump shows EVERY UIVar
-     * is 0, then either GetUIVar is the wrong function or the user
-     * never opened any UI panel. */
-    static unsigned s_snapshotCount = 0;
-    if ((++s_snapshotCount % 60) == 0) {
-        char snap[512]; int sp = 0;
-        sp += _snprintf(snap + sp, sizeof(snap) - sp,
-                        "NPC SNAPSHOT [poll %u]: ", s_snapshotCount);
-        int nonZero = 0;
-        for (DWORD vi = 0x00; vi <= 0x40 && sp < (int)sizeof(snap) - 32; vi++) {
-            DWORD v = 0;
-            __try { v = g_fnGetUIVar(vi); }
-            __except(EXCEPTION_EXECUTE_HANDLER) { continue; }
-            if (v != 0) {
-                sp += _snprintf(snap + sp, sizeof(snap) - sp,
-                                "[0x%02X]=0x%08X ", vi, v);
-                nonZero++;
+    /* Walk nearby rooms (current + adjacent) looking for NPC units. */
+    DWORD rooms[21];
+    int roomCount = 0;
+    rooms[roomCount++] = pRoom;
+    __try {
+        DWORD ppRoomList = *(DWORD*)(pRoom + 0x24);
+        int   nNumRooms  = (int)*(DWORD*)(pRoom + 0x28);
+        if (nNumRooms > 20) nNumRooms = 20;
+        if (ppRoomList && nNumRooms > 0) {
+            for (int r = 0; r < nNumRooms && roomCount < 21; r++) {
+                DWORD nr = *(DWORD*)((DWORD)ppRoomList + r * 4);
+                if (nr && nr != pRoom) rooms[roomCount++] = nr;
             }
         }
-        if (nonZero == 0) {
-            Log("NPC SNAPSHOT [poll %u]: all 65 UIVars 0x00..0x40 = 0 "
-                "(GetUIVar likely wrong function or no UI panels open)\n",
-                s_snapshotCount);
-        } else {
-            Log("%s [%d non-zero]\n", snap, nonZero);
-        }
-    }
+    } __except(EXCEPTION_EXECUTE_HANDLER) { /* fall through with current room only */ }
 
-    for (DWORD vi = 0x00; vi <= 0x40; vi++) {
-        DWORD val = 0;
-        __try { val = g_fnGetUIVar(vi); }
+    /* For each room, walk the unit list (type=1 monsters) and check
+     * for NPC matches. Limited per-room chain length to keep cost
+     * bounded. */
+    for (int ri = 0; ri < roomCount; ri++) {
+        DWORD unit = 0;
+        __try { unit = *(DWORD*)(rooms[ri] + 0x2C); }
         __except(EXCEPTION_EXECUTE_HANDLER) { continue; }
 
-        if (val == s_lastVal[vi]) continue;     /* no change */
-        DWORD prev = s_lastVal[vi];
-        s_lastVal[vi] = val;
+        int chain = 0;
+        while (unit && chain++ < 100) {
+            DWORD type = 0; DWORD txtId = 0; DWORD pMonData = 0;
+            DWORD pNpcPath = 0;
+            int   npcX = 0, npcY = 0;
+            int   hcIdx = -1;
+            __try {
+                type     = *(DWORD*)(unit + 0x00);
+                txtId    = *(DWORD*)(unit + 0x04);
+                pMonData = *(DWORD*)(unit + 0x14);
+                pNpcPath = *(DWORD*)(unit + 0x2C);
+                if (pNpcPath) {
+                    npcX = (int)*(WORD*)(pNpcPath + 0x02);
+                    npcY = (int)*(WORD*)(pNpcPath + 0x06);
+                }
+                if (pMonData) {
+                    hcIdx = (int)*(WORD*)(pMonData + 0x26);
+                }
+                /* Advance to next unit in room chain */
+                unit = *(DWORD*)(unit + 0xE8);
+            } __except(EXCEPTION_EXECUTE_HANDLER) { break; }
 
-        if (s_logCount < 400) {
-            s_logCount++;
-            Log("NPC POLL: UIVar 0x%02X changed 0x%08X -> 0x%08X\n",
-                vi, prev, val);
-        }
+            if (type != 1 || hcIdx < 0) continue;
+            int npcIdx = Extra_HcIdxToNpcIdx(hcIdx);
+            if (npcIdx < 0) continue;
 
-        if (val < 0x100000) continue;           /* not a heap pointer */
+            /* Distance check (Chebyshev — diagonal counts as 1 tile) */
+            int dx = playerX - npcX; if (dx < 0) dx = -dx;
+            int dy = playerY - npcY; if (dy < 0) dy = -dy;
+            int dist = (dx > dy) ? dx : dy;
+            if (dist > NPC_NEAR_TILES) continue;
 
-        /* Try to walk it as a unit. */
-        int txtId = -1; int hcIdx = -1; int unitType = -1;
-        __try {
-            unitType = (int)*(DWORD*)((BYTE*)val + 0x00);
-            txtId    = (int)*(DWORD*)((BYTE*)val + 0x04);
-            DWORD pMonData = *(DWORD*)((BYTE*)val + 0x14);
-            if (pMonData) {
-                hcIdx = (int)*(WORD*)((BYTE*)pMonData + 0x26);
+            /* Player was stationary this tick (or hasn't moved since
+             * last tick reset). Bump the near-counter for this NPC. */
+            s_nearTicks[npcIdx]++;
+            if (s_nearTicks[npcIdx] == NPC_STATIONARY_TICKS) {
+                /* First time crossing the threshold this run — fire. */
+                Log("NPC FIRE: scan-detected hcIdx=%d -> npcIdx=%d (%s) "
+                    "after %d stationary ticks at (%d,%d) dist=%d\n",
+                    hcIdx, npcIdx, EXTRA_NPC_NAMES[npcIdx],
+                    NPC_STATIONARY_TICKS, playerX, playerY, dist);
+                Extra_OnNpcDialogue(npcIdx, g_currentDifficulty);
             }
-        } __except(EXCEPTION_EXECUTE_HANDLER) {
-            if (s_logCount < 400) {
-                Log("NPC POLL:   UIVar 0x%02X val=0x%08X — exception walking as unit\n",
-                    vi, val);
-            }
-            continue;
         }
-
-        if (s_logCount < 400) {
-            Log("NPC POLL:   UIVar 0x%02X val=0x%08X type=%d txtId=%d hcIdx=%d\n",
-                vi, val, unitType, txtId, hcIdx);
-        }
-
-        /* hcIdx -1 means walk failed (no MonsterData). type 1 = MONSTER
-         * (which NPCs technically are). Try to map regardless of type
-         * so we capture all possibilities. */
-        if (hcIdx < 0) continue;
-        int npcIdx = Extra_HcIdxToNpcIdx(hcIdx);
-        if (npcIdx < 0) {
-            if (s_logCount < 400) {
-                Log("NPC POLL:     hcIdx=%d not in NPC mapping table — ignored\n",
-                    hcIdx);
-            }
-            continue;
-        }
-        Log("NPC FIRE: UIVar 0x%02X hcIdx=%d -> npcIdx=%d (%s)\n",
-            vi, hcIdx, npcIdx, EXTRA_NPC_NAMES[npcIdx]);
-        Extra_OnNpcDialogue(npcIdx, g_currentDifficulty);
     }
 }
 
