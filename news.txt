@@ -8,6 +8,49 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.1 - What's New ===
+
+QUALITY OF LIFE
+- Holy Bolt now damages demons (not just undead) AND pierces through
+  enemies. Same heal-allies behaviour as before.
+- Hustle weapon's Level 1 Fanaticism Aura is back (was dropped in
+  1.9.0 because it displayed as "an evil force").
+- New dev menu Loot tab (Ctrl+V): scrollable lists of every set
+  piece + every unique + grids for runes, gems, and reward items.
+  Spawn any specific item for testing.
+
+BUG FIXES
+- AP-delivered random uniques now spawn the correct item. A long-
+  standing parser bug had been silently breaking every "Drop:
+  Random Unique" reward (item code resolved to junk and the spawn
+  always failed). Affects AP server deliveries, bonus check unique
+  rewards, and quest reward unique drops.
+- 8 endgame runeword auras restored. Oath, Dragon, Dream, Ice,
+  Infinity, Last Wish, Phoenix and Rift had their aura properties
+  pointing to the wrong skills (Infinity's "Conviction aura" was
+  actually Shiver Armor, Phoenix's "Redemption aura" was Lightning
+  Mastery, etc. - all displayed as "an evil force" in tooltips).
+- Native-class skill animations restored. Smite shield-bashes
+  again on Paladin, Whirlwind spins on Barbarian, Druid Rabies/
+  Hunger bite in werewolf form, Amazon javelins throw, Dragon
+  Talon kicks. Cross-class casters of the same skills get a safe
+  Attack-1 fallback (single melee swing) instead of softlocking.
+- Jump Attack no longer softlocks the character. The same
+  animation fix that brought back the leap motion also clears the
+  movement-lock state, so the leap actually moves you and you can
+  walk afterwards.
+
+KNOWN ISSUES
+- Some skill names / descriptions still show wrong text ("an evil
+  force" / "Key of Destruction" on Necro Clay Golem, Skeleton Mage,
+  Druid Werewolf, etc., or Phoenix Strike showing "Chain Lightning"
+  instead of "Chaos Lightning"). Fix in progress - requires
+  rebuilding expansionstring.tbl, deferred to a separate test pass.
+- Monster Shuffle and Boss Shuffle are still experimental and not
+  yet balanced - bosses keep their location's stats/resistances,
+  some pairings can be brutal. Pair with entrance_shuffle so you
+  can grind higher-level zones for gear before the bad fights.
+
 === Beta 1.9.0 - New Features ===
 
 AP MULTIPLAYER POLISH — END-TO-END LOOT, KEY + COUNTER FIXES
