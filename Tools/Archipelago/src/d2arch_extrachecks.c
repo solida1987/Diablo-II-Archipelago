@@ -926,7 +926,8 @@ static int Extra_HcIdxToNpcIdx(int hcIdx) {
  * in the codebase. */
 
 #define NPC_NEAR_TILES        2       /* tiles between player and NPC for "near" */
-#define NPC_STATIONARY_TICKS  20      /* ticks player must be near + still (~0.3s @ 60fps) */
+#define NPC_STATIONARY_TICKS  20      /* throttled ticks (10th-tick poll) so
+                                       * 20 = ~3.3s of actual standing-near */
 
 void Extra_PollNpcDialogue(void* pPlayerUnit) {
     /* Heartbeat — log once every ~5000 calls (≈83 sec at 60fps) so
@@ -940,6 +941,13 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
 
     if (!g_extraEnabled[EX_NPC]) return;
     if (!pPlayerUnit) return;
+
+    /* 1.9.2 — Throttle room-scan to every 10th tick (6Hz at 60fps).
+     * Player must stand near an NPC for 20 throttled ticks = ~3.3 sec
+     * before firing — plenty of time to actually open the menu, but
+     * doesn't burden every game tick with the room walk. */
+    static unsigned s_throttle = 0;
+    if ((++s_throttle % 10) != 0) return;
 
     /* Read player's pPath -> pRoom -> nearby rooms. Same pattern as
      * ScanMonsters in gameloop.c. The CLIENT player struct (passed
