@@ -675,14 +675,18 @@ static void TitleSettings_CreateButtons(void) {
         CreateToggleBtn(sx, sy, L"Gold MS", &ts_CheckGoldMilestones);
     }
 
-    /* 1.9.2 — Extra check toggles. Default placement is one column to
-     * the right of the Bonus column. INI section [layout] keys:
-     *   CowX/Y, MercX/Y, HFRunesX/Y, NpcX/Y, RunewordX/Y, CubeX/Y
-     * (or shared ExtraX/Y/ExtraSpacing for the master fallback). */
+    /* 1.9.2 — Extra check toggles. Default placement: stacked DIRECTLY
+     * BELOW the bonus stack in the same X=col2+145 column (same X as
+     * BonusX default). Bonus stack runs Y=180..330 from auto-stack
+     * defaults; extras start Y=180+6*sp = Y=360 by default. INI
+     * overrides at [layout] CowX/Y..CubeX/Y always win. */
     {
-        int extraBaseX = GetPrivateProfileIntA("layout", "ExtraX", col2 + 280, ts_iniPath);
-        int extraBaseY = GetPrivateProfileIntA("layout", "ExtraY", shuffleY,   ts_iniPath);
-        int extraSp    = GetPrivateProfileIntA("layout", "ExtraSpacing", sp,   ts_iniPath);
+        int extraBaseX = GetPrivateProfileIntA("layout", "ExtraX",
+                                               col2 + 145, ts_iniPath);
+        int extraBaseY = GetPrivateProfileIntA("layout", "ExtraY",
+                                               shuffleY + 6 * sp, ts_iniPath);
+        int extraSp    = GetPrivateProfileIntA("layout", "ExtraSpacing", sp,
+                                               ts_iniPath);
 
         int sx, sy;
         sx = GetPrivateProfileIntA("layout", "CowX", extraBaseX, ts_iniPath);
