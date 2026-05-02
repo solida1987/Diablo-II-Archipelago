@@ -634,6 +634,108 @@ stack on the right.
 
 ---
 
+## 9c. Extra check categories (1.9.2 — opt-in)
+
+Six MORE check categories on top of the 1.9.0 bonus checks. Each is
+independently toggleable from the title screen and the apworld YAML.
+All default OFF so existing characters don't get surprise side-quests
+when they update.
+
+### `check_cow_level` (9 slots, AP IDs 65300-65308)
+
+Adds nine AP locations covering the Moo Moo Farm:
+
+- **First entry per difficulty (3 slots)** — fired the first time you
+  step into the Cow Level on Normal / Nightmare / Hell.
+- **Cow King kill per difficulty (3 slots)** — fired when you kill the
+  Cow King super-unique on each difficulty.
+- **Lifetime cow-kill milestones (3 slots)** — fired when your
+  character has killed 100 / 500 / 1,000 Hell Bovines (any difficulty).
+
+In standalone mode each fire grants a flat 1,000 gold reward.
+
+### `check_merc_milestones` (6 slots, 65310-65315)
+
+Six AP locations rewarding mercenary investment:
+
+- **First Mercenary Hired (1 slot)** — fired the first time you hire
+  a merc from any of the four NPCs (Kashya / Greiz / Asheara / Qual-Kehk).
+- **Resurrects 5 / 10 / 25 / 50 (4 slots)** — fired at each lifetime
+  resurrection threshold.
+- **Mercenary Reaches Level 30 (1 slot)** — *deferred to 1.9.3*; the
+  level-30 detection is gated off in 1.9.2 because the StatList
+  accessor needs verification work. Slot is reserved and can be
+  unlocked via AP `/release` until then.
+
+### `check_hellforge_runes` (12 slots, 65320-65331)
+
+Twelve AP locations covering Hellforge use and high-rune drops:
+
+- **Hellforge Used per difficulty (3 slots)** — fired when you smash
+  Mephisto's soulstone on the Hellforge in Hell Act 4 on each
+  difficulty.
+- **High Rune drops per tier per difficulty (9 slots)** — fired the
+  first time you observe a rune from each of three tiers in your
+  inventory:
+  - Tier 0 = Pul / Um / Mal / Ist / Gul (r21–r25)
+  - Tier 1 = Vex / Ohm / Lo / Sur / Ber (r26–r30)
+  - Tier 2 = Jah / Cham / Zod (r31–r33)
+  Each tier × each difficulty = 9 slots.
+
+### `check_npc_dialogue` (81 slots, 65400-65480)
+
+First dialogue with each major NPC across 3 difficulties (27 NPCs ×
+3 = 81 slots). The NPC roster matches the act vendor list:
+
+- **Act 1**: Akara, Charsi, Gheed, Kashya, Warriv, Cain
+- **Act 2**: Atma, Drognan, Elzix, Fara, Greiz, Lysander, Meshif, Jerhyn
+- **Act 3**: Alkor, Asheara, Hratli, Ormus, Cain (A3)
+- **Act 4**: Tyrael, Halbu, Jamella
+- **Act 5**: Anya, Larzuk, Malah, Nihlathak, Qual-Kehk
+
+**1.9.2 ships the apworld locations and AP self-release wiring** —
+the in-game DLL detection hook lands in 1.9.3 (it requires a UIVAR
+poll mapping table that needs more in-game verification).
+Slots are placed on the AP server; you can `/release` them from the
+client console to claim filler items.
+
+### `check_runeword_crafting` (50 slots, 65500-65549)
+
+First craft of each runeword. **1.9.2 ships the apworld locations
+and AP self-release wiring** — DLL detection hangs off the existing
+`Coll_ProcessItem` runeword-flag transition and is finalized in
+1.9.3 (the rune-codes lookup table needs verification against
+runes.txt).
+
+### `check_cube_recipes` (135 slots, 65600-65734)
+
+First successful completion of each Horadric Cube recipe. **1.9.2
+ships the apworld locations and AP self-release wiring** — the
+cube-state diff detection lands in 1.9.3 (extends the existing
+`TradeBtn_Hook` with a recipe-signature pre/post diff against a
+CubeMain.txt-derived 135-recipe table).
+
+### Summary
+
+| Toggle key | Slots | Range | DLL detection in 1.9.2? |
+|---|---|---|---|
+| `check_cow_level` | 9 | 65300-65308 | YES |
+| `check_merc_milestones` | 6 | 65310-65315 | Mostly (level-30 deferred) |
+| `check_hellforge_runes` | 12 | 65320-65331 | YES |
+| `check_npc_dialogue` | 81 | 65400-65480 | NO (1.9.3) |
+| `check_runeword_crafting` | 50 | 65500-65549 | NO (1.9.3) |
+| `check_cube_recipes` | 135 | 65600-65734 | NO (1.9.3) |
+
+Total: **293 new locations** when all six are enabled. Combined with
+the 1.9.0 bonus categories you can push past 2,100 total locations
+on a single character.
+
+The F1 Overview page gets a new "EXTRA CHECKS" section that shows
+your progress per enabled category, and the Item Log on the AP page
+appends the same rows to its "Total Checks" sum.
+
+---
+
 ## 10. Death link (`death_link`)
 
 Standard AP DeathLink. When ON, your character dying broadcasts a
@@ -855,6 +957,18 @@ Story + hunts only (~140 locations). Less side-grinding.
 | `monster_shuffle` | toggle | false | true/false | Per-character monster type shuffle |
 | `boss_shuffle` | toggle | false | true/false | Per-character SuperUnique boss shuffle |
 | `traps_enabled` | toggle | true | true/false | Trap filler items |
+| `check_shrines` | toggle | false | true/false | 1.9.0 — 50 shrine checks/diff |
+| `check_urns` | toggle | false | true/false | 1.9.0 — 100 urn checks/diff |
+| `check_barrels` | toggle | false | true/false | 1.9.0 — 100 barrel checks/diff |
+| `check_chests` | toggle | false | true/false | 1.9.0 — 200 chest checks/diff |
+| `check_set_pickups` | toggle | false | true/false | 1.9.0 — 127 set-piece checks |
+| `check_gold_milestones` | toggle | false | true/false | 1.9.0 — 17 gold-milestone checks |
+| `check_cow_level` | toggle | false | true/false | 1.9.2 — 9 cow-level slots |
+| `check_merc_milestones` | toggle | false | true/false | 1.9.2 — 6 mercenary slots |
+| `check_hellforge_runes` | toggle | false | true/false | 1.9.2 — 12 Hellforge+High Rune slots |
+| `check_npc_dialogue` | toggle | false | true/false | 1.9.2 — 81 NPC slots (DLL detection 1.9.3) |
+| `check_runeword_crafting` | toggle | false | true/false | 1.9.2 — 50 runeword slots (DLL detection 1.9.3) |
+| `check_cube_recipes` | toggle | false | true/false | 1.9.2 — 135 cube slots (DLL detection 1.9.3) |
 | `death_link` | toggle | false | true/false | DeathLink broadcast |
 
 ### AP-internal settings (set by Archipelago itself, not user)
@@ -896,6 +1010,18 @@ you're writing a tracker or a custom client.
 | 50032-50064 | Collection: 33 runes | 33 |
 | 50065-50099 | Collection: 35 gems | 35 |
 | 50100-50109 | Collection: 10 specials | 10 |
+| 60000-60149 | 1.9.0 — Shrines (50 × 3 diff) | 150 |
+| 60200-60499 | 1.9.0 — Urns (100 × 3 diff) | 300 |
+| 60500-60799 | 1.9.0 — Barrels (100 × 3 diff) | 300 |
+| 60800-61399 | 1.9.0 — Chests (200 × 3 diff) | 600 |
+| 65000-65016 | 1.9.0 — Gold milestones (7+5+5) | 17 |
+| 65100-65226 | 1.9.0 — Set piece pickups | 127 |
+| 65300-65308 | 1.9.2 — Cow Level expansion | 9 |
+| 65310-65315 | 1.9.2 — Mercenary milestones | 6 |
+| 65320-65331 | 1.9.2 — Hellforge + High Runes | 12 |
+| 65400-65480 | 1.9.2 — NPC Dialogue (27 × 3 diff) | 81 |
+| 65500-65549 | 1.9.2 — Runeword Crafting | 50 |
+| 65600-65734 | 1.9.2 — Cube Recipes | 135 |
 
 ---
 
@@ -975,5 +1101,5 @@ Act 2 trivial. Keep at 1-3x if you want vanilla difficulty pacing.
 
 ---
 
-*Document version: 1.9.1 | Last updated: 2026-05-02*
+*Document version: 1.9.2 (in development) | Last updated: 2026-05-02*
 *For questions or bug reports: see the Discord link in the launcher.*

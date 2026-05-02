@@ -86,7 +86,13 @@ class Diablo2ArchipelagoWorld(World):
     options: Diablo2ArchipelagoOptions
 
     topology_present = True
-    data_version = 2
+    # 1.9.2: bumped from 2 to 3 because we added 293 new locations
+    # (the six extra-check categories: Cow / Merc / HF+Runes / NPC /
+    # Runeword / Cube). AP clients cache the datapackage keyed by
+    # (game, data_version); without this bump, Universal Tracker /
+    # spoiler clients can keep stale name<->id maps and fail to
+    # resolve the new location names.
+    data_version = 3
 
     item_name_to_id = {name: data[0] for name, data in item_table.items()}
     location_name_to_id = location_table.copy()

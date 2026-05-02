@@ -323,9 +323,15 @@ static void Extra_DeliverStandalone(int apId, const char* tag) {
      * int` redeclaration here resolves to the same internal-linkage
      * variable. Same trick d2arch_bonuschecks.c uses (line 723). The
      * `volatile` qualifier on the previous version mismatched the
-     * underlying declaration and tripped C2373 — keep it plain. */
+     * underlying declaration and tripped C2373 — keep it plain.
+     *
+     * 1.9.2 fix: also emit ShowNotify so standalone players see the
+     * check fired in-game (matches Bonus_DeliverStandalone behaviour). */
     extern int g_pendingRewardGold;
     g_pendingRewardGold += 1000;
+    char msg[96];
+    _snprintf(msg, sizeof(msg), "%s: +1000 gold", tag ? tag : "Extra Check");
+    ShowNotify(msg);
     Log("EXTRA: standalone reward — %s -> +1000 gold (apId=%d)\n",
         tag ? tag : "?", apId);
     (void)apId;
@@ -360,7 +366,7 @@ BOOL Extra_OnAPItemReceived(int apId) {
     if (off < 0) return FALSE;
     if (Extra_IsFired(apId)) return TRUE;
     Extra_MarkFired(apId);
-    Log("EXTRA: AP BONUS-TRACKED apId=%d (received from server)\n", apId);
+    Log("EXTRA: AP EXTRA-TRACKED apId=%d (received from server)\n", apId);
     return TRUE;
 }
 
@@ -368,14 +374,19 @@ BOOL Extra_OnAPItemReceived(int apId) {
  * CATEGORY 1 — COW LEVEL EXPANSION
  * ================================================================== */
 
+/* DIFF_LABEL matches apworld locations.py — empty string for Normal,
+ * " (Nightmare)" / " (Hell)" suffixes. Matching the AP-registered name
+ * exactly so the in-game popup, AP server entry, spoiler, and bridge
+ * log all read the same. */
+static const char* EXTRA_DIFF_LABEL[3] = { "", " (Nightmare)", " (Hell)" };
+
 /* First entry per difficulty. Called from Stats_OnAreaEnter when
  * newAreaId == 39 (Moo Moo Farm). */
 void Extra_OnCowLevelEnter(int diff) {
     if (!g_extraEnabled[EX_COW]) return;
     if (diff < 0 || diff > 2) return;
     char tag[48];
-    static const char* DIFF_NAMES[3] = { "Normal", "Nightmare", "Hell" };
-    _snprintf(tag, sizeof(tag), "Cow Level Entry (%s)", DIFF_NAMES[diff]);
+    _snprintf(tag, sizeof(tag), "Cow Level Entry%s", EXTRA_DIFF_LABEL[diff]);
     Extra_FireApLocation(EXTRA_COW_FIRST_ENTRY_BASE + diff, tag);
 }
 
@@ -387,21 +398,21 @@ void Extra_OnCowKingKilled(int diff) {
     if (!g_extraEnabled[EX_COW]) return;
     if (diff < 0 || diff > 2) return;
     char tag[48];
-    static const char* DIFF_NAMES[3] = { "Normal", "Nightmare", "Hell" };
-    _snprintf(tag, sizeof(tag), "Cow King Killed (%s)", DIFF_NAMES[diff]);
+    _snprintf(tag, sizeof(tag), "Cow King Killed%s", EXTRA_DIFF_LABEL[diff]);
     Extra_FireApLocation(EXTRA_COW_KING_BASE + diff, tag);
 }
 
 /* Hell Bovine kill — bumps lifetime counter and fires milestone
  * checks at 100 / 500 / 1000. Called from the unit-death scan
- * after the SU check. */
+ * after the SU check. Names match apworld locations.py {n:,} format
+ * (comma in 1,000). */
 void Extra_OnCowKilled(void) {
     if (!g_extraEnabled[EX_COW]) return;
     g_extraState.cowKillsLifetime++;
     uint64_t n = g_extraState.cowKillsLifetime;
-    if (n == 100)  Extra_FireApLocation(EXTRA_COW_LIFETIME_BASE + 0, "100 Cows Killed");
-    if (n == 500)  Extra_FireApLocation(EXTRA_COW_LIFETIME_BASE + 1, "500 Cows Killed");
-    if (n == 1000) Extra_FireApLocation(EXTRA_COW_LIFETIME_BASE + 2, "1000 Cows Killed");
+    if (n == 100)  Extra_FireApLocation(EXTRA_COW_LIFETIME_BASE + 0, "Cow Kills: 100");
+    if (n == 500)  Extra_FireApLocation(EXTRA_COW_LIFETIME_BASE + 1, "Cow Kills: 500");
+    if (n == 1000) Extra_FireApLocation(EXTRA_COW_LIFETIME_BASE + 2, "Cow Kills: 1,000");
 }
 
 /* ==================================================================
@@ -449,15 +460,16 @@ void Extra_PollMerc(void* pPlayer) {
 
     /* Resurrect detection — unit id changes when mercenary dies and is
      * re-resurrected at the act NPC. Also catches hire-of-different-merc
-     * but that's also a meaningful milestone. */
+     * but that's also a meaningful milestone. Tag strings match apworld
+     * locations.py "Merc Resurrects: N" format. */
     if (g_extraState.mercLastUnitId > 0 &&
             unitId != g_extraState.mercLastUnitId) {
         g_extraState.mercResurrects++;
         uint32_t r = g_extraState.mercResurrects;
-        if (r ==  5) Extra_FireApLocation(EXTRA_MERC_RESURRECT_BASE + 0,  "5 Merc Resurrects");
-        if (r == 10) Extra_FireApLocation(EXTRA_MERC_RESURRECT_BASE + 1, "10 Merc Resurrects");
-        if (r == 25) Extra_FireApLocation(EXTRA_MERC_RESURRECT_BASE + 2, "25 Merc Resurrects");
-        if (r == 50) Extra_FireApLocation(EXTRA_MERC_RESURRECT_BASE + 3, "50 Merc Resurrects");
+        if (r ==  5) Extra_FireApLocation(EXTRA_MERC_RESURRECT_BASE + 0, "Merc Resurrects: 5");
+        if (r == 10) Extra_FireApLocation(EXTRA_MERC_RESURRECT_BASE + 1, "Merc Resurrects: 10");
+        if (r == 25) Extra_FireApLocation(EXTRA_MERC_RESURRECT_BASE + 2, "Merc Resurrects: 25");
+        if (r == 50) Extra_FireApLocation(EXTRA_MERC_RESURRECT_BASE + 3, "Merc Resurrects: 50");
     }
     g_extraState.mercLastUnitId = unitId;
 
@@ -478,13 +490,13 @@ void Extra_PollMerc(void* pPlayer) {
 
 /* Hellforge use per difficulty. Called from the existing
  * OperateHandlerHook in d2arch_hooks.c on case 49 (Hellforge anvil
- * use). The diff is read from g_currentDifficulty at fire time. */
+ * use). The diff is read from g_currentDifficulty at fire time. Tag
+ * matches apworld locations.py — empty diff suffix for Normal. */
 void Extra_OnHellforgeUsed(int diff) {
     if (!g_extraEnabled[EX_HFRUNES]) return;
     if (diff < 0 || diff > 2) return;
     char tag[48];
-    static const char* DIFF_NAMES[3] = { "Normal", "Nightmare", "Hell" };
-    _snprintf(tag, sizeof(tag), "Hellforge Used (%s)", DIFF_NAMES[diff]);
+    _snprintf(tag, sizeof(tag), "Hellforge Used%s", EXTRA_DIFF_LABEL[diff]);
     Extra_FireApLocation(EXTRA_HF_HELLFORGE_BASE + diff, tag);
 }
 
@@ -494,7 +506,7 @@ void Extra_OnHellforgeUsed(int diff) {
  *   r26 (Vex) .. r30 (Ber)   -> tier 1 (mid "high" runes)
  *   r31 (Jah) .. r33 (Zod)   -> tier 2 (top runes)
  * Called from Coll_ProcessItem on first observation of a rune item
- * by code. */
+ * by code. Tag matches apworld locations.py format. */
 void Extra_OnHighRunePickup(int runeIdx, int diff) {
     if (!g_extraEnabled[EX_HFRUNES]) return;
     if (runeIdx < 21 || runeIdx > 33) return;          /* sub-high runes ignored */
@@ -505,10 +517,9 @@ void Extra_OnHighRunePickup(int runeIdx, int diff) {
     else                    tier = 2;
     int slot = tier * 3 + diff;                        /* 0..8 */
     static const char* TIER_NAMES[3] = { "Pul-Gul", "Vex-Ber", "Jah-Zod" };
-    static const char* DIFF_NAMES[3] = { "Normal", "Nightmare", "Hell" };
     char tag[64];
-    _snprintf(tag, sizeof(tag), "High Rune %s (%s)",
-              TIER_NAMES[tier], DIFF_NAMES[diff]);
+    _snprintf(tag, sizeof(tag), "High Rune %s%s",
+              TIER_NAMES[tier], EXTRA_DIFF_LABEL[diff]);
     Extra_FireApLocation(EXTRA_HF_HIGH_RUNE_BASE + slot, tag);
 }
 
@@ -534,15 +545,26 @@ void Extra_OnHighRunePickup(int runeIdx, int diff) {
  *                    existing TradeBtn_Hook in d2arch_quests.c.
  * ================================================================== */
 
+/* NPC name table — MUST match apworld locations.py EXTRA_NPC_NAMES
+ * order so the slot indices line up. 27 entries. */
+static const char* EXTRA_NPC_NAMES[27] = {
+    "Akara", "Charsi", "Gheed", "Kashya", "Warriv (A1)", "Cain (A1)",
+    "Atma", "Drognan", "Elzix", "Fara", "Greiz", "Lysander",
+    "Meshif (A2)", "Jerhyn",
+    "Alkor", "Asheara", "Hratli", "Ormus", "Cain (A3)",
+    "Tyrael", "Halbu", "Jamella",
+    "Anya", "Larzuk", "Malah", "Nihlathak", "Qual-Kehk",
+};
+
 void Extra_OnNpcDialogue(int npcIdx, int diff) {
     if (!g_extraEnabled[EX_NPC]) return;
     if (npcIdx < 0 || npcIdx >= 27) return;
     if (diff < 0 || diff > 2) return;
     int slot = npcIdx * 3 + diff;
     if (slot >= EXTRA_CT_NPC) return;
-    char tag[48];
-    static const char* DIFF_NAMES[3] = { "Normal", "Nightmare", "Hell" };
-    _snprintf(tag, sizeof(tag), "NPC Dialogue #%d (%s)", npcIdx, DIFF_NAMES[diff]);
+    char tag[64];
+    _snprintf(tag, sizeof(tag), "NPC Dialogue: %s%s",
+              EXTRA_NPC_NAMES[npcIdx], EXTRA_DIFF_LABEL[diff]);
     Extra_FireApLocation(EXTRA_BASE_NPC + slot, tag);
 }
 
@@ -550,7 +572,8 @@ void Extra_OnRunewordCreated(int rwIdx) {
     if (!g_extraEnabled[EX_RUNEWORD]) return;
     if (rwIdx < 0 || rwIdx >= EXTRA_CT_RUNEWORD) return;
     char tag[48];
-    _snprintf(tag, sizeof(tag), "Runeword Crafted #%d", rwIdx);
+    /* 1-indexed to match apworld locations.py "Runeword Crafted #{i+1}" */
+    _snprintf(tag, sizeof(tag), "Runeword Crafted #%d", rwIdx + 1);
     Extra_FireApLocation(EXTRA_BASE_RUNEWORD + rwIdx, tag);
 }
 
@@ -558,7 +581,8 @@ void Extra_OnCubeRecipe(int recipeIdx) {
     if (!g_extraEnabled[EX_CUBE]) return;
     if (recipeIdx < 0 || recipeIdx >= EXTRA_CT_CUBE) return;
     char tag[48];
-    _snprintf(tag, sizeof(tag), "Cube Recipe #%d", recipeIdx);
+    /* 1-indexed to match apworld locations.py "Cube Recipe #{i+1}" */
+    _snprintf(tag, sizeof(tag), "Cube Recipe #%d", recipeIdx + 1);
     Extra_FireApLocation(EXTRA_BASE_CUBE + recipeIdx, tag);
 }
 
@@ -588,37 +612,41 @@ void Extra_AppendSpoilerToFile(FILE* f) {
     fprintf(f, "pre-rolled rewards (matching the bonus-check pipeline) are\n");
     fprintf(f, "a 1.9.3 follow-up.\n\n");
 
-    static const char* DIFF_NAMES[3] = { "Normal", "Nightmare", "Hell" };
+    /* Spoiler entries use the SAME names the apworld registers in
+     * locations.py — empty diff suffix for Normal, NPC names from
+     * the EXTRA_NPC_NAMES table, 1-indexed runeword/cube. Keeps the
+     * spoiler readable next to the AP server's location list. */
 
     /* Cat 1 — Cow Level expansion (9 slots) */
     if (g_extraEnabled[EX_COW]) {
         fprintf(f, "  -- Cow Level (9 slots) --\n");
         for (int d = 0; d < 3; d++) {
-            fprintf(f, "    Cow Level Entry (%s)        -> 1000 Gold\n",
-                    DIFF_NAMES[d]);
+            fprintf(f, "    %-32s -> 1000 Gold\n",
+                    d == 0 ? "Cow Level Entry"
+                           : d == 1 ? "Cow Level Entry (Nightmare)"
+                                    : "Cow Level Entry (Hell)");
         }
         for (int d = 0; d < 3; d++) {
-            fprintf(f, "    Cow King Killed (%s)        -> 1000 Gold\n",
-                    DIFF_NAMES[d]);
+            fprintf(f, "    %-32s -> 1000 Gold\n",
+                    d == 0 ? "Cow King Killed"
+                           : d == 1 ? "Cow King Killed (Nightmare)"
+                                    : "Cow King Killed (Hell)");
         }
-        static const int milestones[3] = { 100, 500, 1000 };
-        for (int i = 0; i < 3; i++) {
-            fprintf(f, "    %d Cows Killed                -> 1000 Gold\n",
-                    milestones[i]);
-        }
+        fprintf(f, "    %-32s -> 1000 Gold\n", "Cow Kills: 100");
+        fprintf(f, "    %-32s -> 1000 Gold\n", "Cow Kills: 500");
+        fprintf(f, "    %-32s -> 1000 Gold\n", "Cow Kills: 1,000");
         fprintf(f, "\n");
     }
 
     /* Cat 2 — Mercenary milestones (6 slots) */
     if (g_extraEnabled[EX_MERC]) {
         fprintf(f, "  -- Mercenary Milestones (6 slots) --\n");
-        fprintf(f, "    First Mercenary Hired         -> 1000 Gold\n");
-        static const int rezCounts[4] = { 5, 10, 25, 50 };
-        for (int i = 0; i < 4; i++) {
-            fprintf(f, "    %d Merc Resurrects             -> 1000 Gold\n",
-                    rezCounts[i]);
-        }
-        fprintf(f, "    Merc Reaches Level 30         -> 1000 Gold\n");
+        fprintf(f, "    %-32s -> 1000 Gold\n", "First Mercenary Hired");
+        fprintf(f, "    %-32s -> 1000 Gold\n", "Merc Resurrects: 5");
+        fprintf(f, "    %-32s -> 1000 Gold\n", "Merc Resurrects: 10");
+        fprintf(f, "    %-32s -> 1000 Gold\n", "Merc Resurrects: 25");
+        fprintf(f, "    %-32s -> 1000 Gold\n", "Merc Resurrects: 50");
+        fprintf(f, "    %-32s -> 1000 Gold\n", "Mercenary Reaches Level 30");
         fprintf(f, "\n");
     }
 
@@ -626,14 +654,18 @@ void Extra_AppendSpoilerToFile(FILE* f) {
     if (g_extraEnabled[EX_HFRUNES]) {
         fprintf(f, "  -- Hellforge + High Runes (12 slots) --\n");
         for (int d = 0; d < 3; d++) {
-            fprintf(f, "    Hellforge Used (%s)         -> 1000 Gold\n",
-                    DIFF_NAMES[d]);
+            char name[48];
+            _snprintf(name, sizeof(name), "Hellforge Used%s",
+                      EXTRA_DIFF_LABEL[d]);
+            fprintf(f, "    %-32s -> 1000 Gold\n", name);
         }
         static const char* TIER_NAMES[3] = { "Pul-Gul", "Vex-Ber", "Jah-Zod" };
         for (int t = 0; t < 3; t++) {
             for (int d = 0; d < 3; d++) {
-                fprintf(f, "    High Rune %s (%s)       -> 1000 Gold\n",
-                        TIER_NAMES[t], DIFF_NAMES[d]);
+                char name[64];
+                _snprintf(name, sizeof(name), "High Rune %s%s",
+                          TIER_NAMES[t], EXTRA_DIFF_LABEL[d]);
+                fprintf(f, "    %-32s -> 1000 Gold\n", name);
             }
         }
         fprintf(f, "\n");
@@ -646,8 +678,10 @@ void Extra_AppendSpoilerToFile(FILE* f) {
         fprintf(f, "    Until then, slots can be unlocked via AP /release.\n");
         for (int n = 0; n < 27; n++) {
             for (int d = 0; d < 3; d++) {
-                fprintf(f, "    NPC #%-2d (%s)              -> 1000 Gold\n",
-                        n + 1, DIFF_NAMES[d]);
+                char name[64];
+                _snprintf(name, sizeof(name), "NPC Dialogue: %s%s",
+                          EXTRA_NPC_NAMES[n], EXTRA_DIFF_LABEL[d]);
+                fprintf(f, "    %-40s -> 1000 Gold\n", name);
             }
         }
         fprintf(f, "\n");
@@ -658,7 +692,8 @@ void Extra_AppendSpoilerToFile(FILE* f) {
         fprintf(f, "  -- Runeword Crafting (50 slots) --\n");
         fprintf(f, "    1.9.2: framework ships, in-game detection lands in 1.9.3.\n");
         for (int i = 0; i < EXTRA_CT_RUNEWORD; i++) {
-            fprintf(f, "    Runeword #%-3d                -> 1000 Gold\n", i + 1);
+            fprintf(f, "    Runeword Crafted #%-3d            -> 1000 Gold\n",
+                    i + 1);
         }
         fprintf(f, "\n");
     }
@@ -668,7 +703,8 @@ void Extra_AppendSpoilerToFile(FILE* f) {
         fprintf(f, "  -- Cube Recipes (135 slots) --\n");
         fprintf(f, "    1.9.2: framework ships, in-game detection lands in 1.9.3.\n");
         for (int i = 0; i < EXTRA_CT_CUBE; i++) {
-            fprintf(f, "    Cube Recipe #%-3d             -> 1000 Gold\n", i + 1);
+            fprintf(f, "    Cube Recipe #%-3d                 -> 1000 Gold\n",
+                    i + 1);
         }
         fprintf(f, "\n");
     }

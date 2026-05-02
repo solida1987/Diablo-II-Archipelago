@@ -1,6 +1,7 @@
 # Diablo II Archipelago — Beta 1.9.2
 
-Released 2026-05-02. The big one this cycle: six new opt-in AP check
+In development (no public release yet — version files still read
+"Beta 1.9.1"). The big one this cycle: six new opt-in AP check
 categories on top of the 1.9.0 bonus checks, push the location budget
 past 2,100 with everything enabled. Plus a developer-menu Mons tab and
 a smarter monster shuffle.
