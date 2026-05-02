@@ -115,6 +115,22 @@ not Resurrected). Windows 10/11 with the .NET 8 Runtime.
 
 ## Known issues
 
+- **`monster_shuffle` and `boss_shuffle` are experimental and not yet
+  balanced.** Difficulty scaling is uneven — you can encounter
+  Hell-tier monsters in Act 1 zones. Bosses keep their location's
+  stats and resistances, only their skills change, so e.g. an Act 1
+  Baal-clone has full Baal stats. Pair with `entrance_shuffle: true`
+  so you can grind higher-level zones for gear before the bad
+  pairings hit.
+- **Some skill names / descriptions show wrong text** ("an evil
+  force", "Key of Destruction", or Phoenix Strike says "Chain
+  Lightning" instead of "Chaos Lightning"). Fix in progress —
+  requires rebuilding `expansionstring.tbl` so it's deferred to a
+  separate test pass.
+- **Skill points may not persist across logout/login** in some cases
+  (rare, reproduction unclear). If you see this, please post your
+  `Game/d2arch_log.txt` + `Game/Save/d2arch_state_<charname>.dat`
+  on Discord so we can diagnose.
 - **F1 Quest counter** may show 9 quests fewer than the expected total
   in some configurations (carried over from 1.9.0 — needs root-cause
   investigation; might be catalog entries with quest IDs > 999 or a
