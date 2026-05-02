@@ -46,26 +46,35 @@ d2arch.ini` under `[settings]`.
   (Akara, Charsi, Gheed, Kashya, Cain, Atma, Drognan, Fara, Lysander,
   Asheara, Hratli, Ormus, Tyrael, Halbu, Jamella, Anya, Larzuk, Malah,
   Nihlathak, Qual-Kehk, Warriv, Meshif, Jerhyn, Greiz, Elzix, Alkor)
-  per difficulty (27 NPCs × 3 difficulties = 81 slots). The apworld
-  reservations and the AP self-release path ship in 1.9.2; in-game
-  detection lands in 1.9.3.
+  per difficulty (27 NPCs × 3 difficulties = 81 slots). Detection runs
+  per game tick — when the active NPC dialogue (D2Client UIVar 0x06)
+  transitions to a new NPC unit, we look up its hcIdx and fire the
+  matching slot.
 
-- **Runeword Crafting** (50 slots) — first time you craft each
-  runeword. Apworld reservation + AP self-release ship now; in-game
-  detection lands in 1.9.3.
+- **Runeword Crafting** (50 slots) — fired sequentially (1st, 2nd, ...,
+  50th) on each successful runeword craft, detected via the existing
+  IFLAG_RUNEWORD 0→1 transition in `Coll_ProcessItem`. The counter
+  persists across saves so a game crash doesn't restart it.
 
-- **Cube Recipes** (135 slots) — first successful completion of each
-  Horadric Cube recipe. Apworld reservation + AP self-release ship now;
-  in-game detection lands in 1.9.3.
+- **Cube Recipes** (135 slots) — fired sequentially (1st, 2nd, ...,
+  135th) on each successful Horadric Cube transmute, detected via the
+  existing TradeBtn_Hook on case 24 (TRADEBTN_TRANSMUTE) when the
+  trampoline returns non-zero (recipe matched). Failed transmutes
+  (no matching recipe) don't bump the counter.
 
 The F1 Overview gets a new **Extra Checks** section that mirrors the
 Bonus Checks section: one row per enabled category showing
 `got / total`, with the totals folded into the page-bottom Total
 counter. The F1 Logbook (page 9) gets the same row block.
 
-In standalone (no AP) mode, every Extra check fired grants a flat
-1,000 gold reward. In multiworld mode, the check is sent to the AP
-server like any other location.
+In standalone (no AP) mode each slot delivers a per-character
+pre-rolled reward (gold / XP / stat / skill / reset / trap /
+boss-loot / charm / set / unique drop) using the same weighted
+catalog as the quest + bonus pre-rolls. The reward is listed in the
+per-character spoiler file (`Game/Save/d2arch_spoiler_<character>.txt`)
+so you can preview what each slot will grant before triggering it.
+In multiworld mode, the check is sent to the AP server like any
+other location.
 
 ### Dev menu — Mons tab
 
@@ -126,9 +135,3 @@ catches anything that slipped through the data layer.
 - F1 Collection counter (`C N/205`) does not count items received from
   the AP server — only items physically picked up. This is intentional
   for now; an inventory-pickup hook may be added later.
-
-- NPC Dialogue / Runeword Crafting / Cube Recipe in-game detection is
-  not yet wired (the apworld locations ARE reserved so AP fill places
-  filler items at them; until detection lands you can self-release the
-  slots from the AP server console with `/release`). All three lands
-  in 1.9.3.

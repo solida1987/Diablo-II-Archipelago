@@ -662,10 +662,8 @@ Six AP locations rewarding mercenary investment:
   a merc from any of the four NPCs (Kashya / Greiz / Asheara / Qual-Kehk).
 - **Resurrects 5 / 10 / 25 / 50 (4 slots)** — fired at each lifetime
   resurrection threshold.
-- **Mercenary Reaches Level 30 (1 slot)** — *deferred to 1.9.3*; the
-  level-30 detection is gated off in 1.9.2 because the StatList
-  accessor needs verification work. Slot is reserved and can be
-  unlocked via AP `/release` until then.
+- **Mercenary Reaches Level 30 (1 slot)** — fired the first time we
+  observe `fnGetStat(pMerc, 12, 0) >= 30` on the per-tick merc poll.
 
 ### `check_hellforge_runes` (12 slots, 65320-65331)
 
@@ -693,38 +691,39 @@ First dialogue with each major NPC across 3 difficulties (27 NPCs ×
 - **Act 4**: Tyrael, Halbu, Jamella
 - **Act 5**: Anya, Larzuk, Malah, Nihlathak, Qual-Kehk
 
-**1.9.2 ships the apworld locations and AP self-release wiring** —
-the in-game DLL detection hook lands in 1.9.3 (it requires a UIVAR
-poll mapping table that needs more in-game verification).
-Slots are placed on the AP server; you can `/release` them from the
-client console to claim filler items.
+Detection runs per game tick — when D2Client UIVar 0x06 (the active
+NPC dialogue unit pointer) transitions to a new NPC, we look up
+its MonStats hcIdx and map to the npcIdx. Only the 27 NPCs above
+fire checks; minor NPCs (act guards, decorative villagers) are
+ignored. Cain's six hcIdx variants across acts fold into two
+logical slots (A1 Cain pre-rescue, A3+ Cain post-rescue).
 
 ### `check_runeword_crafting` (50 slots, 65500-65549)
 
-First craft of each runeword. **1.9.2 ships the apworld locations
-and AP self-release wiring** — DLL detection hangs off the existing
-`Coll_ProcessItem` runeword-flag transition and is finalized in
-1.9.3 (the rune-codes lookup table needs verification against
-runes.txt).
+Sequential 1st through 50th runeword craft. Detection hangs off
+the existing `Coll_ProcessItem` IFLAG_RUNEWORD 0→1 transition —
+when a runeword is completed, we fire the next sequential slot.
+The internal counter persists across saves so a game crash doesn't
+restart it.
 
 ### `check_cube_recipes` (135 slots, 65600-65734)
 
-First successful completion of each Horadric Cube recipe. **1.9.2
-ships the apworld locations and AP self-release wiring** — the
-cube-state diff detection lands in 1.9.3 (extends the existing
-`TradeBtn_Hook` with a recipe-signature pre/post diff against a
-CubeMain.txt-derived 135-recipe table).
+Sequential 1st through 135th successful Horadric Cube transmute.
+Detection extends the existing `TradeBtn_Hook` on case 24
+(TRADEBTN_TRANSMUTE) — the trampoline returns non-zero on a
+matched recipe (zero on no-match), so failed transmutes don't
+bump the counter. Like runewords, the counter persists across saves.
 
 ### Summary
 
-| Toggle key | Slots | Range | DLL detection in 1.9.2? |
+| Toggle key | Slots | Range | Detection |
 |---|---|---|---|
-| `check_cow_level` | 9 | 65300-65308 | YES |
-| `check_merc_milestones` | 6 | 65310-65315 | Mostly (level-30 deferred) |
-| `check_hellforge_runes` | 12 | 65320-65331 | YES |
-| `check_npc_dialogue` | 81 | 65400-65480 | NO (1.9.3) |
-| `check_runeword_crafting` | 50 | 65500-65549 | NO (1.9.3) |
-| `check_cube_recipes` | 135 | 65600-65734 | NO (1.9.3) |
+| `check_cow_level` | 9 | 65300-65308 | Area enter / Cow King kill / lifetime kill counter |
+| `check_merc_milestones` | 6 | 65310-65315 | Per-tick merc poll (hire / unitId-change / level-30) |
+| `check_hellforge_runes` | 12 | 65320-65331 | OperateHandler case 49 / Coll_ProcessItem rune slot |
+| `check_npc_dialogue` | 81 | 65400-65480 | Per-tick UIVar 0x06 poll, hcIdx → NPC mapping |
+| `check_runeword_crafting` | 50 | 65500-65549 | Coll_ProcessItem IFLAG_RUNEWORD 0→1 transition |
+| `check_cube_recipes` | 135 | 65600-65734 | TradeBtn_Hook on successful TRANSMUTE |
 
 Total: **293 new locations** when all six are enabled. Combined with
 the 1.9.0 bonus categories you can push past 2,100 total locations

@@ -114,6 +114,33 @@ typedef struct {
 
     /* Fired bitmap covering the whole 65300..65799 range. */
     uint8_t fired[EXTRA_FIRED_BYTES];
+
+    /* Sequential counters for Cat 5 (runeword) and Cat 6 (cube)
+     * since both fire on EVERY craft/transmute and we need to know
+     * which sequential slot (1st RW, 2nd RW, ..., 50th RW; same for
+     * cube up to 135). Persisted in the state file so a game crash
+     * doesn't restart the counter. */
+    uint16_t runewordCounter;           /* lifetime runeword crafts */
+    uint16_t cubeCounter;               /* lifetime successful cube transmutes */
+
+    /* Per-slot pre-rolled rewards (mirrors d2arch_bonuschecks.c
+     * BonusCheckState). Rolled at character creation by
+     * Extra_PreRollAllRewards using the same seed as the quest +
+     * bonus pre-rolls. Total state added: ~2.5 KB per character.
+     *
+     *   rewardType[off] = BR_GOLD / BR_XP / BR_STAT / BR_SKILL /
+     *                     BR_RESETPT / BR_TRAP / BR_LOOT /
+     *                     BR_DROP_CHARM / BR_DROP_SET / BR_DROP_UNIQUE
+     *   rewardValue[off] = gold amount, XP amount, or sub-index
+     *                      (trap variant 0..3, boss 0..4, etc.)
+     *
+     * Same delivery code path as Bonus_DeliverStandalone — when an
+     * extra check fires in standalone mode, we look up the slot's
+     * rolled reward and apply it via the existing pending-state
+     * globals (g_serverPendingGold, g_serverPendingStatPts, etc.). */
+    uint8_t  rewardType[EXTRA_RANGE_SIZE];
+    int32_t  rewardValue[EXTRA_RANGE_SIZE];
+    BOOL     rewardsRolled;             /* TRUE once Extra_PreRollAllRewards has run */
 } ExtraCheckState;
 
 static ExtraCheckState g_extraState;
@@ -125,6 +152,13 @@ static BOOL g_extraEnabled[EX_TOGGLE_COUNT] = { FALSE, FALSE, FALSE, FALSE, FALS
  * 0 = Normal, 1 = NM, 2 = Hell. */
 extern int g_currentDifficulty;
 extern BOOL g_apConnected;
+
+/* Forward decls for entry points called before their bodies appear
+ * later in the file (Extra_PollNpcDialogue is defined before
+ * Extra_OnNpcDialogue, etc). */
+void Extra_OnNpcDialogue(int npcIdx, int diff);
+void Extra_OnRunewordCreated(int rwIdx);
+void Extra_OnCubeRecipe(int recipeIdx);
 
 /* ------------------------------------------------------------------
  * Bitmap helpers
@@ -205,11 +239,34 @@ void Extra_SaveToFile(FILE* f) {
         fprintf(f, "extra_merc_hires=%u\n", g_extraState.mercHires);
     if (g_extraState.mercReached30)
         fprintf(f, "extra_merc_lvl30=1\n");
+    if (g_extraState.runewordCounter)
+        fprintf(f, "extra_runeword_counter=%u\n",
+                (unsigned)g_extraState.runewordCounter);
+    if (g_extraState.cubeCounter)
+        fprintf(f, "extra_cube_counter=%u\n",
+                (unsigned)g_extraState.cubeCounter);
     fputs("extra_fired=", f);
     for (int i = 0; i < EXTRA_FIRED_BYTES; i++) {
         fprintf(f, "%02x", g_extraState.fired[i]);
     }
     fputc('\n', f);
+
+    /* 1.9.2 — Persist per-slot pre-rolled rewards. We skip writing
+     * if rewardsRolled is FALSE (legacy character pre-1.9.2 state
+     * file) so the load path can detect missing rolls and trigger
+     * a re-roll on next AssignAllRewards. The reward arrays are
+     * deterministic from the seed so this is just a fast-path cache;
+     * losing the cache is harmless. */
+    if (g_extraState.rewardsRolled) {
+        fputs("extra_rewards=", f);
+        for (int i = 0; i < EXTRA_RANGE_SIZE; i++) {
+            /* Compact format: "T:V" pairs separated by commas.
+             * Type fits in 1 hex digit (0..9), value packed to int. */
+            fprintf(f, "%x:%d,", g_extraState.rewardType[i],
+                    g_extraState.rewardValue[i]);
+        }
+        fputc('\n', f);
+    }
 }
 
 void Extra_LoadLine(const char* line) {
@@ -241,6 +298,14 @@ void Extra_LoadLine(const char* line) {
             g_extraState.mercReached30 = (u32 != 0);
             return;
         }
+        if (sscanf(line, "extra_runeword_counter=%u", &u32) == 1) {
+            g_extraState.runewordCounter = (uint16_t)u32;
+            return;
+        }
+        if (sscanf(line, "extra_cube_counter=%u", &u32) == 1) {
+            g_extraState.cubeCounter = (uint16_t)u32;
+            return;
+        }
     }
     if (strncmp(line, "extra_fired=", 12) == 0) {
         const char* hex = line + 12;
@@ -251,6 +316,28 @@ void Extra_LoadLine(const char* line) {
             g_extraState.fired[i++] = (uint8_t)v;
             hex += 2;
         }
+        return;
+    }
+    if (strncmp(line, "extra_rewards=", 14) == 0) {
+        /* Parse "T:V,T:V,..." compact format written by SaveToFile.
+         * If parsing fails partway we still mark rewardsRolled so the
+         * partial reload is preserved (better than re-rolling and
+         * shifting all the slot rewards). */
+        const char* p = line + 14;
+        int i = 0;
+        while (*p && i < EXTRA_RANGE_SIZE) {
+            unsigned t = 0; int v = 0;
+            int n = sscanf(p, "%x:%d", &t, &v);
+            if (n != 2) break;
+            g_extraState.rewardType[i]  = (uint8_t)t;
+            g_extraState.rewardValue[i] = v;
+            i++;
+            /* Skip past 'T:V,' to next entry */
+            const char* comma = strchr(p, ',');
+            if (!comma) break;
+            p = comma + 1;
+        }
+        if (i > 0) g_extraState.rewardsRolled = TRUE;
         return;
     }
 }
@@ -311,30 +398,220 @@ int Extra_CountFiredCategory(int cat) {
 }
 
 /* ------------------------------------------------------------------
- * Standalone reward delivery — for AP-disconnected play. Each fire
- * grants a flat 1000 gold for now. (Per-slot pre-rolled rewards
- * mirroring the bonus_check pipeline are a 1.9.3 follow-up; the
- * spec said "reuse Bonus_DeliverStandalone" but doing that requires
- * pre-rolling 500 reward slots, which adds 8 KB to the per-char
- * state file — skipped for the 1.9.2 ship.) */
+ * Pre-rolled reward (used by spoiler + standalone delivery).
+ * Mirrors Bonus_RollOneReward in d2arch_bonuschecks.c so the two
+ * categories share the same reward distribution.
+ *
+ * The BR_* macros (BR_GOLD, BR_XP, BR_STAT, BR_SKILL, BR_RESETPT,
+ * BR_TRAP, BR_LOOT, BR_DROP_CHARM, BR_DROP_SET, BR_DROP_UNIQUE) are
+ * defined in d2arch_bonuschecks.c which is included BEFORE us in the
+ * unity build, so we just reference them directly.
+ * ------------------------------------------------------------------ */
+extern int g_uniqueCatalogCount;          /* d2arch_quests.c */
+extern void Quests_LoadUniqueCatalog(void);
+extern BOOL g_skillHuntingOn;
+
+static void Extra_RollOneReward(uint8_t* outType, int32_t* outValue) {
+    struct WRow { int weight; int rewardType; int extraIdx; };
+    struct WRow wtable[] = {
+        { 10,  BR_GOLD,        0 },
+        { 15,  BR_XP,          0 },
+        { 10,  BR_STAT,        0 },
+        { 10,  BR_SKILL,       0 },
+        { (g_skillHuntingOn ? 5 : 0), BR_RESETPT, 0 },
+        {  2,  BR_TRAP,        0 },
+        {  1,  BR_TRAP,        1 },
+        {  1,  BR_TRAP,        2 },
+        {  1,  BR_TRAP,        3 },
+        {  1,  BR_LOOT,        0 },
+        {  2,  BR_LOOT,        1 },
+        {  2,  BR_LOOT,        2 },
+        {  1,  BR_LOOT,        3 },
+        {  1,  BR_LOOT,        4 },
+        {  9,  BR_DROP_CHARM,  0 },
+        {  9,  BR_DROP_SET,    0 },
+        {  6,  BR_DROP_UNIQUE, 0 },
+    };
+    int wcount = (int)(sizeof(wtable) / sizeof(wtable[0]));
+    int totalW = 0;
+    for (int i = 0; i < wcount; i++) totalW += wtable[i].weight;
+    if (totalW <= 0) totalW = 1;
+    int roll = rand() % totalW;
+    int cum = 0;
+    int rewardType = BR_GOLD;
+    int extraIdx = 0;
+    for (int i = 0; i < wcount; i++) {
+        if (wtable[i].weight <= 0) continue;
+        cum += wtable[i].weight;
+        if (roll < cum) {
+            rewardType = wtable[i].rewardType;
+            extraIdx   = wtable[i].extraIdx;
+            break;
+        }
+    }
+    *outType = (uint8_t)rewardType;
+    switch (rewardType) {
+        case BR_GOLD:        *outValue = 1 + (rand() % 10000);   break;
+        case BR_XP:          *outValue = 1 + (rand() % 250000);  break;
+        case BR_TRAP:        *outValue = extraIdx;               break;
+        case BR_LOOT:        *outValue = extraIdx;               break;
+        case BR_DROP_CHARM:  *outValue = rand() % 3;             break;
+        case BR_DROP_SET:    *outValue = rand() % 127;           break;
+        case BR_DROP_UNIQUE:
+            if (!g_uniqueCatalogCount) Quests_LoadUniqueCatalog();
+            *outValue = (g_uniqueCatalogCount > 0)
+                         ? (rand() % g_uniqueCatalogCount) : 0;
+            break;
+        default:             *outValue = 0;                      break;
+    }
+}
+
+void Extra_PreRollAllRewards(unsigned seed) {
+    /* +888 offset so we don't collide with quests' AssignAllRewards
+     * (+777) or Bonus_PreRollAllRewards (+999). Same seed as the
+     * other pre-rolls so the spoiler can list everything coherently. */
+    srand(seed + 888);
+    for (int i = 0; i < EXTRA_RANGE_SIZE; i++) {
+        Extra_RollOneReward(&g_extraState.rewardType[i],
+                            &g_extraState.rewardValue[i]);
+    }
+    g_extraState.rewardsRolled = TRUE;
+    Log("Extra_PreRollAllRewards: rolled %d slot rewards (seed=%u)\n",
+        EXTRA_RANGE_SIZE, seed);
+}
+
+/* Format a single rolled reward as human-readable text — used by
+ * the standalone spoiler. Mirrors Bonus_FormatReward. */
+extern const char* Quests_TrapTypeName(int idx);
+extern const char* Quests_BossLootName(int idx);
+extern const char* Quests_CharmName(int idx);
+extern const char* Quests_SetPieceName(int idx);
+extern const char* Quests_UniqueName(int idx);
+static void Extra_FormatReward(int off, char* out, size_t outSize) {
+    if (off < 0 || off >= EXTRA_RANGE_SIZE) {
+        _snprintf(out, outSize, "?");
+        return;
+    }
+    uint8_t rt = g_extraState.rewardType[off];
+    int32_t v  = g_extraState.rewardValue[off];
+    switch (rt) {
+        case BR_GOLD:        _snprintf(out, outSize, "%d Gold",  v); break;
+        case BR_XP:          _snprintf(out, outSize, "%d XP",    v); break;
+        case BR_STAT:        _snprintf(out, outSize, "+5 Stat Points");   break;
+        case BR_SKILL:       _snprintf(out, outSize, "+1 Skill Point");   break;
+        case BR_RESETPT:     _snprintf(out, outSize, "+1 Reset Point");   break;
+        case BR_TRAP:        _snprintf(out, outSize, "%s", Quests_TrapTypeName(v)); break;
+        case BR_LOOT:        _snprintf(out, outSize, "Drop: %s Loot", Quests_BossLootName(v)); break;
+        case BR_DROP_CHARM:  _snprintf(out, outSize, "Drop: %s", Quests_CharmName(v)); break;
+        case BR_DROP_SET:    _snprintf(out, outSize, "Drop: %s (Set)", Quests_SetPieceName(v)); break;
+        case BR_DROP_UNIQUE: _snprintf(out, outSize, "Drop: %s (Unique)", Quests_UniqueName(v)); break;
+        default:             _snprintf(out, outSize, "1000 Gold"); break;  /* fallback */
+    }
+}
+
+/* ------------------------------------------------------------------
+ * Standalone reward delivery — uses the slot's pre-rolled reward
+ * (set at character creation by Extra_PreRollAllRewards). If the
+ * pre-roll never ran (legacy character or pre-rolled state lost),
+ * falls back to a flat 1000 gold so the player still gets something.
+ * Mirrors Bonus_DeliverStandalone exactly so all reward kinds
+ * route through the same pending-state globals.
+ * ------------------------------------------------------------------ */
 static void Extra_DeliverStandalone(int apId, const char* tag) {
-    /* In the unity build d2arch_skilltree.c declares g_pendingRewardGold
-     * as `static int` at file-scope BEFORE this TU sees us; an `extern
-     * int` redeclaration here resolves to the same internal-linkage
-     * variable. Same trick d2arch_bonuschecks.c uses (line 723). The
-     * `volatile` qualifier on the previous version mismatched the
-     * underlying declaration and tripped C2373 — keep it plain.
-     *
-     * 1.9.2 fix: also emit ShowNotify so standalone players see the
-     * check fired in-game (matches Bonus_DeliverStandalone behaviour). */
-    extern int g_pendingRewardGold;
-    g_pendingRewardGold += 1000;
+    int off = Extra_OffsetFromApId(apId);
+    if (off < 0 || !g_extraState.rewardsRolled) {
+        /* Fallback — pre-roll never ran. Grant flat 1000 gold so the
+         * player isn't left empty-handed. */
+        extern int g_pendingRewardGold;
+        g_pendingRewardGold += 1000;
+        char msg[96];
+        _snprintf(msg, sizeof(msg), "%s: +1000 gold", tag ? tag : "Extra Check");
+        ShowNotify(msg);
+        Log("EXTRA: standalone reward (fallback) — %s -> +1000 gold (apId=%d)\n",
+            tag ? tag : "?", apId);
+        return;
+    }
+    uint8_t rt = g_extraState.rewardType[off];
+    int32_t v  = g_extraState.rewardValue[off];
+
+    /* Reuse the pending-state globals the quest delivery path uses —
+     * they're file-scope `static int` in earlier-included files so
+     * we don't redeclare them. NO `extern` keyword for static-int
+     * globals in same TU. */
     char msg[96];
-    _snprintf(msg, sizeof(msg), "%s: +1000 gold", tag ? tag : "Extra Check");
+    switch (rt) {
+        case BR_GOLD: {
+            if (v <= 0) v = 250;
+            g_serverPendingGold += v;
+            _snprintf(msg, sizeof(msg), "%s: +%d gold",
+                      tag ? tag : "Extra Check", v);
+            break;
+        }
+        case BR_XP: {
+            if (v <= 0) v = 1000;
+            /* fnAddStat is `static void(__stdcall*)(void*, int, int, int)`
+             * in d2arch_api.c (included before us) — same trick used by
+             * Bonus_DeliverStandalone, no extern needed. g_cachedPGame
+             * is `static DWORD` in d2arch_skilltree.c, same situation. */
+            if (fnAddStat && g_cachedPGame) {
+                void* pXP = GetServerPlayer(g_cachedPGame);
+                if (pXP) { __try { fnAddStat(pXP, 13, v, 0); } __except(1) {} }
+            }
+            _snprintf(msg, sizeof(msg), "%s: +%d XP",
+                      tag ? tag : "Extra Check", v);
+            break;
+        }
+        case BR_STAT:
+            g_serverPendingStatPts += 5;
+            _snprintf(msg, sizeof(msg), "%s: +5 Stat Points",
+                      tag ? tag : "Extra Check");
+            break;
+        case BR_SKILL:
+            g_serverPendingSkillPts += 1;
+            _snprintf(msg, sizeof(msg), "%s: +1 Skill Point",
+                      tag ? tag : "Extra Check");
+            break;
+        case BR_RESETPT:
+            g_resetPoints++;
+            _snprintf(msg, sizeof(msg), "%s: +1 Reset Point",
+                      tag ? tag : "Extra Check");
+            break;
+        case BR_TRAP:
+            switch (v) {
+                case 0: g_pendingTrapSpawn++;  _snprintf(msg, sizeof(msg), "%s: TRAP! Monsters", tag ? tag : "Extra Check"); break;
+                case 1: g_pendingTrapSlow++;   _snprintf(msg, sizeof(msg), "%s: TRAP! Slow",     tag ? tag : "Extra Check"); break;
+                case 2: g_pendingTrapWeaken++; _snprintf(msg, sizeof(msg), "%s: TRAP! Weaken",   tag ? tag : "Extra Check"); break;
+                case 3: g_pendingTrapPoison++; _snprintf(msg, sizeof(msg), "%s: TRAP! Poison",   tag ? tag : "Extra Check"); break;
+                default: g_pendingTrapSpawn++; strcpy(msg, "TRAP!"); break;
+            }
+            break;
+        case BR_LOOT: {
+            int bossIdx = v;
+            if (bossIdx < 0 || bossIdx > 4) bossIdx = 2;
+            g_pendingLootDrop++;
+            g_pendingLootBossId = bossIdx;
+            static const char* bn[] = {"Andariel","Duriel","Mephisto","Diablo","Baal"};
+            _snprintf(msg, sizeof(msg), "%s: %s loot incoming!",
+                      tag ? tag : "Extra Check", bn[bossIdx]);
+            break;
+        }
+        case BR_DROP_CHARM:
+            Quests_QueueSpecificDrop(7 /* REWARD_DROP_CHARM */,  v, tag);
+            return;
+        case BR_DROP_SET:
+            Quests_QueueSpecificDrop(8 /* REWARD_DROP_SET */,    v, tag);
+            return;
+        case BR_DROP_UNIQUE:
+            Quests_QueueSpecificDrop(9 /* REWARD_DROP_UNIQUE */, v, tag);
+            return;
+        default:
+            { extern int g_pendingRewardGold;
+              g_pendingRewardGold += 250; }
+            _snprintf(msg, sizeof(msg), "%s: +250 gold",
+                      tag ? tag : "Extra Check");
+            break;
+    }
     ShowNotify(msg);
-    Log("EXTRA: standalone reward — %s -> +1000 gold (apId=%d)\n",
-        tag ? tag : "?", apId);
-    (void)apId;
 }
 
 /* ------------------------------------------------------------------
@@ -438,18 +715,10 @@ void Extra_PollMerc(void* pPlayer) {
         return;
     }
 
-    int unitId = 0; int mode = 0; int level = 0;
+    int unitId = 0; int mode = 0;
     __try {
         unitId = *(int*)((BYTE*)pMerc + 0x0C);    /* dwUnitId */
         mode   = *(int*)((BYTE*)pMerc + 0x5C);    /* current animation mode */
-        /* 1.9.2 fix: previously read pStatList from offset 0x5C which
-         * is the animation mode (already loaded above), not the stat
-         * list. The bogus pointer was masked by __except so it just
-         * silently returned 0 every tick — the level-30 detection
-         * never tripped, but reading garbage as a pointer is ugly.
-         * StatList is at offset 0x5C+8 = 0x64 in 1.10f, but the
-         * level-stat-12 lookup needs D2Common ord 10527 anyway and
-         * is deferred to 1.9.3. Skip the read entirely until then. */
     } __except(EXCEPTION_EXECUTE_HANDLER) { return; }
 
     /* First hire detection */
@@ -473,13 +742,24 @@ void Extra_PollMerc(void* pPlayer) {
     }
     g_extraState.mercLastUnitId = unitId;
 
-    /* Level-30 detection — gated off until 1.9.3 wires D2Common
-     * ord 10527 (STATLIST_GetStatValue) for stat 12 (level). The
-     * direct-field-read approach is unreliable across builds, and
-     * reading a wrong offset as a stat-list pointer is what created
-     * the harmless-but-ugly bug fixed above. Keep the slot reachable
-     * via AP /release until then. */
-    (void)level;
+    /* Level-30 detection — read stat 12 (STAT_LEVEL) via fnGetStat
+     * which is the D2Common STATLIST_GetStatValue accessor already
+     * wired in d2arch_api.c and used elsewhere (drawall.c reads
+     * fnGetStat(pPlayer, 12) for character level). Same call works
+     * for merc units. Wrapped in __except because pMerc may be
+     * mid-resurrection and the stat list briefly invalid. */
+    if (!g_extraState.mercReached30) {
+        extern int (__stdcall *fnGetStat)(void*, int, int);
+        int mercLevel = 0;
+        if (fnGetStat) {
+            __try { mercLevel = fnGetStat(pMerc, 12, 0); }
+            __except(EXCEPTION_EXECUTE_HANDLER) { mercLevel = 0; }
+        }
+        if (mercLevel >= 30) {
+            g_extraState.mercReached30 = 1;
+            Extra_FireApLocation(EXTRA_MERC_LEVEL30, "Mercenary Reaches Level 30");
+        }
+    }
 
     (void)mode;
 }
@@ -556,6 +836,98 @@ static const char* EXTRA_NPC_NAMES[27] = {
     "Anya", "Larzuk", "Malah", "Nihlathak", "Qual-Kehk",
 };
 
+/* MonStats hcIdx -> npcIdx mapping. Cross-referenced with the NPC
+ * block of g_shuffleBannedIdx[] in d2arch_shuffle.c which lists every
+ * vendor / hireable / quest-NPC hcIdx. Missing rows: 0 = unknown
+ * (silently ignored). Cain has 6 hcIdx variants across acts; A1 Cain
+ * (146) folds to npcIdx 5, every later variant (244/245/246/265/520)
+ * folds to npcIdx 18 (Cain A3) since the player's interactions with
+ * "rescued Cain" are functionally one logical NPC. */
+static int Extra_HcIdxToNpcIdx(int hcIdx) {
+    switch (hcIdx) {
+        /* Act 1 */
+        case 148: return 0;   /* Akara */
+        case 154: return 1;   /* Charsi */
+        case 147: return 2;   /* Gheed */
+        case 150: return 3;   /* Kashya */
+        case 155: return 4;   /* Warriv (A1) */
+        case 146: return 5;   /* Cain (A1) — pre-rescue */
+        /* Act 2 */
+        case 176: return 6;   /* Atma */
+        case 177: return 7;   /* Drognan */
+        case 199: return 8;   /* Elzix */
+        case 178: return 9;   /* Fara */
+        case 198: return 10;  /* Greiz */
+        case 202: return 11;  /* Lysander */
+        case 210: return 12;  /* Meshif (A2) */
+        case 175: return 12;  /* Warriv (A2) — same logical NPC slot */
+        case 201: return 13;  /* Jerhyn */
+        /* Act 3 */
+        case 254: return 14;  /* Alkor */
+        case 252: return 15;  /* Asheara */
+        case 253: return 16;  /* Hratli */
+        case 255: return 17;  /* Ormus */
+        case 244: return 18;  /* Cain (A3) variant 1 */
+        case 245: return 18;  /* Cain variant 2 */
+        case 246: return 18;  /* Cain variant 3 */
+        case 264: return 18;  /* Meshif (A3) — fold to Cain slot? actually skip */
+        case 265: return 18;  /* Cain variant 5 */
+        case 520: return 18;  /* Cain variant 6 */
+        /* Act 4 */
+        case 251: return 19;  /* Tyrael (A4) */
+        case 367: return 19;  /* Tyrael variant */
+        case 521: return 19;  /* Tyrael variant */
+        case 257: return 20;  /* Halbu */
+        case 405: return 21;  /* Jamella */
+        /* Act 5 */
+        case 512: return 22;  /* Anya (drehya) */
+        case 527: return 22;  /* Anya iced variant */
+        case 511: return 23;  /* Larzuk */
+        case 513: return 24;  /* Malah */
+        case 514: return 25;  /* Nihlathak (town) */
+        case 515: return 26;  /* Qual-Kehk */
+        default:  return -1;
+    }
+}
+
+/* Per-tick NPC dialogue poll. Called from gameloop.c game-tick block
+ * right after Extra_PollMerc. Edge-detects "the NPC dialogue unit just
+ * changed" and fires the matching slot.
+ *
+ * Strategy: D2Client GetUIVar(0x06) returns the currently-talked-to
+ * NPC unit pointer (or 0 when no NPC menu is open). When the value
+ * transitions from any state to a NEW non-zero unit, we walk the
+ * unit struct to read its MonStats hcIdx and look up the npc index.
+ * Defensive __try/__except guards every dereference because UIVar
+ * semantics across vanilla D2 / D2MOO can vary slightly. */
+void Extra_PollNpcDialogue(void* pPlayerUnit) {
+    if (!g_extraEnabled[EX_NPC]) return;
+    (void)pPlayerUnit;
+    extern DWORD (*g_fnGetUIVar)(DWORD);
+    if (!g_fnGetUIVar) return;
+
+    DWORD pNpcUnit = 0;
+    __try { pNpcUnit = g_fnGetUIVar(0x06); }
+    __except(EXCEPTION_EXECUTE_HANDLER) { return; }
+
+    static DWORD s_lastNpcUnit = 0;
+    if (pNpcUnit == s_lastNpcUnit) return;     /* no edge */
+    s_lastNpcUnit = pNpcUnit;
+    if (pNpcUnit == 0) return;                 /* dialogue closed */
+    if (pNpcUnit < 0x1000) return;             /* not a pointer (UIVar can return small flags) */
+
+    int hcIdx = 0;
+    __try {
+        DWORD pMonData = *(DWORD*)((BYTE*)pNpcUnit + 0x14);
+        if (!pMonData) return;
+        hcIdx = (int)*(WORD*)((BYTE*)pMonData + 0x26);
+    } __except(EXCEPTION_EXECUTE_HANDLER) { return; }
+
+    int npcIdx = Extra_HcIdxToNpcIdx(hcIdx);
+    if (npcIdx < 0) return;       /* unmapped NPC (e.g. Cain pre-rescue child) */
+    Extra_OnNpcDialogue(npcIdx, g_currentDifficulty);
+}
+
 void Extra_OnNpcDialogue(int npcIdx, int diff) {
     if (!g_extraEnabled[EX_NPC]) return;
     if (npcIdx < 0 || npcIdx >= 27) return;
@@ -577,6 +949,18 @@ void Extra_OnRunewordCreated(int rwIdx) {
     Extra_FireApLocation(EXTRA_BASE_RUNEWORD + rwIdx, tag);
 }
 
+/* 1.9.2 — Auto-counter wrapper for Coll_ProcessItem. Bumps an
+ * internal sequential counter and fires the Nth runeword slot.
+ * Called from d2arch_collections.c on IFLAG_RUNEWORD 0->1 transition.
+ * The counter persists across saves (extra_runeword_counter line). */
+void Extra_OnRunewordCreatedAuto(void) {
+    if (!g_extraEnabled[EX_RUNEWORD]) return;
+    if (g_extraState.runewordCounter >= EXTRA_CT_RUNEWORD) return;
+    int slot = (int)g_extraState.runewordCounter;
+    g_extraState.runewordCounter++;
+    Extra_OnRunewordCreated(slot);
+}
+
 void Extra_OnCubeRecipe(int recipeIdx) {
     if (!g_extraEnabled[EX_CUBE]) return;
     if (recipeIdx < 0 || recipeIdx >= EXTRA_CT_CUBE) return;
@@ -586,16 +970,22 @@ void Extra_OnCubeRecipe(int recipeIdx) {
     Extra_FireApLocation(EXTRA_BASE_CUBE + recipeIdx, tag);
 }
 
+/* 1.9.2 — Auto-counter wrapper for TradeBtn_Hook. Bumps an
+ * internal sequential counter and fires the Nth cube-recipe slot.
+ * Called from d2arch_hooks.c on a successful cube transmute. */
+void Extra_OnCubeRecipeAuto(void) {
+    if (!g_extraEnabled[EX_CUBE]) return;
+    if (g_extraState.cubeCounter >= EXTRA_CT_CUBE) return;
+    int slot = (int)g_extraState.cubeCounter;
+    g_extraState.cubeCounter++;
+    Extra_OnCubeRecipe(slot);
+}
+
 /* ==================================================================
  * STANDALONE SPOILER FILE — appended to the per-character spoiler
  * .txt that Quests_WriteSpoilerFile produces. Lists every extra
- * check slot with its standalone reward (flat 1000 gold for 1.9.2).
- *
- * Mirrors Bonus_AppendSpoilerToFile but simpler since the 1.9.2
- * extras don't pre-roll per-slot rewards (every fire grants a flat
- * 1000 gold). Per-slot pre-rolling is a 1.9.3 follow-up — when that
- * lands this function will switch to formatting the rolled reward
- * the same way Bonus_FormatReward does.
+ * check slot with its pre-rolled standalone reward (mirrors the
+ * bonus-check spoiler section).
  * ================================================================== */
 void Extra_AppendSpoilerToFile(FILE* f) {
     if (!f) return;
@@ -608,45 +998,65 @@ void Extra_AppendSpoilerToFile(FILE* f) {
     fprintf(f, "\n================ Extra Check Rewards ================\n\n");
     fprintf(f, "Each extra check fires the first time you trigger it (per\n");
     fprintf(f, "character per slot, deduplicated via the fired bitmap).\n");
-    fprintf(f, "Standalone reward is a flat 1000 gold per fire — per-slot\n");
-    fprintf(f, "pre-rolled rewards (matching the bonus-check pipeline) are\n");
-    fprintf(f, "a 1.9.3 follow-up.\n\n");
+    if (g_extraState.rewardsRolled) {
+        fprintf(f, "Standalone rewards are pre-rolled per slot using the\n");
+        fprintf(f, "character's seed and the same weighted catalog as the\n");
+        fprintf(f, "quest + bonus pre-rolls. Re-running AssignAllRewards\n");
+        fprintf(f, "(seed change) re-rolls these slots too.\n\n");
+    } else {
+        fprintf(f, "(Pre-rolled rewards not yet generated — every fire\n");
+        fprintf(f, "will grant a flat 1000 gold fallback until you trigger\n");
+        fprintf(f, "AssignAllRewards via a seed change or fresh character.)\n\n");
+    }
 
     /* Spoiler entries use the SAME names the apworld registers in
      * locations.py — empty diff suffix for Normal, NPC names from
      * the EXTRA_NPC_NAMES table, 1-indexed runeword/cube. Keeps the
      * spoiler readable next to the AP server's location list. */
 
+    /* Helper to print one slot row with the pre-rolled reward (or
+     * "1000 Gold" fallback when rewardsRolled is FALSE). */
+    #define EXTRA_PRINT_SLOT(apId, name) do { \
+        char rewBuf[80]; \
+        if (g_extraState.rewardsRolled) { \
+            int _off = Extra_OffsetFromApId(apId); \
+            Extra_FormatReward(_off, rewBuf, sizeof(rewBuf)); \
+        } else { \
+            _snprintf(rewBuf, sizeof(rewBuf), "1000 Gold (fallback)"); \
+        } \
+        fprintf(f, "    %-40s -> %s\n", name, rewBuf); \
+    } while (0)
+
     /* Cat 1 — Cow Level expansion (9 slots) */
     if (g_extraEnabled[EX_COW]) {
         fprintf(f, "  -- Cow Level (9 slots) --\n");
         for (int d = 0; d < 3; d++) {
-            fprintf(f, "    %-32s -> 1000 Gold\n",
-                    d == 0 ? "Cow Level Entry"
-                           : d == 1 ? "Cow Level Entry (Nightmare)"
-                                    : "Cow Level Entry (Hell)");
+            char name[48];
+            _snprintf(name, sizeof(name), "Cow Level Entry%s",
+                      EXTRA_DIFF_LABEL[d]);
+            EXTRA_PRINT_SLOT(EXTRA_COW_FIRST_ENTRY_BASE + d, name);
         }
         for (int d = 0; d < 3; d++) {
-            fprintf(f, "    %-32s -> 1000 Gold\n",
-                    d == 0 ? "Cow King Killed"
-                           : d == 1 ? "Cow King Killed (Nightmare)"
-                                    : "Cow King Killed (Hell)");
+            char name[48];
+            _snprintf(name, sizeof(name), "Cow King Killed%s",
+                      EXTRA_DIFF_LABEL[d]);
+            EXTRA_PRINT_SLOT(EXTRA_COW_KING_BASE + d, name);
         }
-        fprintf(f, "    %-32s -> 1000 Gold\n", "Cow Kills: 100");
-        fprintf(f, "    %-32s -> 1000 Gold\n", "Cow Kills: 500");
-        fprintf(f, "    %-32s -> 1000 Gold\n", "Cow Kills: 1,000");
+        EXTRA_PRINT_SLOT(EXTRA_COW_LIFETIME_BASE + 0, "Cow Kills: 100");
+        EXTRA_PRINT_SLOT(EXTRA_COW_LIFETIME_BASE + 1, "Cow Kills: 500");
+        EXTRA_PRINT_SLOT(EXTRA_COW_LIFETIME_BASE + 2, "Cow Kills: 1,000");
         fprintf(f, "\n");
     }
 
     /* Cat 2 — Mercenary milestones (6 slots) */
     if (g_extraEnabled[EX_MERC]) {
         fprintf(f, "  -- Mercenary Milestones (6 slots) --\n");
-        fprintf(f, "    %-32s -> 1000 Gold\n", "First Mercenary Hired");
-        fprintf(f, "    %-32s -> 1000 Gold\n", "Merc Resurrects: 5");
-        fprintf(f, "    %-32s -> 1000 Gold\n", "Merc Resurrects: 10");
-        fprintf(f, "    %-32s -> 1000 Gold\n", "Merc Resurrects: 25");
-        fprintf(f, "    %-32s -> 1000 Gold\n", "Merc Resurrects: 50");
-        fprintf(f, "    %-32s -> 1000 Gold\n", "Mercenary Reaches Level 30");
+        EXTRA_PRINT_SLOT(EXTRA_MERC_HIRE,                "First Mercenary Hired");
+        EXTRA_PRINT_SLOT(EXTRA_MERC_RESURRECT_BASE + 0,  "Merc Resurrects: 5");
+        EXTRA_PRINT_SLOT(EXTRA_MERC_RESURRECT_BASE + 1,  "Merc Resurrects: 10");
+        EXTRA_PRINT_SLOT(EXTRA_MERC_RESURRECT_BASE + 2,  "Merc Resurrects: 25");
+        EXTRA_PRINT_SLOT(EXTRA_MERC_RESURRECT_BASE + 3,  "Merc Resurrects: 50");
+        EXTRA_PRINT_SLOT(EXTRA_MERC_LEVEL30,             "Mercenary Reaches Level 30");
         fprintf(f, "\n");
     }
 
@@ -657,7 +1067,7 @@ void Extra_AppendSpoilerToFile(FILE* f) {
             char name[48];
             _snprintf(name, sizeof(name), "Hellforge Used%s",
                       EXTRA_DIFF_LABEL[d]);
-            fprintf(f, "    %-32s -> 1000 Gold\n", name);
+            EXTRA_PRINT_SLOT(EXTRA_HF_HELLFORGE_BASE + d, name);
         }
         static const char* TIER_NAMES[3] = { "Pul-Gul", "Vex-Ber", "Jah-Zod" };
         for (int t = 0; t < 3; t++) {
@@ -665,7 +1075,7 @@ void Extra_AppendSpoilerToFile(FILE* f) {
                 char name[64];
                 _snprintf(name, sizeof(name), "High Rune %s%s",
                           TIER_NAMES[t], EXTRA_DIFF_LABEL[d]);
-                fprintf(f, "    %-32s -> 1000 Gold\n", name);
+                EXTRA_PRINT_SLOT(EXTRA_HF_HIGH_RUNE_BASE + t * 3 + d, name);
             }
         }
         fprintf(f, "\n");
@@ -674,14 +1084,12 @@ void Extra_AppendSpoilerToFile(FILE* f) {
     /* Cat 4 — NPC Dialogue (81 slots: 27 NPCs × 3 diff) */
     if (g_extraEnabled[EX_NPC]) {
         fprintf(f, "  -- NPC Dialogue (81 slots, 27 NPCs x 3 diff) --\n");
-        fprintf(f, "    1.9.2: framework ships, in-game detection lands in 1.9.3.\n");
-        fprintf(f, "    Until then, slots can be unlocked via AP /release.\n");
         for (int n = 0; n < 27; n++) {
             for (int d = 0; d < 3; d++) {
                 char name[64];
                 _snprintf(name, sizeof(name), "NPC Dialogue: %s%s",
                           EXTRA_NPC_NAMES[n], EXTRA_DIFF_LABEL[d]);
-                fprintf(f, "    %-40s -> 1000 Gold\n", name);
+                EXTRA_PRINT_SLOT(EXTRA_BASE_NPC + n * 3 + d, name);
             }
         }
         fprintf(f, "\n");
@@ -690,10 +1098,10 @@ void Extra_AppendSpoilerToFile(FILE* f) {
     /* Cat 5 — Runeword crafting (50 slots) */
     if (g_extraEnabled[EX_RUNEWORD]) {
         fprintf(f, "  -- Runeword Crafting (50 slots) --\n");
-        fprintf(f, "    1.9.2: framework ships, in-game detection lands in 1.9.3.\n");
         for (int i = 0; i < EXTRA_CT_RUNEWORD; i++) {
-            fprintf(f, "    Runeword Crafted #%-3d            -> 1000 Gold\n",
-                    i + 1);
+            char name[48];
+            _snprintf(name, sizeof(name), "Runeword Crafted #%d", i + 1);
+            EXTRA_PRINT_SLOT(EXTRA_BASE_RUNEWORD + i, name);
         }
         fprintf(f, "\n");
     }
@@ -701,11 +1109,12 @@ void Extra_AppendSpoilerToFile(FILE* f) {
     /* Cat 6 — Cube recipes (135 slots) */
     if (g_extraEnabled[EX_CUBE]) {
         fprintf(f, "  -- Cube Recipes (135 slots) --\n");
-        fprintf(f, "    1.9.2: framework ships, in-game detection lands in 1.9.3.\n");
         for (int i = 0; i < EXTRA_CT_CUBE; i++) {
-            fprintf(f, "    Cube Recipe #%-3d                 -> 1000 Gold\n",
-                    i + 1);
+            char name[48];
+            _snprintf(name, sizeof(name), "Cube Recipe #%d", i + 1);
+            EXTRA_PRINT_SLOT(EXTRA_BASE_CUBE + i, name);
         }
         fprintf(f, "\n");
     }
+    #undef EXTRA_PRINT_SLOT
 }

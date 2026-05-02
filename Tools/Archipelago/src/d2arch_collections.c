@@ -1465,7 +1465,17 @@ static void Coll_ProcessItem(void* pItem, BOOL requireLegit) {
         if (e) {
             DWORD prevFlags = ((DWORD)e->prevFlagsHi << 16) | e->prevFlagsLo;
             DWORD newOn = currentFlags & ~prevFlags;  /* bits flipped 0→1 */
-            if (newOn & COLL_IFLAG_RUNEWORD)   Stats_OnRunewordCreated();
+            if (newOn & COLL_IFLAG_RUNEWORD) {
+                Stats_OnRunewordCreated();
+                /* 1.9.2 Cat 5 — fire the next sequential runeword AP
+                 * slot. Extra_OnRunewordCreated maintains its own
+                 * counter inside d2arch_extrachecks.c (g_charStats
+                 * isn't visible here yet — stats.c is included AFTER
+                 * collections.c in the unity build). The function
+                 * picks the right next slot internally. */
+                extern void Extra_OnRunewordCreatedAuto(void);
+                Extra_OnRunewordCreatedAuto();
+            }
             if (newOn & COLL_IFLAG_IDENTIFIED) Stats_OnItemIdentified();
             e->prevFlagsLo = (WORD)(currentFlags & 0xFFFF);
             e->prevFlagsHi = (WORD)((currentFlags >> 16) & 0xFFFF);

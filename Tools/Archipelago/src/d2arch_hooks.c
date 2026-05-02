@@ -295,16 +295,31 @@ static int __fastcall TradeBtn_Hook(void* pGame, void* pPlayer,
     BOOL doLog = (s_logCount < 6);
     if (doLog) s_logCount++;
 
+    int rv = ((TradeBtnFn_t)s_tradeBtnDetour.trampoline)(pGame, pPlayer,
+                                                          nButton, nGoldAmount);
     if (nButton == TRADEBTN_TRANSMUTE) {
-        g_charStats.cubeTransmutes++;
-        if (doLog) Log("TRADEBTN_HOOK: TRANSMUTE (cube) — count=%llu\n",
-                       (unsigned long long)g_charStats.cubeTransmutes);
+        /* The trampoline return value is non-zero on a SUCCESSFUL
+         * transmute (D2's cube checks all return BOOL via EAX).
+         * Failed transmutes (no recipe matches the cube contents)
+         * return 0 — those don't bump the counter. */
+        if (rv != 0) {
+            g_charStats.cubeTransmutes++;
+            if (doLog) Log("TRADEBTN_HOOK: TRANSMUTE OK — count=%llu\n",
+                           (unsigned long long)g_charStats.cubeTransmutes);
+            /* 1.9.2 Cat 6 — fire the next sequential cube-recipe AP
+             * slot. Extra_OnCubeRecipeAuto maintains its own counter
+             * inside d2arch_extrachecks.c so we don't have to thread
+             * g_charStats here. Slots 0..134 are reserved (135 total). */
+            extern void Extra_OnCubeRecipeAuto(void);
+            Extra_OnCubeRecipeAuto();
+        } else if (doLog) {
+            Log("TRADEBTN_HOOK: TRANSMUTE failed (no recipe matched)\n");
+        }
     } else if (doLog) {
         Log("TRADEBTN_HOOK: button=%u (not transmute, ignored)\n",
             (unsigned)nButton);
     }
-    return ((TradeBtnFn_t)s_tradeBtnDetour.trampoline)(pGame, pPlayer,
-                                                      nButton, nGoldAmount);
+    return rv;
 }
 
 /* ----------------------------------------------------------------

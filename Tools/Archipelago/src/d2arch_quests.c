@@ -1077,6 +1077,14 @@ static void AssignAllRewards(DWORD seed) {
     extern void Bonus_PreRollAllRewards(unsigned seed);
     Bonus_PreRollAllRewards(seed);
 
+    /* 1.9.2 — Pre-roll extra check rewards (six new categories: Cow /
+     * Merc / HF+Runes / NPC / Runeword / Cube). Same seed, +888 offset
+     * inside the function so the rolls don't collide with Bonus or
+     * quest rolls. The standalone spoiler lists these alongside the
+     * other categories. */
+    extern void Extra_PreRollAllRewards(unsigned seed);
+    Extra_PreRollAllRewards(seed);
+
     /* 1.9.0 — Write the per-character standalone spoiler file. The
      * file documents what each filler quest will reward this character;
      * it lives next to the per-char state file so users can browse

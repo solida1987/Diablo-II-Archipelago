@@ -317,6 +317,7 @@ static void ProcessPendingGameTick(void) {
         extern void Coll_OnGameTick(void* pPlayerUnit);
         extern void Stats_OnGameTick(void* pPlayerUnit);
         extern void Extra_PollMerc(void* pPlayer);  /* 1.9.2 Cat 2 */
+        extern void Extra_PollNpcDialogue(void* pPlayer); /* 1.9.2 Cat 4 */
         if (fnGetPlayer) {
             void* pCliPlayer = NULL;
             __try { pCliPlayer = fnGetPlayer(); } __except(1) {}
@@ -324,6 +325,7 @@ static void ProcessPendingGameTick(void) {
                 Coll_OnGameTick(pCliPlayer);
                 Stats_OnGameTick(pCliPlayer);  /* 1.9.0 — playtime + death-edge */
                 Extra_PollMerc(pCliPlayer);    /* 1.9.2 — merc hire/resurrect/level */
+                Extra_PollNpcDialogue(pCliPlayer); /* 1.9.2 — NPC dialogue start */
             }
         }
     }

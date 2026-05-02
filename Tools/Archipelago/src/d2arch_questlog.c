@@ -716,6 +716,34 @@ static void RenderTracker(void) {
         }
     }
 
+    /* 1.9.2 — Extra check categories (Cow / Merc / HF+Runes / NPC /
+     * Runeword / Cube). Same compact one-line format as the Bonus
+     * checks above, prefixed "E" for Extra. Only renders when at
+     * least one category is enabled. */
+    {
+        extern BOOL Extra_IsCategoryEnabled(int cat);
+        extern int  Extra_GetSlotCount(int cat);
+        extern int  Extra_CountFiredCategory(int cat);
+        BOOL anyExtra = FALSE;
+        int eGot = 0, eAll = 0;
+        for (int c = 0; c < 6; c++) {
+            if (!Extra_IsCategoryEnabled(c)) continue;
+            anyExtra = TRUE;
+            eGot += Extra_CountFiredCategory(c);
+            eAll += Extra_GetSlotCount(c);
+        }
+        if (anyExtra) {
+            char ebuf[32];
+            if (eAll >= 1000)
+                sprintf(ebuf, "E %d/%d.%dK", eGot, eAll / 1000, (eAll % 1000) / 100);
+            else
+                sprintf(ebuf, "E %d/%d", eGot, eAll);
+            fnFont(6);
+            DrawText2(ebuf, tx + 4, cy + 10, 5, 0);
+            cy += 14;
+        }
+    }
+
     if (IsTown(curArea)) return;
 
     /* Show waypoint quest for current area (if any) */
