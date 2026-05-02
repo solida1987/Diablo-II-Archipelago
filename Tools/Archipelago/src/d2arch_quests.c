@@ -1268,21 +1268,37 @@ static void Quests_WriteSpoilerFile(void) {
     extern void Extra_AppendSpoilerToFile(FILE* f);
     Extra_AppendSpoilerToFile(f);
 
-    /* 1.9.2 — Grand total footer. Sums quest checks (already
-     * computed above as 'tot') + every enabled bonus + every enabled
-     * extra slot, so the user sees one clear number for "how many
-     * total checks does this character have access to". */
+    /* 1.9.2 — Grand total footer. Sums every check category that the
+     * F1 Overview page displays so the spoiler footer matches the
+     * in-game "Total Checks" line exactly. The Overview includes:
+     *   - Quest checks (computed above as 'tot')
+     *   - Skill checks (g_poolCount when g_skillHuntingOn)
+     *   - Bonus + Extra checks (only enabled categories)
+     *   - Collection (always 205 — set pieces 127 + runes 33 + gems 35
+     *     + specials 10; the slots exist in the AP location_table
+     *     regardless of Goal=Collection)
+     *   - Zones (54 when g_zoneLockingOn — 18 gates × 3 difficulties) */
     extern int Bonus_GetTotalEnabledSlots(void);
     extern int Extra_GetTotalEnabledSlots(void);
+    extern int g_poolCount;             /* d2arch_skilltree.c */
+    extern BOOL g_zoneLockingOn;        /* d2arch_zones.c     */
+    int skillTot = g_skillHuntingOn ? g_poolCount : 0;
     int bonusTot = Bonus_GetTotalEnabledSlots();
     int extraTot = Extra_GetTotalEnabledSlots();
-    int grandTot = tot + bonusTot + extraTot;
+    int collTot  = 205;                 /* 127 set + 33 runes + 35 gems + 10 specials */
+    int zoneTot  = g_zoneLockingOn ? 54 : 0;  /* 18 gates × 3 diff */
+    int grandTot = tot + skillTot + bonusTot + extraTot + collTot + zoneTot;
     fprintf(f, "\n================ Grand Total ================\n\n");
     fprintf(f, "  Quest checks            : %d\n", tot);
+    if (skillTot > 0)
+        fprintf(f, "  Skill checks            : %d\n", skillTot);
     if (bonusTot > 0)
         fprintf(f, "  Bonus checks (enabled)  : %d\n", bonusTot);
     if (extraTot > 0)
         fprintf(f, "  Extra checks (enabled)  : %d\n", extraTot);
+    fprintf(f, "  Collection checks       : %d\n", collTot);
+    if (zoneTot > 0)
+        fprintf(f, "  Zone checks             : %d\n", zoneTot);
     fprintf(f, "  ----------------------------------------\n");
     fprintf(f, "  TOTAL CHECKS            : %d\n", grandTot);
     fprintf(f, "\n");
