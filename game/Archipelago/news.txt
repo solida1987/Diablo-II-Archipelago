@@ -8,6 +8,118 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.2 - What's New ===
+
+SIX NEW OPT-IN CHECK CATEGORIES (293 EXTRA SLOTS)
+Six independent toggle categories add up to 293 new AP locations on
+top of the 1.9.0 bonus checks. All OFF by default - flip each on
+from the title screen or the apworld YAML.
+- Cow Level (9 slots) - first Moo Moo Farm entry per difficulty,
+  Cow King kill per difficulty, lifetime cow-kill milestones at
+  100 / 500 / 1000.
+- Mercenary Milestones (6 slots) - first hire, 5/10/25/50 lifetime
+  resurrections, first time a merc reaches level 30+.
+- Hellforge & High Runes (12 slots) - using the Hellforge per
+  difficulty, plus the first pickup of each high-rune tier
+  (Pul-Gul / Vex-Ber / Jah-Zod) per difficulty.
+- NPC Dialogue (81 slots) - talking to each major NPC per
+  difficulty (27 NPCs x 3 difficulties).
+- Runeword Crafting (50 slots) - fired sequentially on each
+  successful runeword craft.
+- Cube Recipes (135 slots) - fired sequentially on each successful
+  Horadric Cube transmute.
+F1 Overview, F1 Logbook (page 9) and the F3 tracker overlay all
+get an Extra Checks section that mirrors the existing Bonus row
+layout. Standalone players get a per-character pre-rolled reward
+for every slot, listed in the spoiler file.
+
+CUSTOM GOAL MODE (AP)
+A new "goal: custom" choice lets you pick exactly what counts as
+"done". 54 individual checkboxes split into 5 groups - Subsystems
+(skill / collection / quest / waypoint / story), Act Boss Kills,
+Cow King + Pandemonium Ubers, Famous Super-Uniques, and Bulk
+Object/Check Targets - plus a custom gold target. Goal completes
+when ALL selected targets are achieved AND your lifetime gold
+reaches the configured target.
+
+GOAL: GOLD COLLECTION (RENAMED FROM "collection")
+The old "goal: collection" mode is now "gold_collection" - a pure
+lifetime-gold target with no other requirements. The old name still
+parses for backward compatibility. To use the F1 Collection book as
+a goal, switch to "goal: custom" with the Collection subsystem
+toggle on; the existing collect_set_*/collect_rune_*/etc. toggles
+then determine which items are required.
+
+STRUCTURED OPTIONS PANEL
+The Options Creator now organises every D2 option into 17 logical
+categories (Game Mode / Goal / Quest Categories / Skill Class
+Filter / Difficulty & XP / Shuffles / Filler Items / Bonus Checks /
+the 5 Custom Goal groups / the 4 Collection groups / Multiworld)
+mirroring how OpenTTD's settings are grouped. Long-tail Collection
+groups and all Custom Goal groups are collapsed by default to keep
+the panel compact for new users.
+
+STANDALONE SPOILER - GRAND TOTALS
+The per-character spoiler file (Game/Save/d2arch_spoiler_<char>.txt)
+gets two new bottom-of-file sections: a Grand Total line that
+matches the F1 Overview total exactly (Quest + Skill + Bonus +
+Extra + Collection + Zone), and a Total Reward Mix that breaks
+down the entire reward pool across all sources (gold/XP/stat/
+skill/trap/loot/drop) so you can see what your seed will deliver
+before you play.
+
+DEV MENU - MONS TAB
+Press Ctrl+V and click the new Mons tab (rightmost) for individual-
+monster spawning grouped under four sub-tabs: SuperUniques (all 66
+vanilla SUs), Bosses (the 5 act bosses), Normal (all 400 player-
+killable monsters from MonStats.txt), and Random (placeholder for
+weighted-roll spawns). Both scrollable lists support mouse-wheel.
+
+SMARTER MONSTER SHUFFLE
+Monster shuffle now respects a runtime ban list of about 205
+monster rows that previously could swap out and crash the game or
+break quest progression - spawner monsters with missing children,
+quest bosses tied to scripts, special-AI monsters, player pets
+and summons, NPCs and vendors, decoration rows. Belt-and-
+suspenders with the existing shuffle preset .dat files.
+
+BUG FIXES
+- Skill pool exhaustion fallback (standalone): when Skill Hunting
+  was on and the seeded skill pool was fully unlocked, the next
+  ~54 progression-quest completions silently delivered nothing.
+  Each pool-overflow quest now grants +1 Skill Point instead.
+- NPC dialogue lookup fixed (txtId vs hcIdx) - first-pass NPC
+  detection always returned -1 because it read the SuperUnique
+  field instead of the MonStats row id.
+- Hellforge case 49 fall-through fixed - any quest-object
+  interaction (Cain Gibbet, Charsi imbue, Anya scroll, etc.) was
+  falsely firing one Hellforge check per game.
+- Cube transmute counter only increments on successful matches
+  now (was counting every cube-button click).
+- Item Log totals now match F1 Overview totals exactly (was
+  missing Skill / Collection / Zone checks - a 469-slot gap).
+- Title-screen button cap bumped 64 -> 96 to fit the new Custom
+  Goal toggles (Zone Locking + 5 quest toggles were silently
+  dropping off).
+- Custom Goal alias support so old YAMLs using "goal: collection"
+  still generate.
+
+KNOWN ISSUES (carried from 1.9.1)
+- Some skill names / descriptions still show wrong text ("an evil
+  force" / "Key of Destruction" on Necro Clay Golem, Skeleton
+  Mage, Druid Werewolf, etc., or Phoenix Strike showing "Chain
+  Lightning" instead of "Chaos Lightning"). Fix in progress.
+- F1 Quest counter on some characters shows 9 fewer than expected
+  (cosmetic only - the underlying state is correct).
+- F1 Collection counter only counts items physically picked up,
+  not items received from AP. An inventory-pickup hook may be
+  added later.
+- NPC speech text in the chat box ("Welcome to the Rogue
+  Encampment...") is missing on some installs - environmental
+  (TBL/MPQ data files), pre-existing in 1.9.1. The new NPC
+  Dialogue checks still fire correctly via room-scan detection
+  regardless of whether the speech text renders.
+
 === Beta 1.9.1 - What's New ===
 
 QUALITY OF LIFE

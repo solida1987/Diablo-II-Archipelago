@@ -1,11 +1,10 @@
 # Diablo II Archipelago — Beta 1.9.2
 
-In development (no public release yet — version files still read
-"Beta 1.9.1"). The big one this cycle: six new opt-in AP check
-categories on top of the 1.9.0 bonus checks, a fully customisable
-goal mode, restructured options panel, dev-menu Mons tab, smarter
-monster shuffle. Total location budget pushed past 2,950 with
-everything enabled.
+The big one this cycle: six new opt-in AP check categories on top
+of the 1.9.0 bonus checks, a fully customisable goal mode,
+restructured options panel, dev-menu Mons tab, smarter monster
+shuffle. Total location budget pushed past 2,950 with everything
+enabled.
 
 ---
 
