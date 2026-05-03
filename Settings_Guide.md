@@ -198,7 +198,7 @@ beat Andariel → Act 2, beat Duriel → Act 3, etc.
 
 ## 3. Goal mode (`goal`)
 
-Determines the win condition. Four options:
+Determines the win condition. Five options as of 1.9.2:
 
 ### `full_normal` (0) — beat Baal Normal
 
@@ -219,40 +219,150 @@ Determines the win condition. Four options:
 - Win = "Eve of Destruction (Hell)" reached
 - Longest seed; most spheres
 
-### `collection` (3) — fill the F1 Collection book
+### `gold_collection` (3) — reach a lifetime-gold target
 
-- Difficulty scope: Normal-only quest locations + 110 Collection
-  locations layered on top
-- Locations: ~225-333 depending on which Collection toggles are on
-- Win = the in-game DLL fires goal-complete when every targeted
-  collection slot is checked (per `Coll_IsGoalComplete()`)
-- **Difficulty progression is optional** — you can play any
-  difficulty. Some Collection items only drop in higher difficulties
-  (Hellfire Torch, top runes Sur+) so you'll naturally play Hell to
-  finish, but it's not enforced
-- For AP fill purposes, this mode is treated as Normal-difficulty
-  scope so quest-location count stays manageable
+*Renamed in 1.9.2 from `collection`. The old name still parses as
+an alias for backward compatibility.*
+
+- Difficulty scope: Normal-only quest locations
+- Locations: ~225 (the F1 Collection page no longer drives goal —
+  Collection toggles below still control whether their items show
+  in the F1 book and on the AP location list, but win condition is
+  pure gold)
+- Win = lifetime gold counter on F1 Collection page reaches the
+  `collection_gold_target` setting (any value 0..100M)
+- **Difficulty progression is optional** — play any difficulty
+- Set `collection_gold_target` > 0 or the goal trivially completes
+
+### `custom` (4) — build your own win condition (1.9.2)
+
+AP-side only — standalone defaults to Full Normal because the
+title-screen UI doesn't have room for the 54-checkbox picker.
+
+- Pick any combination of 54 individual targets (10 subsystems,
+  15 act bosses × diff, 7 cow king + ubers, 10 super-uniques,
+  12 bulk object/check completions) plus an optional
+  `custom_goal_gold_target`
+- Goal completes when **ALL selected targets** are achieved AND
+  lifetime gold reaches the optional gold target
+- Empty selection + 0 gold = trivially complete (falls back to
+  Full Normal behaviour)
+- Difficulty scope: full pool (Normal+NM+Hell) generated for AP
+  fill purposes since the user can pick targets across all 3 diffs
+- See section 4b for the full target list
 
 ---
 
-## 4. Collection goal — sub-settings
+## 4. Gold Collection sub-settings
 
-Only meaningful when `goal: collection`. These let you pick exactly
-which items count toward your win.
+Only meaningful when `goal: gold_collection`.
 
-### `collection_target_gems` (default: `true`)
+### `collection_gold_target` (default: `1000000`)
 
-All-or-nothing toggle for **35 gems** (7 colors × 5 grades:
-Chipped/Flawed/Normal/Flawless/Perfect). When ON, every individual
-gem pickup (35 unique slots) fires an AP check. There's no
-per-grade or per-color granularity for gems.
+Lifetime-gold threshold. Range: 0 to 100,000,000. The F1 Collection
+page shows a monotonic gold counter that only counts gold pickup
+(from ground) + quest-reward gold — vendor-sale revenue is
+excluded. The goal requires reaching this value.
 
-### `collection_gold_target` (default: `0`)
+### `collection_target_gems` (moved 1.9.2)
 
-Optional lifetime-gold threshold. Range: 0 to 100,000,000. The F1
-Collection page shows a monotonic gold counter that only counts
-gold pickup (from ground) + quest-reward gold — vendor-sale revenue
-is excluded. If non-zero, the goal requires this much gold collected.
+In 1.9.2 this toggle moved out of the Goal section and into the
+Collection — Gems group. It controls whether the 35 individual gem
+pickups count toward the F1 Collection book + Custom Goal's
+"include collection" subsystem. No longer a goal-mode-specific
+setting.
+
+---
+
+## 4b. Custom Goal targets (1.9.2 — AP only)
+
+Only meaningful when `goal: custom`. Each option below is a
+standalone Toggle checkbox in the Options Creator. The goal
+completes when **every checked target is achieved AND lifetime gold
+reaches `custom_goal_gold_target`**.
+
+The 54 toggles are organised into 5 collapsed groups in the
+Options Creator UI:
+
+### Subsystem includes (10 toggles)
+
+Bulk completion gates — each one means "win requires the entire
+subsystem to be complete":
+
+- `custom_goal_subsystem_skill_hunting` — unlock every skill in
+  your seeded skill pool (up to 210)
+- `custom_goal_subsystem_collection` — fill the F1 Collection book
+  per the existing collect_set_*/collect_rune_*/collect_special_*/
+  gems toggles. Mix of items required is configured in those
+  collection groups (so you can combine "Custom Goal: include
+  Collection" with "only collect 5 specific runes")
+- `custom_goal_subsystem_hunt_quests` — complete every Hunt
+  super-unique quest across all 3 difficulties (~42 total)
+- `custom_goal_subsystem_kill_zone_quests` — complete every
+  kill-zone quest across all 3 difficulties
+- `custom_goal_subsystem_exploration_quests` — every "Reach <area>"
+  exploration quest across all 3 difficulties
+- `custom_goal_subsystem_waypoints` — activate every waypoint
+  across all 3 difficulties (~38 × 3 = 114)
+- `custom_goal_subsystem_level_milestones` — reach every level
+  milestone (5/10/15/.../99) across all 3 difficulties
+- `custom_goal_subsystem_story_normal/nightmare/hell` — three
+  separate toggles, one per difficulty, requiring every story
+  quest on that difficulty (Den of Evil through Eve of Destruction)
+
+### Act Boss kills (15 toggles)
+
+`custom_goal_kill_<boss>_<diff>` for each of the 15
+combinations:
+
+- Andariel Normal/Nightmare/Hell
+- Duriel Normal/Nightmare/Hell
+- Mephisto Normal/Nightmare/Hell
+- Diablo Normal/Nightmare/Hell
+- Baal Normal/Nightmare/Hell
+
+### Cow King + Pandemonium ubers (7 toggles)
+
+- `custom_goal_kill_cow_king_normal/nightmare/hell` — Cow King in
+  the Moo Moo Farm per difficulty
+- `custom_goal_kill_uber_mephisto/diablo/baal` — individual Uber
+  kills in the Pandemonium event
+- `custom_goal_hellfire_torch_complete` — complete one full
+  Pandemonium run (all 3 ubers + Hellfire Torch drop)
+
+### Famous Super-Uniques (10 toggles)
+
+`custom_goal_kill_<su>` for popular super-uniques:
+
+Bishibosh (Cold Plains), Corpsefire (Den of Evil),
+Rakanishu (Stony Field), Griswold (Tristram),
+Pindleskin (Nihlathak's Temple), Nihlathak (Halls of Vaught),
+The Summoner (Arcane Sanctuary), Radament (Sewers Level 3),
+Izual (Plains of Despair), Council Member (Travincal)
+
+### Bulk object/check completions (12 toggles)
+
+For when you want "complete every X check" as your goal. Requires
+the matching `check_*` toggle (see sections 9b/9c) to be ON or the
+counters never bump:
+
+- `custom_goal_all_shrines/urns/barrels/chests/set_pickups/
+  gold_milestones` (1.9.0 bonus check categories)
+- `custom_goal_all_cow_level_checks/merc_milestones/
+  hellforge_runes/npc_dialogue/runeword_crafting/cube_recipes`
+  (1.9.2 extra check categories)
+
+### `custom_goal_gold_target` (default: `0`)
+
+Range 0..100M. Optional gold threshold ON TOP of every selected
+target. Set to 0 if you don't want gold to gate the goal.
+
+### Win logic
+
+`custom goal complete = (all required targets fired) AND
+(lifetime gold >= custom_goal_gold_target)`. Empty target set + 0
+gold = trivially complete = behaves like Full Normal (DLL falls
+through to standard goal handling).
 
 ### `collect_set_*` (32 toggles, default: all `true`)
 
@@ -933,9 +1043,18 @@ Story + hunts only (~140 locations). Less side-grinding.
 |---|---|---|---|---|
 | `skill_hunting` | toggle | true | true/false | Skill randomization mode |
 | `zone_locking` | toggle | false | true/false | Gate-key progression |
-| `goal` | choice | full_normal | normal/nightmare/hell/collection | Win condition |
-| `collection_target_gems` | toggle | true | true/false | Gems in Collection goal |
-| `collection_gold_target` | range | 0 | 0..100M | Lifetime gold target |
+| `goal` | choice | full_normal | full_normal/full_nightmare/full_hell/gold_collection/custom | Win condition (1.9.2 added `custom`) |
+| `collection_target_gems` | toggle | true | true/false | Gems count toward F1 Collection book + custom_goal subsystem_collection |
+| `collection_gold_target` | range | 1000000 | 0..100M | Lifetime gold target (only for goal=gold_collection) |
+| `custom_goal_gold_target` | range | 0 | 0..100M | 1.9.2 — Lifetime gold req on top of custom goal targets |
+| `custom_goal_subsystem_*` (10) | toggle | false | true/false | 1.9.2 — Custom goal: include skill_hunting / collection / hunt_quests / kill_zone_quests / exploration_quests / waypoints / level_milestones / story_normal / story_nightmare / story_hell |
+| `custom_goal_kill_<boss>_<diff>` (15) | toggle | false | true/false | 1.9.2 — Custom goal act-boss kills (Andariel/Duriel/Mephisto/Diablo/Baal × 3 diff) |
+| `custom_goal_kill_cow_king_<diff>` (3) | toggle | false | true/false | 1.9.2 — Custom goal Cow King × 3 diff |
+| `custom_goal_kill_uber_<name>` (3) | toggle | false | true/false | 1.9.2 — Custom goal Uber Mephisto/Diablo/Baal |
+| `custom_goal_hellfire_torch_complete` | toggle | false | true/false | 1.9.2 — Custom goal full Pandemonium run |
+| `custom_goal_kill_<su>` (10) | toggle | false | true/false | 1.9.2 — Custom goal Bishibosh/Corpsefire/Rakanishu/Griswold/Pindleskin/Nihlathak/Summoner/Radament/Izual/Council |
+| `custom_goal_all_<bonus>` (6) | toggle | false | true/false | 1.9.2 — Custom goal bulk bonus check completions |
+| `custom_goal_all_<extra>` (6) | toggle | false | true/false | 1.9.2 — Custom goal bulk extra check completions |
 | `collect_set_*` (32) | toggle | true | true/false | Per-set Collection target |
 | `collect_rune_*` (33) | toggle | true | true/false | Per-rune Collection target |
 | `collect_special_*` (10) | toggle | true | true/false | Per-special Collection target |
@@ -1100,5 +1219,5 @@ Act 2 trivial. Keep at 1-3x if you want vanilla difficulty pacing.
 
 ---
 
-*Document version: 1.9.2 (in development) | Last updated: 2026-05-02*
+*Document version: 1.9.2 (in development) | Last updated: 2026-05-03*
 *For questions or bug reports: see the Discord link in the launcher.*
