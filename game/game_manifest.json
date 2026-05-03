@@ -1,6 +1,6 @@
 {
-  "version": "Beta-1.9.1",
-  "version_display": "Beta 1.9.1",
+  "version": "Beta-1.9.2",
+  "version_display": "Beta 1.9.2",
   "file_count": 892,
   "files": [
     {
@@ -375,18 +375,18 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "51fab0cfb8f639244df726e5ec7b91dc28656e1a25313fe1a2dbe04cd16e3ec5",
-      "size": 38688
+      "sha256": "95e4c62a7162e9b451d22350dc78b44694ff58f9ef25cbf62afb0890bd621362",
+      "size": 46368
     },
     {
       "path": "apworld/diablo2_archipelago/__init__.py",
-      "sha256": "011bb4f8df08cf6ed8155f95b7d5731057c4a004e000aa12cc51bc4f519173c6",
-      "size": 32771
+      "sha256": "602fc00810efc5262f5ce77690a22694fd49c0f87c77ec57b81a5d7d2592ffeb",
+      "size": 39731
     },
     {
       "path": "apworld/diablo2_archipelago/archipelago.json",
-      "sha256": "528ec19744ffd01ef41b76317dc3c6c6932872c5fd88076d009fd23d766c39fd",
-      "size": 152
+      "sha256": "dd5f8e5cd0ee92d40b4ce2091788ff7a7cbdbaa47aeeed41dd016e6275ec37d3",
+      "size": 231
     },
     {
       "path": "apworld/diablo2_archipelago/items.py",
@@ -395,18 +395,18 @@
     },
     {
       "path": "apworld/diablo2_archipelago/locations.py",
-      "sha256": "ea94823b5bfd9ced0bc3854041268eae486bb7952d9f24f8cd1ee5dd70f7f17c",
-      "size": 33696
+      "sha256": "681d1e24de5d82f64681ccc7ff1ca89e5abfe4052f1aa827205ce058640685f1",
+      "size": 37119
     },
     {
       "path": "apworld/diablo2_archipelago/options.py",
-      "sha256": "5ffe28b1215fdf5f2b926be6e91cbf63cdaa011fa24c1c5ecd0b7641575343b0",
-      "size": 18301
+      "sha256": "793585d7cec7eb291f603242e5f66e04a58e8a78d157f7eb434a046fbe421cd7",
+      "size": 39378
     },
     {
       "path": "apworld/diablo2_archipelago/regions.py",
-      "sha256": "f9bb86208ab47d87ed6ed8f5fb78ba363b0ffc9b162ac62466bd08bbf6470c72",
-      "size": 29764
+      "sha256": "a80ab70f07d6e12f8310024b17a2efb660a2ac858283f76e8f48803ec029315c",
+      "size": 30167
     },
     {
       "path": "Archipelago/ArchIcons15.DC6",
@@ -445,13 +445,13 @@
     },
     {
       "path": "Archipelago/d2arch.ini",
-      "sha256": "5a23b45fcc8629704deb0d4bd10889109ffcfd37180717f6bc5010c0dd7c068a",
-      "size": 35125
+      "sha256": "40e5cb34966179c8343e2a440381b314f7f3c26d577a5c7c13aa29d9ad257191",
+      "size": 36647
     },
     {
       "path": "Archipelago/news.txt",
-      "sha256": "a323e13aaff79f4b19195066713ac9c1bec7ec8b1d0101be21ca79547b9753be",
-      "size": 30058
+      "sha256": "a55b8d334d1bfc00f16733765c3a03b8324f88641c64f5f7f3d9c6ea8a8ec7c7",
+      "size": 35671
     },
     {
       "path": "Archipelago/shuffle_presets/shuffle_preset_01.dat",
@@ -670,7 +670,7 @@
     },
     {
       "path": "Archipelago/version.dat",
-      "sha256": "e5b4dd42bf0881e2ace558b8f2f7010214c411b4440bee846b9ec57b1faefff5",
+      "sha256": "309877908babc4867ebfb4b7efb53ce8b0254dcaa3c2b06d2eaa793a13d0f029",
       "size": 10
     },
     {
@@ -690,13 +690,13 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "0e908ac0ecf9295e5bed986796acfbd3715f217577c1ea2c05ad3cf86a6b2ba3",
+      "sha256": "6e63b946dd72936b1bbd7597dae1b2ee78e6bda075c9422b0b76baf263fb0a55",
       "size": 121856
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "1380fbf4f25da4c7cdd6481f28b0002b14fd3eaba02a4f5f4d2e684618357a8b",
-      "size": 644096
+      "sha256": "0b119e98e15f6c81e1da6541927b6ca8f900bf3d459d399864f10bcb81c8e9cc",
+      "size": 696320
     },
     {
       "path": "D2Client.dll",
@@ -1135,7 +1135,7 @@
     },
     {
       "path": "data/global/excel/missiles.bin",
-      "sha256": "ea4abef4d493e3428ba55c2ba746310cd6f882751070556800b9a370be02ea76",
+      "sha256": "c4d1faa9aa18ffbae3686655e4888d8e2f96f115411597e8db8a89a4b24639b5",
       "size": 287284
     },
     {
@@ -1380,7 +1380,7 @@
     },
     {
       "path": "data/global/excel/runes.bin",
-      "sha256": "0a57dff60048fb586e47c8c1d74a9f19d383559ee0127dc286f48f5b0eca6496",
+      "sha256": "367b7ae7c0ec81f3f93773e8985dc3fd7f2033f6cb9a3ebb97a37392329a622d",
       "size": 50404
     },
     {
@@ -4405,8 +4405,8 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "1380fbf4f25da4c7cdd6481f28b0002b14fd3eaba02a4f5f4d2e684618357a8b",
-      "size": 644096
+      "sha256": "0b119e98e15f6c81e1da6541927b6ca8f900bf3d459d399864f10bcb81c8e9cc",
+      "size": 696320
     },
     {
       "path": "patch/D2Common.dll.disabled",
