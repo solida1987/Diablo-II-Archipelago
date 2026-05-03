@@ -8,6 +8,13 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.3 - Bug Fix Release ===
+
+Stability and bug-fix release on top of 1.9.2. No new features - all
+focus is on resolving issues reported after the 1.9.2 release.
+
+(Detailed fix list below as bugs are addressed.)
+
 === Beta 1.9.2 - What's New ===
 
 SIX NEW OPT-IN CHECK CATEGORIES (293 EXTRA SLOTS)

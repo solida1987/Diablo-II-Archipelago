@@ -326,7 +326,15 @@ _COLL_SPECIALS = [
 
 def _make_collect_toggle(field_name, display, doc_extra=""):
     """Create a Toggle subclass at runtime and register it on this
-    module so the options framework can pick it up by attribute name."""
+    module so the options framework can pick it up by attribute name.
+
+    1.9.3 fix: returns ONLY the class, not (name, cls) tuple. Returning
+    a tuple here meant _COLL_SET_CLASSES etc. were lists of tuples,
+    which broke AP 0.6.7's get_option_groups (it iterates group.options
+    and accesses .visibility on each, but tuples have no such attribute).
+    Yaml template generation crashed with:
+      AttributeError: 'tuple' object has no attribute 'visibility'
+    """
     cls_name = ''.join(p.capitalize() for p in field_name.split('_'))
     bases = (Toggle,)
     attrs = {
@@ -339,11 +347,12 @@ def _make_collect_toggle(field_name, display, doc_extra=""):
     }
     cls = type(cls_name, bases, attrs)
     setattr(_sys.modules[__name__], cls_name, cls)
-    return cls_name, cls
+    return cls
 
-# Build all 75 toggle classes. The returned (cls_name, cls) pairs
-# are stashed on private lists so the dataclass annotations later
-# can reference them in the same order.
+# Build all 75 toggle classes — list of class refs (not tuples) so the
+# OPTION_GROUPS at the bottom of this file passes valid Option lists to
+# AP's OptionGroup. Required by AP 0.6.7+ which iterates the options
+# list and accesses .visibility on each entry.
 _COLL_SET_CLASSES = [
     _make_collect_toggle(field, display)
     for field, display in _COLL_SETS
@@ -725,14 +734,14 @@ _FIELDS = [
     ("death_link",             DeathLink),
 ]
 
-# 32 sets — append to fields list
-_FIELDS += [(field, cls) for (field, _disp), (_cn, cls)
+# 32 sets — append to fields list (1.9.3: classes no longer wrapped in tuple)
+_FIELDS += [(field, cls) for (field, _disp), cls
             in zip(_COLL_SETS, _COLL_SET_CLASSES)]
 # 33 runes
 _FIELDS += [(f"collect_rune_{name}", cls)
-            for name, (_cn, cls) in zip(_COLL_RUNES, _COLL_RUNE_CLASSES)]
+            for name, cls in zip(_COLL_RUNES, _COLL_RUNE_CLASSES)]
 # 10 specials
-_FIELDS += [(field, cls) for (field, _disp), (_cn, cls)
+_FIELDS += [(field, cls) for (field, _disp), cls
             in zip(_COLL_SPECIALS, _COLL_SPECIAL_CLASSES)]
 
 # 1.9.2 — 54 individual Custom Goal toggles (replaces the old
