@@ -1,6 +1,6 @@
 {
-  "version": "Beta-1.9.3",
-  "version_display": "Beta 1.9.3",
+  "version": "Beta-1.9.4",
+  "version_display": "Beta 1.9.4",
   "file_count": 892,
   "files": [
     {
@@ -450,8 +450,8 @@
     },
     {
       "path": "Archipelago/news.txt",
-      "sha256": "284355e4e7b13e4d613623f8e6fb8382804ccda189e419e5322bcc6cdaa49688",
-      "size": 35892
+      "sha256": "7e838c92bc7119b3ba51e87cf910f607201abc745a674a7065aff37e75767be9",
+      "size": 36848
     },
     {
       "path": "Archipelago/shuffle_presets/shuffle_preset_01.dat",
@@ -670,7 +670,7 @@
     },
     {
       "path": "Archipelago/version.dat",
-      "sha256": "f45c31334f38aa6f3df77ddc67b222f38adfceca23eb7c6bdd06fd0a19c31282",
+      "sha256": "7514229653bfd9929930abee14ebfc2b7a5fdc2eba052cf36a38f18d0e9e15e9",
       "size": 10
     },
     {
@@ -690,13 +690,13 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "a59b454aa45d400566449b0c01b3b090fd5a1cabbc5053a671653a2834d4297d",
+      "sha256": "8e470c7f2ad5d7cc2daf114696edad7997eb8ebe4b4102f4767dd5ff21659ee4",
       "size": 121856
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "856348ba171f62f9c5c1e06aba00ffcefe95dd1d53553ece2b474c90683771ac",
-      "size": 696832
+      "sha256": "207f9e0c21f24c80a23bcbdf101be5ef6801db25c92c15a53700cf1c804d6a38",
+      "size": 697856
     },
     {
       "path": "D2Client.dll",
@@ -1115,7 +1115,7 @@
     },
     {
       "path": "data/global/excel/misc.txt",
-      "sha256": "afeb3dbc210f40b0167c2c1c9299d5752e5da937787cb083a0d2880777098b32",
+      "sha256": "6ba0d9c8548ec883ee93e743ac8c0ef303645540d54905014dbf13f238028d33",
       "size": 55839
     },
     {
@@ -4405,8 +4405,8 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "856348ba171f62f9c5c1e06aba00ffcefe95dd1d53553ece2b474c90683771ac",
-      "size": 696832
+      "sha256": "207f9e0c21f24c80a23bcbdf101be5ef6801db25c92c15a53700cf1c804d6a38",
+      "size": 697856
     },
     {
       "path": "patch/D2Common.dll.disabled",

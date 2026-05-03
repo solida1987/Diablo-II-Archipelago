@@ -138,7 +138,7 @@ Warlord's Trust	100	1		1		43	35	9la	Military Axe			5	5000	whit	whit						ac		75	
 Spellsteel	100	1		1		47	39	9ba	Bearded Axe			5	5000	whit	whit						ease		-60	-60	mana		100	100	red-mag		12	15	cast1		10	10	dmg%		165	165	regen-mana		25	25	charged	54	20	1	charged	87	30	3	charged	101	100	10	charged	225	60	12									0
 Stormrider	100	1		1		49	41	9bt	Tabar			5	5000	lred	lred		inv9btu				hit-skill	53	5	10	hit-skill	38	10	0	dmg-ltng		1	200	dmg-norm		35	75	dmg%		100	100	dur		50	50	light-thorns		15	15	gethit-skill	38	15	5																	0
 Boneslayer Blade	100	1		1		50	42	9ga	Gothic Axe			5	5000				invgaxu				att-und/lvl	10			dmg-und/lvl	20			str		8	8	swing2		20	20	att%		35	35	dmg%		180	220	charged	101	200	20	gethit-skill	101	50	0																	0
-The Minataur	100	1		1		53	45	9gi	Ancient Axe			5	5000				inv9giu				stupidity		2	2	half-freeze		1	1	str		15	20	slow		50	50	crush		30	30	dmg-norm		20	30	dmg%		140	200																					0
+The Minotaur	100	1		1		53	45	9gi	Ancient Axe			5	5000				inv9giu				stupidity		2	2	half-freeze		1	1	str		15	20	slow		50	50	crush		30	30	dmg-norm		20	30	dmg%		140	200																					0
 Suicide Branch	100	1		1		41	33	9wn	Burnt Wand			5	5000								thorns		25	25	cast2		50	50	res-all		10	10	mana%		10	10	hp		40	40	allskills		1	1																									0
 Carin Shard	100	1		1		43	35	9yw	Petrified Wand			5	5000	cblu	cblu						hp/lvl	10			cast2		10	10	mana/lvl	10			balance2		30	30	regen		5	5	nec		1	1	skilltab	8	2	2																					0
 Arm of King Leoric	100	1		1		44	36	9bw	Tomb Wand			5	5000				invbwnu				skilltab	8	2	2	gethit-skill	93	5	10	mana/lvl	10			gethit-skill	88	10	2	cast1		10	10	skilltab	7	2	2	skill	77	2	2	skill	80	2	2	skill	69	3	3	skill	70	3	3									0
