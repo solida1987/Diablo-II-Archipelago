@@ -27,6 +27,27 @@ You need an existing Diablo II + Lord of Destruction install
 
 ## Bug fixes
 
+- **Level milestone rewards fired all at once on character load.** A
+  character entering a fresh AP session at e.g. level 30 with no per-
+  character state file used to receive every level milestone reward
+  from level 5 through 30 on the first tick (Maegis bug report:
+  "it gave me all rewards from level 5 to 30 without me doing
+  anything"). Root cause: `CheckLevelMilestones` ran every tick and
+  fired `OnQuestComplete` for every milestone where `level >=
+  quest->param` was true, with no distinction between "earned this
+  tick" and "already earned in past sessions". Fix: on the first
+  CheckLevelMilestones tick after each character load, silently
+  backfill milestones <= current level into the completion flags
+  without firing rewards. Subsequent ticks then fire only when the
+  player crosses a NEW milestone threshold during play.
+
+- **Ctrl+V in main menu blocked input.** Pressing Ctrl+V before
+  entering a game opened an invisible cheat menu that captured
+  mouse input — the player could not click anything until they
+  re-pressed Ctrl+V (Thedragon005 bug report). Fix: gate the
+  Ctrl+V hotkey on Player() != NULL so it's a no-op outside an
+  active game session.
+
 - **YAML template generation crashed** with `AttributeError: 'tuple'
   object has no attribute 'visibility'` on AP 0.6.7+. Players using
   the AP launcher's "Generate Template Options" button could not

@@ -168,9 +168,16 @@ static LRESULT CALLBACK HookWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
          * need to hook D2's actual stash-open event (triggered by clicking
          * the stash chest in town) before it's user-visible. TODO for
          * future session: find D2Client's stash-panel open callback. */
-        /* Ctrl+V = toggle cheat menu */
+        /* Ctrl+V = toggle cheat menu — ONLY in-game.
+         * 1.9.3 fix: pressing Ctrl+V in the main menu used to open an
+         * invisible cheat menu that captured input (player couldn't
+         * click anything). Per Thedragon005 bug report. Now we gate on
+         * Player() != NULL so the hotkey is a no-op outside an active
+         * game session. */
         if (wp == 'V' && (GetAsyncKeyState(VK_CONTROL) & 0x8000)) {
-            g_cheatMenuOpen = !g_cheatMenuOpen;
+            if (Player()) {
+                g_cheatMenuOpen = !g_cheatMenuOpen;
+            }
             return 0;
         }
         /* Shift+P = toggle packet logging for 30 seconds */

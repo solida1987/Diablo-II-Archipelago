@@ -2592,11 +2592,55 @@ static void CheckQuestFlags(void) {
 /* Check player level for QTYPE_LEVEL quests.
  * Level milestones auto-complete on ALL difficulties if already done on a lower one.
  * E.g. if "Reach Level 5" is done on Normal, it auto-completes on Nightmare+Hell too. */
+/* 1.9.3 fix: backfill flag for CheckLevelMilestones, file-scope so
+ * OnCharacterLoad can reset it via Milestone_ResetBackfill(). */
+static BOOL g_milestoneBackfillDone = FALSE;
+
+void Milestone_ResetBackfill(void) {
+    g_milestoneBackfillDone = FALSE;
+    Log("LEVEL MILESTONE: backfill flag reset (next tick will silent-backfill)\n");
+}
+
 static void CheckLevelMilestones(void) {
     void* p = Player();
     if (!p || !fnGetStat) return;
     int level = (int)fnGetStat(p, 12, 0); /* STAT_LEVEL=12 */
     int diff = g_currentDifficulty;
+
+    /* The bug we fix here: a character that loads at e.g. level 30 with
+     * NO existing level-milestone quest completions (first-time mod
+     * load, or per-character state reset) used to trigger
+     * OnQuestComplete for EVERY milestone where level >= quest->param
+     * on the first tick — handing out rewards for level 5, 10, 15, 20,
+     * 30 all at once "without doing anything" (per Maegis bug report
+     * 2026-05-03).
+     *
+     * Fix: on the FIRST tick after a character load (signalled by
+     * Milestone_ResetBackfill clearing g_milestoneBackfillDone), we
+     * silently mark milestones <= current level as completed without
+     * firing OnQuestComplete. Subsequent ticks run the normal
+     * "trigger when reaching a new milestone" logic. */
+    if (!g_milestoneBackfillDone) {
+        int silentMarks = 0;
+        for (int a = 0; a < 5; a++) {
+            for (int q = 0; q < g_acts[a].num; q++) {
+                Quest* quest = &g_acts[a].quests[q];
+                if (quest->type != QTYPE_LEVEL) continue;
+                int qid = quest->id;
+                if (qid <= 0 || qid >= MAX_QUEST_ID) continue;
+                if (!g_questCompleted[diff][qid] && level >= quest->param) {
+                    g_questCompleted[diff][qid] = TRUE;
+                    silentMarks++;
+                }
+            }
+        }
+        g_milestoneBackfillDone = TRUE;
+        if (silentMarks > 0) {
+            Log("LEVEL MILESTONE: silent-backfilled %d already-met milestones on character load (level=%d diff=%d)\n",
+                silentMarks, level, diff);
+        }
+        return;  /* skip normal logic this tick — let backfill take effect */
+    }
 
     for (int a = 0; a < 5; a++) {
         for (int q = 0; q < g_acts[a].num; q++) {

@@ -1713,6 +1713,16 @@ static void OnCharacterLoad(void) {
      * Dragon Talon kicks. Non-native skills keep the A1 fallback. */
     Skilltree_OnCharacterLoadHook();
 
+    /* 1.9.3 fix — reset the level-milestone backfill flag so the first
+     * tick of CheckLevelMilestones silently marks already-met milestones
+     * (level <= player level) as completed without firing rewards. Without
+     * this, a high-level character whose per-char state was reset would
+     * receive ALL milestone rewards 5..30 in one tick. */
+    {
+        extern void Milestone_ResetBackfill(void);
+        Milestone_ResetBackfill();
+    }
+
     /* 1.9.0: Move any legacy per-char files from Archipelago/ into Save/
      * BEFORE CleanupOrphanedSaves runs, so files belonging to existing
      * characters get relocated rather than deleted as orphans. */
