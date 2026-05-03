@@ -1850,6 +1850,28 @@ BOOL StashQuickMoveToStash(void) {
             Log("StashQuick: screen_shift=%u (need 2 or 3)\n", v);
             return FALSE;
         }
+
+        /* 1.9.4 fix — defer to D2 if a vendor/trade UI is open.
+         * koivuklapi bug: shift+rclick on potion in merchant window
+         * was being captured by stash quick-move, drawing items from
+         * stash instead of filling the belt from the merchant.
+         * gpUIState array offsets:
+         *   [0x0C] = NPC shop window
+         *   [0x17] = multiplayer trade window
+         * If either is non-zero, the player is interacting with a
+         * vendor/trade — let D2's normal shift+rclick handler do its
+         * thing (fill belt from merchant / move item to trade window). */
+        DWORD* pUIState = (DWORD*)((BYTE*)hDc + 0x11A6A8);
+        DWORD npcShop = 0, mpTrade = 0;
+        __try {
+            npcShop = pUIState[0x0C];
+            mpTrade = pUIState[0x17];
+        } __except(EXCEPTION_EXECUTE_HANDLER) {}
+        if (npcShop != 0 || mpTrade != 0) {
+            Log("StashQuick: vendor UI open (npcShop=%u mpTrade=%u) — deferring to D2\n",
+                npcShop, mpTrade);
+            return FALSE;
+        }
     }
 
     /* 1.9.0 — STK withdraw via shift+rclick. If the active stash tab is

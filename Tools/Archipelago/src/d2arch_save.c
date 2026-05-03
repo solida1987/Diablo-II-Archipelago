@@ -1723,6 +1723,16 @@ static void OnCharacterLoad(void) {
         Milestone_ResetBackfill();
     }
 
+    /* 1.9.4 fix — gate the NPC dialogue poll for the first 5 seconds
+     * after character load. Player spawn position near Warriv used to
+     * fire the Warriv NPC check before they could even click anything
+     * (Maegis report: "it did say a Warriv NPC message but i dont see
+     * it and it did nothing"). */
+    {
+        extern void Extra_NpcPoll_OnCharacterLoad(void);
+        Extra_NpcPoll_OnCharacterLoad();
+    }
+
     /* 1.9.0: Move any legacy per-char files from Archipelago/ into Save/
      * BEFORE CleanupOrphanedSaves runs, so files belonging to existing
      * characters get relocated rather than deleted as orphans. */

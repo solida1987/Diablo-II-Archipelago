@@ -1498,21 +1498,58 @@ static void PollAPUnlocks(void) {
                      * spoiler visibility for AP becomes a hard requirement).
                      * Quests_QueueSpecificDrop hands off to the gameloop
                      * tick processor that calls QUESTS_CreateItem. */
-                    case 45519: {
-                        int idx = rand() % 3; /* small/large/grand */
-                        Quests_QueueSpecificDrop(REWARD_DROP_CHARM, idx, "AP server");
-                        break;
-                    }
-                    case 45520: {
-                        int idx = rand() % 127; /* set piece catalog */
-                        Quests_QueueSpecificDrop(REWARD_DROP_SET, idx, "AP server");
-                        break;
-                    }
-                    case 45521: {
-                        if (!g_uniqueCatalogLoaded) Quests_LoadUniqueCatalog();
-                        int n = g_uniqueCatalogCount > 0 ? g_uniqueCatalogCount : 1;
-                        int idx = rand() % n;
-                        Quests_QueueSpecificDrop(REWARD_DROP_UNIQUE, idx, "AP server");
+                    case 45519: case 45520: case 45521: {
+                        /* 1.9.4 fix — defensive dedup. Maegis bug: "first
+                         * magic charm gave 2, first unique gave 2".
+                         * The bridge can re-send the same filler ID during
+                         * connect/reconnect, and both arrivals would queue
+                         * a separate drop. We now suppress duplicate
+                         * receives of the same filler ID within a 5-second
+                         * window. Genuine multiple receives (player gets
+                         * 2 charms in quick succession via separate
+                         * checks) still work because each receive carries
+                         * a unique location_id at the bridge layer; only
+                         * the in-flight DLL receive is deduped. */
+                        static struct { int apId; DWORD when; } s_recentFillers[8] = {0};
+                        DWORD nowMs = GetTickCount();
+                        BOOL isDuplicate = FALSE;
+                        for (int i = 0; i < 8; i++) {
+                            if (s_recentFillers[i].apId == apId &&
+                                nowMs - s_recentFillers[i].when < 5000) {
+                                isDuplicate = TRUE;
+                                Log("AP FILLER DEDUP: suppressing duplicate apId=%d within 5s window\n", apId);
+                                break;
+                            }
+                        }
+                        if (!isDuplicate) {
+                            /* Find oldest slot to overwrite */
+                            int oldest = 0;
+                            for (int i = 1; i < 8; i++) {
+                                if (s_recentFillers[i].when < s_recentFillers[oldest].when) oldest = i;
+                            }
+                            s_recentFillers[oldest].apId = apId;
+                            s_recentFillers[oldest].when = nowMs;
+
+                            switch (apId) {
+                                case 45519: {
+                                    int idx = rand() % 3;
+                                    Quests_QueueSpecificDrop(REWARD_DROP_CHARM, idx, "AP server");
+                                    break;
+                                }
+                                case 45520: {
+                                    int idx = rand() % 127;
+                                    Quests_QueueSpecificDrop(REWARD_DROP_SET, idx, "AP server");
+                                    break;
+                                }
+                                case 45521: {
+                                    if (!g_uniqueCatalogLoaded) Quests_LoadUniqueCatalog();
+                                    int n = g_uniqueCatalogCount > 0 ? g_uniqueCatalogCount : 1;
+                                    int idx = rand() % n;
+                                    Quests_QueueSpecificDrop(REWARD_DROP_UNIQUE, idx, "AP server");
+                                    break;
+                                }
+                            }
+                        }
                         break;
                     }
 

@@ -8,6 +8,28 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.4 - Comprehensive Bug Fix Release ===
+
+Massive bug-fix release addressing all community reports from the
+1.9.2/1.9.3 release window. No new gameplay features.
+
+Headlines:
+- AP filler item duplication (charm/unique drops giving 2x) fixed
+- AP-delivered items now equippable on ANY level (str/lvl/dex
+  requirements all stripped)
+- F1 Collection tracker now counts AP-delivered set/rune/special
+  items
+- Den of Evil "awesome loot" no longer fires twice
+- Skill Hunting OFF properly blocks skill rewards
+- Level milestone rewards no longer dump on character load
+- Auto-completed Warriv check on first game entry suppressed
+- Stash quick-shift no longer interferes with merchant belt-fill
+- Tomes of TP/Identify capped at 100 (was 999) to prevent gold sink
+- "The Minataur" typo fixed -> "The Minotaur"
+- Hidden stash & loose rocks now count as chests
+- Ctrl+V in main menu no longer blocks input
+- YAML template generation fixed for AP 0.6.7+
+
 === Beta 1.9.3 - Bug Fix Release ===
 
 Stability and bug-fix release on top of 1.9.2. No new features - all

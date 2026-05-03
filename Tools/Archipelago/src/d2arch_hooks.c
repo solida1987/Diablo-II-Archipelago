@@ -405,17 +405,27 @@ static int __fastcall OperateHandlerHook(void* pGame, void* pPlayer,
                             g_charStats.doorsOpened++;
                             break;
 
-                        /* ----- Loot containers ----- */
-                        case 1:  /* Casket */
+                        /* ----- Loot containers -----
+                         * 1.9.4 expanded list — Maegis bug report: hidden
+                         * stash, loose rocks, and dead rogue corpses
+                         * weren't counted as chests. Added operateFn IDs
+                         * 36 (LooseRock) and 60 (TristramCoffin variant).
+                         * Cases 2 (Shrine), 17 (Obelisk), 24 (TaintedSunAltar)
+                         * are claimed by other handlers below — hidden
+                         * stash actually uses operateFn 1 (Casket) which
+                         * is already in this list, so it's already counted. */
+                        case 1:  /* Casket — also covers HiddenStash, dead rogue corpses */
                         case 4:  /* Chest */
                         case 19: /* ArmorStand (drops armor) */
                         case 20: /* WeaponRack (drops weapons) */
                         case 26: /* BookShelf */
                         case 30: /* ExplodingChest */
+                        case 36: /* LooseRock (Maegis: was missing) */
                         case 51: /* JungleStash */
                         case 57: /* KhalimChest 1 */
                         case 58: /* KhalimChest 2 */
                         case 59: /* KhalimChest 3 */
+                        case 60: /* TristramCoffin loot variant */
                             g_charStats.chestsOpened++;
                             /* 1.9.0 — fire bonus AP check via escalating chance */
                             Bonus_OnChestOpened(g_currentDifficulty);

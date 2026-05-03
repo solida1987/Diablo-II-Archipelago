@@ -972,6 +972,33 @@ static int Extra_HcIdxToNpcIdx(int txtId) {
                                        * 0.5s of clicking, so 1s captures it
                                        * even on slow clicks. */
 
+/* 1.9.4 — Reset on character load so initial-game-entry sweep doesn't
+ * fire NPC dialogue checks for NPCs the player happens to spawn near
+ * (Warriv in Rogue Encampment etc). Maegis bug:
+ *   "ive entered den of evil and got the awesome loot twice"
+ *   "it gave me all rewards from level 5 to 30 with out me doing anything"
+ *   "it did say a Warriv NPC message but i dont see it and it did nothing"
+ *
+ * Without this gate, the player loaded into the Rogue Camp at the spawn
+ * point near Warriv → s_nearTicks[Warriv]++ each tick → after ~1 second
+ * the Warriv slot fired even though the player never opened dialogue.
+ *
+ * Strategy: skip the entire NPC poll for the first ~5 seconds after
+ * each character load, AND clear s_nearTicks[] so any in-progress
+ * count from a previous session is wiped. */
+static DWORD g_npcPollSkipUntilMs = 0;
+
+void Extra_NpcPoll_OnCharacterLoad(void) {
+    g_npcPollSkipUntilMs = GetTickCount() + 5000;
+    /* The s_nearTicks array lives inside Extra_PollNpcDialogue; we
+     * reset it via a sentinel flag the function checks at start. */
+    extern volatile int g_npcPollNeedsReset;
+    g_npcPollNeedsReset = 1;
+    Log("NPC POLL: gated for next 5 seconds (character load) + reset flag set\n");
+}
+
+volatile int g_npcPollNeedsReset = 0;
+
 void Extra_PollNpcDialogue(void* pPlayerUnit) {
     /* Heartbeat — log once every ~5000 calls (≈83 sec at 60fps) so
      * we know the per-tick poll is actually running. */
@@ -984,6 +1011,12 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
 
     if (!g_extraEnabled[EX_NPC]) return;
     if (!pPlayerUnit) return;
+
+    /* 1.9.4 — gate first 5 seconds after character load to prevent
+     * spurious "near Warriv at spawn" fires. */
+    if (g_npcPollSkipUntilMs && GetTickCount() < g_npcPollSkipUntilMs) {
+        return;
+    }
 
     /* 1.9.2 — Throttle room-scan to every 10th tick (6Hz at 60fps).
      * Player must stand near an NPC for 20 throttled ticks = ~3.3 sec
@@ -1016,6 +1049,13 @@ void Extra_PollNpcDialogue(void* pPlayerUnit) {
      * prevents duplicate fires even if player stays near long
      * enough to bump the counter to a huge number. */
     static int s_nearTicks[27] = {0};
+
+    /* 1.9.4 — flush per-NPC near-counter on each character load so a
+     * partially-counted NPC from a previous session doesn't carry over. */
+    if (g_npcPollNeedsReset) {
+        for (int i = 0; i < 27; i++) s_nearTicks[i] = 0;
+        g_npcPollNeedsReset = 0;
+    }
 
     /* Walk nearby rooms (current + adjacent) looking for NPC units. */
     DWORD rooms[21];

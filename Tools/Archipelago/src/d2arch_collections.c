@@ -1404,7 +1404,12 @@ static void Coll_ScanGroundItems(void* pPlayerUnit) {
  *   FALSE — legacy mode, used only during the one-time grace pass for
  *           sidecars upgrading from v1 → v2. Marks anything matching
  *           the catalog without GUID checks. */
-static void Coll_ProcessItem(void* pItem, BOOL requireLegit) {
+/* 1.9.4: non-static so d2arch_gameloop.c can call this on AP-delivered
+ * items via forward extern decl. AP-delivered items go straight to
+ * inventory (bDroppable=0) and bypassed the inventory-walk pickup path
+ * that normally triggers Coll_ProcessItem. Without this hook, F1
+ * Collection counters never advance for AP rewards. */
+void Coll_ProcessItem(void* pItem, BOOL requireLegit) {
     if (!pItem) return;
     DWORD classId = 0;
     void* pItemData = NULL;

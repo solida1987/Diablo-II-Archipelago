@@ -954,7 +954,12 @@ static void AssignAllRewards(DWORD seed) {
                     { 10,  REWARD_GOLD,        0 },
                     { 15,  REWARD_XP,          0 },
                     { 10,  REWARD_STAT,        0 },
-                    { 10,  REWARD_SKILL,       0 },
+                    /* 1.9.4 fix: gate REWARD_SKILL on skill_hunting toggle.
+                     * Maegis bug: "game still trying to send me skills despite
+                     * skill hunt being off". Reward roller previously gave
+                     * skills weight=10 unconditionally, so non-skill-hunting
+                     * runs still received skill points as filler rewards. */
+                    { (g_skillHuntingOn ? 10 : 0), REWARD_SKILL,  0 },
                     { (g_skillHuntingOn ? 5 : 0), REWARD_RESETPT, 0 },
                     {  2,  REWARD_TRAP,        TRAP_MONSTERS },
                     {  1,  REWARD_TRAP,        TRAP_SLOW     },

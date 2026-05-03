@@ -1102,12 +1102,39 @@ static void ProcessPendingGameTick(void) {
                                  * item_levelreq. Setting to 1 makes any
                                  * character of level 1+ able to equip the
                                  * item. */
+                                /* 1.9.4 fix: strip ALL requirement stats so
+                                 * AP-delivered items are equippable on any
+                                 * char regardless of level/str/dex. Prior
+                                 * versions only stripped lvl-req (stat 92),
+                                 * leaving STR (91) and DEX (93) blocking
+                                 * items like Spirit Shroud (per Maegis report).
+                                 * Stat IDs from ItemStatCost.txt:
+                                 *   91 = item_strengthreq
+                                 *   92 = item_levelreq
+                                 *   93 = item_dexterityreq */
                                 if (fnSetStat) {
                                     __try {
-                                        fnSetStat(pSpawned, 92, 1, 0);
+                                        fnSetStat(pSpawned, 91, 0, 0);  /* str req → 0 */
+                                        fnSetStat(pSpawned, 92, 1, 0);  /* lvl req → 1 */
+                                        fnSetStat(pSpawned, 93, 0, 0);  /* dex req → 0 */
                                     } __except(EXCEPTION_EXECUTE_HANDLER) {}
                                 }
-                                Log("SPEC DROP: kind=%d idx=%d code=%08X qual=%d ilvl=%d -> OK (inventory, req=1)\n",
+                                /* 1.9.4 fix: register the AP-delivered item with
+                                 * the F1 Collection tracker. Vanilla code only
+                                 * counts items the player physically picks up
+                                 * off the ground; bDroppable=0 deliveries land
+                                 * directly in inventory and bypassed the
+                                 * pickup hook (per Maegis: "checks gave me
+                                 * arcana + hwanin pieces but tracker shows
+                                 * 0/X"). Coll_ProcessItem registers the GUID
+                                 * and updates the per-set/rune/special counters. */
+                                {
+                                    extern void Coll_ProcessItem(void* pItem, int requireLegit);
+                                    __try {
+                                        Coll_ProcessItem(pSpawned, 1 /* TRUE */);
+                                    } __except(EXCEPTION_EXECUTE_HANDLER) {}
+                                }
+                                Log("SPEC DROP: kind=%d idx=%d code=%08X qual=%d ilvl=%d -> OK (inventory, req=1, coll-registered)\n",
                                     peekKind, peekIdx, code, qual, itemLevel);
                                 Quests_ConsumePendingDrop();
                             } else {
@@ -1742,6 +1769,17 @@ static void OnQuestComplete(Quest* quest) {
     if (qid >= MAX_QUEST_ID) return;
     if (g_questCompleted[diff][qid]) return;
 
+    /* 1.9.4 fix — set the dedup flag IMMEDIATELY, BEFORE any reward
+     * processing. Prior versions set it later (after the type-toggle
+     * check) and after rewards were queued, which left a window where
+     * a second OnQuestComplete call from a parallel detector path
+     * (CheckQuestFlags + ScanMonsters + boss-kill walk all fire in the
+     * same tick for some quests, e.g. Den of Evil) could pass the
+     * dedup check before the flag was set. Result: "awesome loot"
+     * fires twice. Setting the flag first guarantees true single-fire. */
+    g_questCompleted[diff][qid] = TRUE;
+    quest->completed = TRUE;
+
     /* 1.8.0: quest-type toggle gate. If the user has disabled this quest's
      * type via the title screen (Hunting / KillZn / Explore / Waypnt /
      * Levels), skip the completion entirely — no reward, no AP check, no
@@ -1753,10 +1791,6 @@ static void OnQuestComplete(Quest* quest) {
             qid, quest->name, (int)quest->type);
         return;
     }
-
-    /* Mark as completed immediately (memory-only, no file I/O) */
-    g_questCompleted[diff][qid] = TRUE;
-    quest->completed = TRUE;
     Log("QUEST COMPLETE (deferred): [%d] %s AP=%d\n", qid, quest->name, g_apConnected);
 
     /* 1.9.0 — F1 Logbook: count this quest. Also stamp act-completion
