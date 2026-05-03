@@ -1,7 +1,7 @@
 {
   "version": "Beta-1.9.4",
   "version_display": "Beta 1.9.4",
-  "file_count": 892,
+  "file_count": 891,
   "files": [
     {
       "path": "ap_bridge_dist/_internal/_asyncio.pyd",
@@ -1524,13 +1524,8 @@
       "size": 294
     },
     {
-      "path": "data/global/excel/uniqueitems.bin",
-      "sha256": "25ba3198af240c86cdaf0de60f03dabfcee63e203723c20daaf1b349f0a0a2a7",
-      "size": 133136
-    },
-    {
       "path": "data/global/excel/UniqueItems.txt",
-      "sha256": "0fc16b02cf10f2833730c86d570ee9c68c1ea1883476f24b41de1ea774189ef7",
+      "sha256": "ca603e6ba608e3863adc111dcf058d6e3e5643638eda459cdc817b9ff5c4ae53",
       "size": 73539
     },
     {
