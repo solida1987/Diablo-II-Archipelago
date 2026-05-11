@@ -405,10 +405,15 @@ static void SaveStateFile(void) {
  */
 static void WriteChecksFile(void) {
     if (!g_charName[0]) return;
-    char dir[MAX_PATH], path[MAX_PATH];
+    char dir[MAX_PATH], path[MAX_PATH], tmpPath[MAX_PATH];
     GetCharFileDir(dir, MAX_PATH);
     sprintf(path, "%sd2arch_checks_%s.dat", dir, g_charName);
-    FILE* f = fopen(path, "w");
+    /* 1.9.5 Bug 3 fix — atomic write via tmp+rename. Previously the bare
+     * fopen(path, "w") truncates the file in-place; the bridge can read
+     * an empty file in the ~ms window between truncate and the first
+     * fprintf landing. Atomic rename eliminates that race. */
+    sprintf(tmpPath, "%sd2arch_checks_%s.dat.tmp", dir, g_charName);
+    FILE* f = fopen(tmpPath, "w");
     if (!f) return;
     for (int diff = 0; diff < 3; diff++) {
         int offset = diff * 1000;
@@ -466,6 +471,15 @@ static void WriteChecksFile(void) {
         }
     }
     fclose(f);
+    /* 1.9.5 Bug 3 fix — atomic rename. MoveFileExA with
+     * MOVEFILE_REPLACE_EXISTING is the Windows atomic-replace operation;
+     * the bridge will either see the OLD complete file or the NEW
+     * complete file, never a half-written one. */
+    if (!MoveFileExA(tmpPath, path, MOVEFILE_REPLACE_EXISTING)) {
+        DWORD err = GetLastError();
+        Log("WriteChecksFile: rename failed (err=%lu) — leaving tmp at %s\n",
+            err, tmpPath);
+    }
 }
 
 /* Load completed quests and area kills from state file */
@@ -2185,6 +2199,9 @@ static void OnCharacterLoad(void) {
         ApplyEntranceShuffle(g_seed);
     }
 
+    /* Rift Maps removed 2026-05-05 — see
+     * Research/RIFT_AND_RESET_FAILURE_2026-05-05.md */
+
     /* Per-character AP-stash sidecar + initial tab seeding. Declared
      * here as forward references because d2arch_save.c is compiled
      * before d2arch_stash.c in the unity build (see d2arch.c). */
@@ -2359,4 +2376,14 @@ static void OnCharacterLoad(void) {
      * (1.9.0 dev) was removed because it cleared dedup unconditionally
      * and caused stackable filler items (gold, XP, stat pts) to
      * re-apply on every login. */
+
+    /* 1.9.5 Bug 3 fix — re-emit the full checks file after LoadChecks
+     * populates g_questCompleted/g_gateBossKilled/etc. Without this,
+     * a character loaded after an alt-F4 (where the previous session
+     * landed a quest completion in state but the deferred WriteChecksFile
+     * never fired) keeps the loss until the NEXT new quest completes.
+     * Republishing here ensures the bridge sees the full completed-check
+     * set immediately on load, so a re-send to AP server can recover any
+     * checks lost mid-session. */
+    WriteChecksFile();
 }

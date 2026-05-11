@@ -114,6 +114,9 @@ static void* g_apEdPass = NULL;
 static void WriteAPCommand(const char* action);
 static void StartAPBridge(void);
 static void SaveAPConfig(void);
+/* 1.9.5 Gap 4 — slot-change collision protection: wipes dedup files
+ * when reconnecting same character to a different AP server. */
+static void CheckSlotChangeOnConnect(void);
 
 /* D2Win BUTTON_Create (ordinal 10107) - creates persistent buttons */
 typedef void* (__fastcall *ButtonCreate_t)(
@@ -429,6 +432,8 @@ static int __stdcall OnConnectClick(void* p) {
 
     Log("AP CONNECT: IP=%s Slot=%s\n", g_apIP, g_apSlot);
     if (g_apIP[0] && g_apSlot[0]) {
+        /* 1.9.5 Gap 4 — check for slot/server change before connecting */
+        CheckSlotChangeOnConnect();
         StartAPBridge();
         WriteAPCommand("connect");
         /* 1.9.0 — set g_apPolling (NOT g_apMode) so PollAPStatus starts

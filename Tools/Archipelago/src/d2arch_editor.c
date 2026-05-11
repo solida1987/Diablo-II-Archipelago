@@ -1907,6 +1907,19 @@ static void RenderEditor(void) {
                 wchar_t wSt[64]; MultiByteToWideChar(CP_ACP, 0, g_apStatus, -1, wSt, 64);
                 fnText(wSt, 160, 85, 7, 0);
             }
+            /* 1.9.5 Bug C3 fix — show last error reason in red beneath
+             * the status line when the connection is in error/refused.
+             * Without this, "Refused" left the player guessing whether
+             * it was a wrong password, wrong slot name, or server-side
+             * issue. Bridge writes errormsg= for both refused (server
+             * sent ConnectionRefused with reasons) and error (websocket
+             * exception, TLS failure, generic exception). */
+            extern char g_apErrorMsg[128];
+            if (!g_apConnected && g_apErrorMsg[0]) {
+                wchar_t wEm[160];
+                MultiByteToWideChar(CP_ACP, 0, g_apErrorMsg, -1, wEm, 160);
+                fnText(wEm, 50, 100, 11 /* red */, 0);
+            }
 
             /* Editable fields: Server, Slot, Password */
             {
@@ -1975,6 +1988,11 @@ static void RenderEditor(void) {
                             g_apConnected = FALSE;
                             strcpy(g_apStatus, "Disconnecting...");
                         } else if (g_apIP[0] && g_apSlot[0]) {
+                            /* 1.9.5 Gap 4 — slot-change collision check.
+                             * Defined later in the unity build in d2arch_ap.c;
+                             * uses implicit-int decl like the existing calls
+                             * to StartAPBridge/WriteAPCommand right below. */
+                            CheckSlotChangeOnConnect();
                             StartAPBridge();
                             WriteAPCommand("connect");
                             /* 1.9.0 — set g_apPolling (NOT g_apMode); g_apMode is now
@@ -1982,6 +2000,54 @@ static void RenderEditor(void) {
                             g_apPolling = TRUE;
                             strcpy(g_apStatus, "Connecting...");
                         }
+                    }
+                }
+            }
+
+            /* 1.9.5 Gap 5 — Force Reconnect button. Visible when bridge
+             * has been started (g_apPolling) and we are NOT currently
+             * authenticated. Lets the player break out of the bridge's
+             * exponential backoff (up to 60s) by issuing a fresh
+             * connect command — bridge's main_loop tears down its
+             * current attempt and starts over immediately.
+             *
+             * 1.9.5 Gap 10 fix — also hide the button when the player
+             * has explicitly clicked Disconnect (g_apStatus reflects
+             * "Disconnecting..." or "Disconnected"). The Connect button
+             * is the right action in those states. */
+            if (g_apPolling && !g_apConnected
+                && strcmp(g_apStatus, "Disconnected")    != 0
+                && strcmp(g_apStatus, "Disconnecting...") != 0) {
+                int bx = 200, by = 190, bw = 140, bh = 24;
+                BOOL bHov = InRect(mx2, my2, bx, by, bw, bh);
+                if (fnRect) {
+                    fnRect(bx, by, bx+bw, by+bh, bHov ? 4 : 0, 5);
+                    fnRect(bx,by,bx+bw,by+1,7,5); fnRect(bx,by+bh-1,bx+bw,by+bh,7,5);
+                    fnRect(bx,by,bx+1,by+bh,7,5); fnRect(bx+bw-1,by,bx+bw,by+bh,7,5);
+                }
+                fnText(L"Force Reconnect", bx+bw/2, by+17, bHov ? 0 : 7, 1);
+                if (bHov && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+                    static DWORD _rc3 = 0;
+                    if (GetTickCount() - _rc3 > 1000) {
+                        _rc3 = GetTickCount();
+                        /* Force a fresh connect attempt by writing the
+                         * command again. Bridge's main_loop sees a new
+                         * mtime on ap_command.dat and processes it,
+                         * tearing down any in-progress attempt. Also
+                         * re-spawn bridge if it died (StartAPBridge is
+                         * idempotent if process is still alive). */
+                        Log("AP: Force Reconnect clicked\n");
+                        ShowNotify("AP: Forcing reconnect...");
+                        /* 1.9.5 Gap 7 fix — Force Reconnect must run the same
+                         * slot-change wipe protection as the normal Connect
+                         * path. Without this, the user could edit the slot
+                         * field and Force-Reconnect, and the new server's
+                         * items would be silently dropped by stale dedup
+                         * markers from the previous slot. */
+                        CheckSlotChangeOnConnect();
+                        StartAPBridge();
+                        WriteAPCommand("connect");
+                        strcpy(g_apStatus, "Force reconnecting...");
                     }
                 }
             }

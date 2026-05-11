@@ -264,27 +264,132 @@ static BOOL IsAssassinTrapSkill(int skillId) {
     return FALSE;
 }
 
+/* 1.9.5 Bugs 7-14 fix — skills whose animation sequence cannot be
+ * faithfully reproduced under the A1 cross-class fallback. Per the
+ * Bug Research 2026-05-11 report:
+ *   - SQ/TH/KK/S1-S4 mode skills rely on per-frame EVENTTYPE_PERFRAME
+ *     events to drive secondary hits / kick combos / leap movement /
+ *     blade chains / werewolf bites.
+ *   - 1.9.1's PatchAllSkillAnimations rewrites the `anim` byte to A1
+ *     for cross-class casters, but seqtrans/monanim/seqnum still point
+ *     at the original mode. A1's attack-event schedule does NOT tick
+ *     the per-frame handlers, so the secondary effect never fires.
+ *   - Result on cross-class: Leap Attack SOFTLOCKS (STATE_SKILL_MOVE
+ *     never clears), Whirlwind plays a single A1 swing, Double
+ *     Swing/Throw fire only one hit, javelins play A1 without a
+ *     projectile (no throwable equipped), etc.
+ *   - 1.9.1 RestoreNativeAnimsForClass correctly restores the original
+ *     mode for the OWNING class. So Barb keeps WW/Leap, Assassin keeps
+ *     Dragon Talon/Claw/Blade Fury, etc.
+ *   - This filter excludes these skills from being randomly assigned
+ *     to a cross-class player in the first place. Native class still
+ *     gets them via the normal pool entry.
+ *
+ * IDs sourced from Skills.txt:
+ *   Barb:  133 Double Swing, 140 Double Throw, 143 Leap Attack, 151 Whirlwind
+ *   Asn:   255 Dragon Talon, 259 Fists of Fire, 260 Dragon Claw,
+ *          266 Blade Fury, 269 Claws of Thunder, 274 Blades of Ice
+ *   Ama:   15 Poison Javelin, 20 Lightning Bolt, 25 Plague Javelin,
+ *          35 Lightning Fury  (the pure-throw javelins; melee variants
+ *          Power Strike/Charged Strike/Lightning Strike are anim=A1
+ *          natively so they don't need exclusion)
+ *   Dru:   238 Rabies, 242 Hunger (require werewolf form)
+ *   Pal:   97 Smite (cosmetic-only without shield, but excluded so
+ *          cross-class players don't see broken shield-bash)
+ */
+static const int NATIVE_ONLY_SKILL_IDS[] = {
+    /* Amazon — pure throwing javelins */
+    15, 20, 25, 35,
+    /* Paladin — shield-bash */
+    97,
+    /* Barbarian — sequence skills */
+    133, 140, 143, 151,
+    /* Druid — werewolf-form bites */
+    238, 242,
+    /* Assassin — kicks/claws/blade-fury/charge-up combo */
+    255, 259, 260, 266, 269, 274,
+};
+#define NATIVE_ONLY_SKILL_COUNT \
+    (sizeof(NATIVE_ONLY_SKILL_IDS) / sizeof(NATIVE_ONLY_SKILL_IDS[0]))
+
+/* True if this skill should ONLY appear for native class.
+ * Caller passes the skill's class code and the player's class code;
+ * if the skill is in the exclusion list AND the codes differ, skip it. */
+static BOOL IsNativeOnlySkill(int skillId,
+                              const char* skillClassCode,
+                              const char* playerClassCode) {
+    int i;
+    if (!skillClassCode || !playerClassCode) return FALSE;
+    /* Same class → always allowed (native owner) */
+    if (strcmp(skillClassCode, playerClassCode) == 0) return FALSE;
+    for (i = 0; i < (int)NATIVE_ONLY_SKILL_COUNT; i++) {
+        if (NATIVE_ONLY_SKILL_IDS[i] == skillId) return TRUE;
+    }
+    return FALSE;
+}
+
+/* Convert int class id (0..6) to the SkillEntry classCode string.
+ * Returns NULL on invalid id. Order matches D2 class enum:
+ *   0=Amazon, 1=Sorceress, 2=Necromancer, 3=Paladin,
+ *   4=Barbarian, 5=Druid, 6=Assassin */
+static const char* SkillClassCodeForId(int classId) {
+    switch (classId) {
+        case 0: return "ama";
+        case 1: return "sor";
+        case 2: return "nec";
+        case 3: return "pal";
+        case 4: return "bar";
+        case 5: return "dru";
+        case 6: return "ass";
+        default: return NULL;
+    }
+}
+
 /* ================================================================
  * SKILL RANDOMIZER
  * ================================================================ */
 static void InitSkillPool(DWORD seed) {
     int t1[70], t2[70], t3[70];
     int n1 = 0, n2 = 0, n3 = 0;
+    int excludedNative = 0;
 
     /* All skills are now available for all classes.
      * Animation fix (PatchAllSkillAnimations) ensures cross-class casting works.
      * Assassin trap filter removed — no longer needed. */
+
+    /* 1.9.5 Bugs 7-14 — resolve player class for the native-only filter.
+     * GetPlayerClass is defined static LATER in d2arch_zones.c (line 32
+     * vs this file at line 29 in d2arch.c). Forward-declared at the top
+     * of this TU so the unity-build linker resolves it cleanly. -1 means
+     * we can't determine class yet (e.g., InitSkillPool called pre-
+     * character-load); in that case the filter is a no-op and all skills
+     * can appear. */
+    int playerClassId = GetPlayerClass();
+    const char* playerClassCode = SkillClassCodeForId(playerClassId);
 
     /* Categorize all skills by tier */
     for (int i = 0; i < (int)SKILL_DB_COUNT; i++) {
         /* Class filter: skip skills from disabled classes (standalone only) */
         if (!g_apMode && g_classFilter && !IsClassEnabled(g_skillDB[i].classCode))
             continue;
+        /* 1.9.5 Bugs 7-14 — exclude skills whose animation can't survive
+         * the cross-class A1 fallback. Native class still gets them. */
+        if (playerClassCode
+            && IsNativeOnlySkill(g_skillDB[i].id,
+                                  g_skillDB[i].classCode,
+                                  playerClassCode)) {
+            excludedNative++;
+            continue;
+        }
         switch (g_skillDB[i].tier) {
             case 1: t1[n1++] = i; break;
             case 2: t2[n2++] = i; break;
             case 3: t3[n3++] = i; break;
         }
+    }
+    if (excludedNative > 0) {
+        Log("InitSkillPool: excluded %d cross-class-broken skills (player=%s)\n",
+            excludedNative, playerClassCode ? playerClassCode : "?");
     }
 
     /* Fisher-Yates shuffle each tier */

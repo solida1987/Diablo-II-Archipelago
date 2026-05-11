@@ -428,6 +428,16 @@ BOOL g_apConnected    = FALSE;
 static char  g_apStatus[64]   = "Not Connected";
 static BOOL  g_apPanelVisible = TRUE;
 
+/* 1.9.5 Bug C3 fix — last bridge error message. Bridge writes
+ * `errormsg=<text>` lines into ap_status.dat on refused/error states
+ * with details like "InvalidPassword" or "InvalidSlot". Previously
+ * the DLL never read these — the player only saw "Refused" with no
+ * indication of WHY. Now PollAPStatus parses errormsg= and the F1
+ * Editor renders it under the status line so the player can see
+ * exactly what went wrong (e.g., wrong password). 120 chars matches
+ * the bridge-side truncation in ap_bridge.py. */
+static char  g_apErrorMsg[128] = {0};
+
 /* AP Settings (from slot_data via bridge) */
 /* 1.8.0: Goal simplified to 3 values (0=Full Normal, 1=Full NM, 2=Full Hell).
  * Act scope is ALWAYS 4 (full game). Old 15-value encoding is migrated in

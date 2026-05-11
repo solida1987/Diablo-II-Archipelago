@@ -307,6 +307,8 @@ static void ProcessPendingGameTick(void) {
     if (g_cachedPGame) {
         CustomBoss_Tick((void*)g_cachedPGame);
         TreasureCow_Tick((void*)g_cachedPGame);
+        /* Rift/Reset hooks removed 2026-05-05 — see
+         * Research/RIFT_AND_RESET_FAILURE_2026-05-05.md */
     }
 
     /* 1.9.0 NEW: F1 Collection page tick — scans player inventory and
@@ -646,7 +648,27 @@ static void ProcessPendingGameTick(void) {
                                 if (pLevel) curLevelId = *(int*)(pLevel + 0x04);
                             }
                         }
-                        if (pRoom && destLevel == 39 && objId == 60) {
+                        /* Restriction: D2 1.10f's CreatePortalObject asserts
+                         * on CROSS-ACT portals (Skills.cpp:3651). Our rift
+                         * levels (id 134..143) live in Act 5's ID range per
+                         * the hardcoded gnTownIds, but with D2MOO active and
+                         * MAX_LEVEL_ID=1024 we can warp to them cross-act
+                         * via LEVEL_ChangeAct → lazy-alloc pAct[4]. Allow
+                         * rift IDs unconditionally; same-act for everything
+                         * else. */
+                        #define ACT_OF_LEVEL(id) \
+                            ((id) < 40  ? 0 : \
+                             (id) < 75  ? 1 : \
+                             (id) < 103 ? 2 : \
+                             (id) < 109 ? 3 : 4)
+                        int srcAct  = ACT_OF_LEVEL(curLevelId);
+                        int destAct = ACT_OF_LEVEL(destLevel);
+                        BOOL inTown = IsTown((DWORD)curLevelId);
+                        /* Cross-act portals removed 2026-05-05 (rift abandoned).
+                         * Only same-act portals allowed (matches Cow Portal). */
+                        BOOL allowed = pRoom && objId == 60 && (srcAct == destAct);
+                        #undef ACT_OF_LEVEL
+                        if (allowed) {
                             int spX = playerX + 3;
                             int spY = playerY;
                             void* pPortal = NULL;
@@ -654,13 +676,15 @@ static void ProcessPendingGameTick(void) {
                                                     (void*)pRoom, spX, spY,
                                                     destLevel, &pPortal,
                                                     objId, 1);
-                            Log("CHEAT PORTAL: src=%d dest=%d objId=%d at (%d,%d) "
-                                "rc=%d pPortal=%p\n",
-                                curLevelId, destLevel, objId, spX, spY, rc, pPortal);
+                            Log("CHEAT PORTAL: src=%d(act%d) dest=%d(act%d) objId=%d "
+                                "at (%d,%d) rc=%d pPortal=%p inTown=%d\n",
+                                curLevelId, srcAct, destLevel, destAct, objId,
+                                spX, spY, rc, pPortal, (int)inTown);
                         } else {
-                            Log("CHEAT PORTAL: rejected src=%d dest=%d objId=%d "
-                                "(only Cow Portal supported)\n",
-                                curLevelId, destLevel, objId);
+                            Log("CHEAT PORTAL: rejected src=%d(act%d) dest=%d(act%d) "
+                                "objId=%d inTown=%d (cross-act portals would assert)\n",
+                                curLevelId, srcAct, destLevel, destAct, objId,
+                                (int)inTown);
                         }
                     }
                 } __except(EXCEPTION_EXECUTE_HANDLER) {
@@ -673,20 +697,39 @@ static void ProcessPendingGameTick(void) {
     }
 
     /* ZONE TELEPORT: warp player to town if in locked zone */
-    if (g_pendingZoneTeleport > 0 && g_cachedPGame && hD2Game) {
+    if (g_pendingZoneTeleport > 0) {
         int townArea = g_pendingZoneTeleport;
-        __try {
-            FARPROC warpFn = (FARPROC)((DWORD)hD2Game + 0xC410);
-            DWORD pClient = *(DWORD*)(g_cachedPGame + 0x88);
-            DWORD pUnit = 0;
-            if (pClient > 0x10000) pUnit = *(DWORD*)(pClient + 0x174);
-            if (pUnit > 0x10000 && warpFn) {
-                typedef void (__fastcall *WarpUnit_t)(void*, void*, int, int);
-                ((WarpUnit_t)warpFn)((void*)g_cachedPGame, (void*)pUnit, townArea, 0);
-                Log("ZONE WARP: teleported to area %d\n", townArea);
-            }
-        } __except(1) { Log("ZONE WARP: exception\n"); }
-        g_pendingZoneTeleport = 0;
+        if (!g_cachedPGame || !hD2Game) {
+            /* Hold the queue until pGame becomes available — DON'T silently
+             * drop. Previously this branch reset g_pendingZoneTeleport to 0
+             * on the next tick if pGame was missing, eating the warp. */
+            Log("ZONE WARP: deferring (pGame=%08X hD2Game=%08X area=%d)\n",
+                g_cachedPGame, (DWORD)hD2Game, townArea);
+        } else {
+            BOOL warpFired = FALSE;
+            __try {
+                FARPROC warpFn = (FARPROC)((DWORD)hD2Game + 0xC410);
+                DWORD pClient = *(DWORD*)(g_cachedPGame + 0x88);
+                DWORD pUnit = 0;
+                if (pClient > 0x10000) pUnit = *(DWORD*)(pClient + 0x174);
+                if (pUnit > 0x10000 && warpFn) {
+                    typedef void (__fastcall *WarpUnit_t)(void*, void*, int, int);
+                    Log("ZONE WARP: calling LEVEL_WarpUnit(pGame=%08X pUnit=%08X area=%d)\n",
+                        g_cachedPGame, pUnit, townArea);
+                    ((WarpUnit_t)warpFn)((void*)g_cachedPGame, (void*)pUnit, townArea, 0);
+                    Log("ZONE WARP: LEVEL_WarpUnit returned — area=%d\n", townArea);
+                    warpFired = TRUE;
+                } else {
+                    Log("ZONE WARP: skip — pClient=%08X pUnit=%08X warpFn=%08X area=%d\n",
+                        pClient, pUnit, (DWORD)warpFn, townArea);
+                }
+            } __except(1) { Log("ZONE WARP: exception (area=%d)\n", townArea); }
+            /* Always clear so we don't loop on a bad request — but log
+             * whether it actually fired so we can tell silent-drop from
+             * succeed. */
+            g_pendingZoneTeleport = 0;
+            (void)warpFired;
+        }
     }
 
     /* Process cheat menu commands (set from UI, consumed here in game tick) */
@@ -1000,16 +1043,40 @@ static void ProcessPendingGameTick(void) {
                         if (itemLevel > 99) itemLevel = 99;
 
                         int nDropped = 0;
+                        /* 1.9.5 Bug 6 fix — capture the dropped item pointers
+                         * so we can strip stat 91/92/93 (str/lvl/dex req)
+                         * after the TC roll completes. Previously this call
+                         * passed NULL for ppItems so items hit the floor with
+                         * full vanilla requirements; players reported AP
+                         * boss-loot rewards being unequippable (Maegis). */
+                        void* droppedItems[6] = { NULL };
                         __try {
                             fnDropTC((void*)g_cachedPGame, pCurseTarget, pCurseTarget,
-                                     tcId, 0, itemLevel, 0, NULL, &nDropped, 6);
+                                     tcId, 0, itemLevel, 0, droppedItems, &nDropped, 6);
                         } __except(1) {
                             Log("LOOT DROP: boss=%s tcId=%d CRASHED\n", g_bossLootNames[bossIdx], tcId);
                             nDropped = 0;
                         }
                         if (nDropped > 0) {
-                            Log("LOOT DROP: boss=%s tcId=%d ilvl=%d -> %d items\n",
-                                g_bossLootNames[bossIdx], tcId, itemLevel, nDropped);
+                            /* 1.9.5 Bug 6 — strip requirements on each dropped
+                             * item. Limited to 91/92/93; class restriction
+                             * (itype) is baked into ItemTypes.txt and cannot
+                             * be removed at runtime. */
+                            int stripped = 0;
+                            if (fnSetStat) {
+                                int di;
+                                for (di = 0; di < nDropped && di < 6; di++) {
+                                    if (!droppedItems[di]) continue;
+                                    __try {
+                                        fnSetStat(droppedItems[di], 91, 0, 0);  /* str req → 0 */
+                                        fnSetStat(droppedItems[di], 92, 1, 0);  /* lvl req → 1 */
+                                        fnSetStat(droppedItems[di], 93, 0, 0);  /* dex req → 0 */
+                                        stripped++;
+                                    } __except(EXCEPTION_EXECUTE_HANDLER) {}
+                                }
+                            }
+                            Log("LOOT DROP: boss=%s tcId=%d ilvl=%d -> %d items (%d stripped)\n",
+                                g_bossLootNames[bossIdx], tcId, itemLevel, nDropped, stripped);
                             ShowNotify("Awesome loot incoming!");
                         } else {
                             Log("LOOT DROP: boss=%s tcId=%d ilvl=%d -> 0 items (TC rolled nothing)\n",
@@ -1127,11 +1194,20 @@ static void ProcessPendingGameTick(void) {
                                  * pickup hook (per Maegis: "checks gave me
                                  * arcana + hwanin pieces but tracker shows
                                  * 0/X"). Coll_ProcessItem registers the GUID
-                                 * and updates the per-set/rune/special counters. */
+                                 * and updates the per-set/rune/special counters.
+                                 *
+                                 * 1.9.5 fix (Bug 19): pass FALSE (not TRUE) for
+                                 * requireLegit. AP-delivered items don't have
+                                 * IFLAG_NEWITEM observed-on-ground (Flag A),
+                                 * so strict mode marks them TAINTED and the
+                                 * early return at d2arch_collections.c:1510
+                                 * skips Coll_MarkSlotCollected entirely. The
+                                 * trusted-delivery path (FALSE) is what
+                                 * Coll_GrandfatherInvItem uses internally. */
                                 {
                                     extern void Coll_ProcessItem(void* pItem, int requireLegit);
                                     __try {
-                                        Coll_ProcessItem(pSpawned, 1 /* TRUE */);
+                                        Coll_ProcessItem(pSpawned, 0 /* FALSE — AP delivery is trusted */);
                                     } __except(EXCEPTION_EXECUTE_HANDLER) {}
                                 }
                                 Log("SPEC DROP: kind=%d idx=%d code=%08X qual=%d ilvl=%d -> OK (inventory, req=1, coll-registered)\n",

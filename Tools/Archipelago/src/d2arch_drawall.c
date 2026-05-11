@@ -2273,6 +2273,9 @@ static void DrawAll(void) {
          * game cross-act via Skills.cpp:3651's live assert. Use
          * the Teleport tab to move between zones.
          *   501 = Cow Portal (objId 60, dest 39)
+         *   502 = Rift Portal (physical portal targeting our rift level 134)
+         *   434 = Direct teleport to area 134 (via g_pendingZoneTeleport,
+         *         cmd-300 = areaId in the existing teleport handler)
          */
         static const struct CheatCell TAB_PORTALS[] = {
             { MK_HDR, L"PHYSICAL PORTAL",           0, NULL },
@@ -3212,6 +3215,8 @@ static void DrawAll(void) {
                             int objId    = 60;  /* default red permanent */
                             switch (c) {
                                 case 501: destArea = 39;  objId = 60; break; /* Cow Level */
+                                /* Rift/Reset commands 502-506 removed 2026-05-05
+                                 * — see Research/RIFT_AND_RESET_FAILURE_2026-05-05.md */
                                 default: break;
                             }
                             if (destArea > 0) {

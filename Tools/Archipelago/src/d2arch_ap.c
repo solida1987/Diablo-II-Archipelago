@@ -13,6 +13,47 @@
 static PROCESS_INFORMATION g_bridgePI = {0};
 static BOOL g_bridgeStarted = FALSE;
 
+/* ==================================================================
+ * 1.9.5 — Robust AP lifecycle (Gaps 1, 2, 4 from
+ *         Research/AP_LIFECYCLE_AUDIT_2026-05-11.md)
+ * ================================================================== */
+
+/* Gap 1 — ghost-disconnect detection. The DLL polls the bridge's
+ * heartbeat timestamp + checks process exit code every 60 seconds.
+ * If the bridge is found dead OR its heartbeat is >120s stale, the
+ * bridge is respawned + a notify is shown to the player.        */
+static DWORD g_apLastBridgeHealthCheck = 0;   /* GetTickCount of last call  */
+static int   g_apBridgeRespawnCount    = 0;   /* total respawns this session */
+
+/* Gap 2 — disconnect/reconnect notify state. ShowNotify is debounced
+ * (30s minimum gap) so a flapping connection doesn't spam the UI.  */
+static BOOL  g_apHadDisconnect         = FALSE;  /* set on disconnect, cleared on reconnect */
+static DWORD g_apLastDisconnectNotify  = 0;
+
+/* Gap 4 — server+slot hash for slot-change collision detection. If
+ * the user reconnects the SAME character to a DIFFERENT AP server,
+ * the DLL applied-set + bridge dedup file are wiped so the new
+ * server's items aren't silently dropped by stale dedup. Hash is
+ * computed as djb2 of "<server>|<slot>" and stored in
+ * d2arch_ap_<char>.dat. */
+static unsigned int g_apStoredServerSlotHash = 0;  /* 0 = no stored value */
+
+/* Simple djb2 hash for server+slot fingerprint. */
+static unsigned int APHashStr(const char* s) {
+    unsigned int h = 5381;
+    while (s && *s) {
+        h = (h * 33u) ^ (unsigned char)*s++;
+    }
+    return h;
+}
+
+static unsigned int APCurrentServerSlotHash(void) {
+    char combined[256];
+    _snprintf(combined, sizeof(combined), "%s|%s", g_apIP, g_apSlot);
+    combined[sizeof(combined) - 1] = 0;
+    return APHashStr(combined);
+}
+
 /* 1.7.1: additional slot_data fields from APworld that the DLL now acknowledges.
  * Shop shuffle and treasure cows are applied by d2arch_shuffle.c when it is
  * eventually updated; for now we parse + log so the launcher's
@@ -87,6 +128,53 @@ static void MarkApIdApplied(int apId) {
     }
 }
 
+/* 1.9.5 Bug C1 fix — kill any orphan ap_bridge.exe processes left
+ * behind by a previous game session that didn't get to run DLL
+ * DLL_PROCESS_DETACH (Alt-F4, task-kill, crash). Without this, the
+ * orphan keeps holding ap_status.dat / ap_unlocks.dat / ap_command.dat
+ * / d2arch_bridge_locations_<char>.dat handles, and the new bridge
+ * spawn races against the orphan — items duplicate, dedup file gets
+ * double-appended, status reads stale data.
+ *
+ * Strategy: enumerate processes via CreateToolhelp32Snapshot, match
+ * by exact image name "ap_bridge.exe", TerminateProcess each match
+ * with a 500ms wait. Skip our own current bridge (g_bridgePI). */
+#include <tlhelp32.h>
+static void KillOrphanBridges(void) {
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snap == INVALID_HANDLE_VALUE) return;
+    PROCESSENTRY32 pe;
+    pe.dwSize = sizeof(pe);
+    int killed = 0;
+    DWORD ourPid = g_bridgePI.hProcess ? g_bridgePI.dwProcessId : 0;
+    DWORD selfPid = GetCurrentProcessId();
+    if (Process32First(snap, &pe)) {
+        do {
+            /* Image name in szExeFile is filename only (no path) */
+            if (_stricmp(pe.szExeFile, "ap_bridge.exe") != 0) continue;
+            /* Skip ourselves' bridge (if we have one) */
+            if (ourPid != 0 && pe.th32ProcessID == ourPid) continue;
+            /* Defensive: don't kill our own game.exe (shouldn't match anyway) */
+            if (pe.th32ProcessID == selfPid) continue;
+            HANDLE hOrphan = OpenProcess(PROCESS_TERMINATE | SYNCHRONIZE,
+                                          FALSE, pe.th32ProcessID);
+            if (hOrphan) {
+                Log("AP Bridge: killing orphan ap_bridge.exe PID %lu\n",
+                    pe.th32ProcessID);
+                TerminateProcess(hOrphan, 1);
+                WaitForSingleObject(hOrphan, 500);
+                CloseHandle(hOrphan);
+                killed++;
+            }
+        } while (Process32Next(snap, &pe));
+    }
+    CloseHandle(snap);
+    if (killed > 0) {
+        Log("AP Bridge: killed %d orphan bridge(s) from previous sessions\n",
+            killed);
+    }
+}
+
 static void StartAPBridge(void) {
     if (g_bridgeStarted) {
         /* Check if still running */
@@ -103,6 +191,16 @@ static void StartAPBridge(void) {
             }
         }
     }
+
+    /* 1.9.5 Bug C1 fix — sweep orphan bridges before spawning a new
+     * one. This is the FIRST call to StartAPBridge in a fresh game
+     * session AFTER a previous session's abnormal close, so any
+     * orphan from that previous session is still alive and holding
+     * IPC file handles. Killing them here prevents data duplication
+     * (two bridges both processing ReceivedItems) and stale-status
+     * reads (DLL reads ap_status.dat written by orphan instead of
+     * the new bridge). */
+    KillOrphanBridges();
 
     /* Find ap_bridge.exe */
     char dir[MAX_PATH], bridgePath[MAX_PATH], bridgeCmd[MAX_PATH * 2];
@@ -136,12 +234,156 @@ static void StartAPBridge(void) {
 
 static void StopAPBridge(void) {
     if (g_bridgeStarted && g_bridgePI.hProcess) {
+        /* 1.9.5 Bug C1 fix — wait for the bridge to actually exit
+         * before releasing the handle. TerminateProcess is async on
+         * Windows; without the wait the next StartAPBridge could race
+         * against still-open file handles from the dying bridge. */
         TerminateProcess(g_bridgePI.hProcess, 0);
+        WaitForSingleObject(g_bridgePI.hProcess, 1000);
         CloseHandle(g_bridgePI.hProcess);
         CloseHandle(g_bridgePI.hThread);
         memset(&g_bridgePI, 0, sizeof(g_bridgePI));
         g_bridgeStarted = FALSE;
         Log("AP Bridge: stopped\n");
+    }
+}
+
+/* 1.9.5 — Gap 1: ghost-disconnect detection.
+ *
+ * Called from PollAPStatus every game tick; rate-limited to one full
+ * check per 60 seconds. Detects two distinct bridge-failure modes the
+ * old code missed:
+ *
+ *   (a) Hard death — bridge process exited (crash, killed by user,
+ *       Windows job-object termination on parent exit, etc.). The
+ *       DLL's g_bridgeStarted flag was set when we spawned, but the
+ *       OS has reaped the process. Previously the DLL only noticed
+ *       this when StartAPBridge was called again (manual Connect
+ *       click). Now we proactively check GetExitCodeProcess.
+ *
+ *   (b) Soft death / hang — bridge process is alive but its event
+ *       loop has stalled (Python deadlock, asyncio task hang, OS
+ *       I/O block, etc.). The bridge cannot write ap_status.dat so
+ *       its heartbeat timestamp ages. We compare the heartbeat
+ *       against current wall-clock time; if it's older than 120s
+ *       we consider the bridge dead and respawn.
+ *
+ * On detection: ShowNotify the player, free old handles, clear
+ * connection state, respawn the bridge via StartAPBridge, and
+ * re-issue WriteAPCommand("connect") so the new bridge picks up
+ * authentication automatically.
+ */
+static void CheckBridgeHealth(void) {
+    DWORD nowTicks = GetTickCount();
+    if (nowTicks - g_apLastBridgeHealthCheck < 60000) return;
+    g_apLastBridgeHealthCheck = nowTicks;
+
+    /* Don't run the check until the user has actually pressed Connect.
+     * Pre-connect state legitimately has no bridge running. */
+    if (!g_apPolling) return;
+    if (!g_bridgeStarted) return;
+
+    BOOL bridgeIsDead = FALSE;
+    const char* deathReason = "unknown";
+
+    /* --- Check (a): process exit code --- */
+    if (g_bridgePI.hProcess) {
+        DWORD exitCode = 0;
+        BOOL gotExit = GetExitCodeProcess(g_bridgePI.hProcess, &exitCode);
+        if (gotExit && exitCode != STILL_ACTIVE) {
+            bridgeIsDead = TRUE;
+            deathReason  = "process exited";
+            Log("BRIDGE HEALTH: process exit code %lu — bridge dead\n",
+                exitCode);
+        }
+    }
+
+    /* --- Check (b): heartbeat staleness (only if process appears alive) --- */
+    if (!bridgeIsDead) {
+        char statusPath[MAX_PATH];
+        GetArchDir(statusPath, MAX_PATH);
+        strcat(statusPath, "ap_status.dat");
+        FILE* f = fopen(statusPath, "r");
+        if (f) {
+            char line[256];
+            unsigned long heartbeatTs = 0;
+            while (fgets(line, sizeof(line), f)) {
+                if (sscanf(line, "heartbeat=%lu", &heartbeatTs) == 1) {
+                    break;   /* found it */
+                }
+            }
+            fclose(f);
+
+            if (heartbeatTs > 0) {
+                time_t nowUnix = time(NULL);
+                if (nowUnix > 0 && (unsigned long)nowUnix > heartbeatTs) {
+                    unsigned long age = (unsigned long)nowUnix - heartbeatTs;
+                    /* 120s threshold: bridge writes heartbeat every 30s, so
+                     * 120s = 4 consecutive missed writes. */
+                    if (age > 120) {
+                        bridgeIsDead = TRUE;
+                        deathReason  = "heartbeat stale";
+                        Log("BRIDGE HEALTH: heartbeat is %lu seconds old "
+                            "(>120s threshold) — bridge stuck\n", age);
+                    }
+                }
+            }
+        }
+    }
+
+    if (!bridgeIsDead) return;
+
+    /* --- Bridge is dead: notify, respawn, reconnect --- */
+    g_apBridgeRespawnCount++;
+    char msg[160];
+    _snprintf(msg, sizeof(msg),
+              "AP bridge died (%s) — restarting [respawn #%d]",
+              deathReason, g_apBridgeRespawnCount);
+    msg[sizeof(msg) - 1] = 0;
+    ShowNotify(msg);
+    Log("BRIDGE HEALTH: %s\n", msg);
+
+    /* Clean up old process handles.
+     * IMPORTANT: on "heartbeat stale" the process is still alive but stuck.
+     * If we just CloseHandle without TerminateProcess, the zombie keeps
+     * running, may eventually un-stick, and we then have two bridges
+     * fighting over the same file IPC. Always kill the hung process. */
+    if (g_bridgePI.hProcess) {
+        DWORD exitCode = 0;
+        BOOL stillAlive = GetExitCodeProcess(g_bridgePI.hProcess, &exitCode)
+                          && exitCode == STILL_ACTIVE;
+        if (stillAlive) {
+            Log("BRIDGE HEALTH: terminating hung bridge PID %lu\n",
+                g_bridgePI.dwProcessId);
+            TerminateProcess(g_bridgePI.hProcess, 1);
+            /* Give Windows ~500ms to actually tear it down so the next
+             * StartAPBridge doesn't race against still-open file handles. */
+            WaitForSingleObject(g_bridgePI.hProcess, 500);
+        }
+        CloseHandle(g_bridgePI.hProcess);
+        if (g_bridgePI.hThread) CloseHandle(g_bridgePI.hThread);
+        memset(&g_bridgePI, 0, sizeof(g_bridgePI));
+    }
+    g_bridgeStarted = FALSE;
+    g_apConnected   = FALSE;
+    strcpy(g_apStatus, "Bridge restarting...");
+    g_apHadDisconnect = TRUE;  /* so the upcoming reconnect fires the green notify */
+
+    /* 1.9.5 Gap 9 fix — also run the slot-change wipe protection on the
+     * health-respawn path. If g_apIP or g_apSlot changed between the last
+     * successful connect and the moment a health-driven respawn fires
+     * (e.g., user edited fields in F1 then died waiting on backoff), the
+     * dedup files from the previous slot must be wiped — otherwise the
+     * new server's items would be silently dropped. */
+    CheckSlotChangeOnConnect();
+
+    /* Respawn + reconnect */
+    StartAPBridge();
+    if (g_bridgeStarted) {
+        WriteAPCommand("connect");
+    } else {
+        Log("BRIDGE HEALTH: respawn FAILED — manual Connect required\n");
+        ShowNotify("AP bridge respawn FAILED — click Connect manually");
     }
 }
 
@@ -186,6 +428,10 @@ static void SaveAPCharConfig(void) {
     fprintf(f, "ap_server=%s\n", g_apIP);
     fprintf(f, "ap_slot=%s\n", g_apSlot);
     fprintf(f, "ap_password=%s\n", g_apPassword);
+    /* 1.9.5 Gap 4 — fingerprint the (server,slot) pair so a future
+     * Connect against a DIFFERENT pair can wipe dedup files before
+     * the new server's items collide with stale applied-id markers. */
+    fprintf(f, "server_slot_hash=%u\n", APCurrentServerSlotHash());
     fclose(f);
     Log("AP: Saved per-char config for '%s'\n", g_charName);
 }
@@ -198,17 +444,80 @@ static BOOL LoadAPCharConfig(void) {
     if (!f) return FALSE;
     char line[256];
     BOOL apMode = FALSE;
+    g_apStoredServerSlotHash = 0;   /* 1.9.5: reset before load */
     while (fgets(line, sizeof(line), f)) {
         char val[64];
         int n = 0;
+        unsigned int u = 0;
         if (sscanf(line, "ap_mode=%d", &n) == 1) apMode = (n != 0);
         if (sscanf(line, "ap_server=%63[^\n]", val) == 1) strncpy(g_apIP, val, 63);
         if (sscanf(line, "ap_slot=%31[^\n]", val) == 1) strncpy(g_apSlot, val, 31);
         if (sscanf(line, "ap_password=%31[^\n]", val) == 1) strncpy(g_apPassword, val, 31);
+        /* 1.9.5 Gap 4 — load stored hash if present (older configs may not
+         * have it, in which case stays 0 and slot-change detection is
+         * effectively disabled for that character until next Save). */
+        if (sscanf(line, "server_slot_hash=%u", &u) == 1) g_apStoredServerSlotHash = u;
     }
     fclose(f);
-    Log("AP: Loaded per-char config for '%s' (mode=%d)\n", g_charName, apMode);
+    Log("AP: Loaded per-char config for '%s' (mode=%d hash=%u)\n",
+        g_charName, apMode, g_apStoredServerSlotHash);
     return apMode;
+}
+
+/* 1.9.5 Gap 4 — call this RIGHT BEFORE issuing a Connect command.
+ * Compares current (g_apIP, g_apSlot) hash to the stored hash for
+ * this character. If they differ AND a stored hash exists, wipes
+ * the dedup files so the new server's items aren't dropped by
+ * stale applied-id markers. Also wipes old spoiler/checklist
+ * since they describe the old slot's item placements. */
+static void CheckSlotChangeOnConnect(void) {
+    if (!g_charName[0]) return;
+    if (g_apStoredServerSlotHash == 0) return;   /* first connect for this char */
+    if (!g_apIP[0] || !g_apSlot[0]) return;
+
+    unsigned int curHash = APCurrentServerSlotHash();
+    if (curHash == g_apStoredServerSlotHash) return;   /* same server, no action */
+
+    Log("AP SLOT-CHANGE DETECTED: stored hash=%u current=%u "
+        "(server '%s' or slot '%s' changed) — wiping dedup files\n",
+        g_apStoredServerSlotHash, curHash, g_apIP, g_apSlot);
+    ShowNotify("AP server/slot changed — clearing old item history");
+
+    /* Wipe DLL applied AP IDs */
+    char appliedPath[MAX_PATH];
+    GetAppliedApFilePath(appliedPath, MAX_PATH);
+    if (DeleteFileA(appliedPath)) {
+        Log("AP SLOT-CHANGE: deleted %s\n", appliedPath);
+    }
+    g_appliedApCount = 0;
+    g_appliedApLoaded = FALSE;
+
+    /* Wipe bridge dedup file + spoiler + checklist (all per-char in Save/) */
+    char dir[MAX_PATH];
+    GetCharFileDir(dir, MAX_PATH);
+
+    char bridgeLocPath[MAX_PATH];
+    _snprintf(bridgeLocPath, MAX_PATH, "%sd2arch_bridge_locations_%s.dat",
+              dir, g_charName);
+    bridgeLocPath[MAX_PATH - 1] = 0;
+    if (DeleteFileA(bridgeLocPath)) {
+        Log("AP SLOT-CHANGE: deleted %s\n", bridgeLocPath);
+    }
+
+    char spoilerPath[MAX_PATH];
+    _snprintf(spoilerPath, MAX_PATH, "%sd2arch_ap_spoiler_%s.txt",
+              dir, g_charName);
+    spoilerPath[MAX_PATH - 1] = 0;
+    DeleteFileA(spoilerPath);
+
+    char checklistPath[MAX_PATH];
+    _snprintf(checklistPath, MAX_PATH, "%sd2arch_ap_checklist_%s.txt",
+              dir, g_charName);
+    checklistPath[MAX_PATH - 1] = 0;
+    DeleteFileA(checklistPath);
+
+    /* Update stored hash so we don't trigger again this session */
+    g_apStoredServerSlotHash = curHash;
 }
 
 /* ================================================================
@@ -965,6 +1274,19 @@ static void PollAPStatus(void) {
     if (now - g_lastAPStatusPoll < 2000) return;
     g_lastAPStatusPoll = now;
 
+    /* 1.9.5 Gap 4 fix — capture wasConnected BEFORE CheckBridgeHealth so the
+     * heartbeat-stale path (which sets g_apConnected=FALSE internally) doesn't
+     * hide the connected→disconnected transition from the notify logic below.
+     * The respawn path inside CheckBridgeHealth sets g_apHadDisconnect=TRUE
+     * which is what the post-poll reconnect block actually keys off, so we
+     * still get correct behavior on the heartbeat-stale → respawn → reconnect
+     * loop; this just makes the *click-through* disconnect notify fire when
+     * appropriate. */
+    BOOL wasConnected = g_apConnected;
+
+    /* 1.9.5 Gap 1 — detect ghost-dead bridge (rate-limited to 60s inside) */
+    CheckBridgeHealth();
+
     char dir[MAX_PATH], path[MAX_PATH];
     GetArchDir(dir, MAX_PATH);
     /* 1.9.0: poll only after the user has actually pressed Connect (bridge
@@ -977,13 +1299,28 @@ static void PollAPStatus(void) {
     FILE* f = fopen(path, "r");
     if (!f) return;
     char line[256];
-    BOOL wasConnected = g_apConnected;
+    /* 1.9.5 Bug C3 fix — track whether we just transitioned to an
+     * error state so we can fire a one-shot ShowNotify on the error
+     * with its reason. Without this the player sees "Refused" with
+     * no clue WHY (typo'd password? wrong slot name? server offline?). */
+    BOOL prevWasError = (strcmp(g_apStatus, "Refused") == 0
+                         || strcmp(g_apStatus, "Error") == 0);
+    BOOL newIsError = FALSE;
     while (fgets(line, sizeof(line), f)) {
         char val[64];
+        char emsg[120];
+        /* 1.9.5 Bug C3 fix — capture errormsg= lines into g_apErrorMsg. */
+        if (sscanf(line, "errormsg=%119[^\r\n]", emsg) == 1) {
+            strncpy(g_apErrorMsg, emsg, sizeof(g_apErrorMsg) - 1);
+            g_apErrorMsg[sizeof(g_apErrorMsg) - 1] = 0;
+            continue;
+        }
         if (sscanf(line, "status=%63s", val) == 1) {
             if (strcmp(val, "authenticated") == 0) {
                 g_apConnected = TRUE;
                 strcpy(g_apStatus, "Connected");
+                /* 1.9.5 Bug C3 — clear any prior error on successful auth */
+                g_apErrorMsg[0] = 0;
             } else if (strcmp(val, "connected") == 0) {
                 /* 1.8.5 — websocket open but slot_data not yet received.
                  * Treat as "still connecting" so the green button doesn't
@@ -1005,17 +1342,36 @@ static void PollAPStatus(void) {
             } else if (strcmp(val, "error") == 0) {
                 g_apConnected = FALSE;
                 strcpy(g_apStatus, "Error");
+                newIsError = TRUE;
             } else if (strcmp(val, "refused") == 0) {
                 g_apConnected = FALSE;
                 strcpy(g_apStatus, "Refused");
+                newIsError = TRUE;
             }
         }
     }
     fclose(f);
+    /* 1.9.5 Bug C3 fix — on transition into error/refused, surface
+     * the reason on screen so the player knows what to fix. */
+    if (newIsError && !prevWasError && g_apErrorMsg[0]) {
+        char notify[160];
+        _snprintf(notify, sizeof(notify),
+                  "AP %s: %s", g_apStatus, g_apErrorMsg);
+        notify[sizeof(notify) - 1] = 0;
+        ShowNotify(notify);
+        Log("AP ERROR STATUS: %s — %s\n", g_apStatus, g_apErrorMsg);
+    }
     if (!wasConnected && g_apConnected) {
         /* 1.8.4 — banner removed at user request; the green Connect button
          * already signals authentication. Log line kept for diagnostics. */
         Log("AP: Connection established\n");
+        /* 1.9.5 Gap 2 — show reconnect notify if we previously disconnected
+         * (and notified the player). Suppress on initial connect since the
+         * green button is enough signal for first-time connect. */
+        if (g_apHadDisconnect) {
+            ShowNotify("AP RECONNECTED — pending checks will sync");
+            g_apHadDisconnect = FALSE;
+        }
         /* 1.9.0 — flip g_apMode TRUE here, on actual auth, instead of at
          * Connect-click time. This is the gating moment that determines
          * whether subsequently-loaded characters bake AP settings + default
@@ -1105,6 +1461,16 @@ static void PollAPStatus(void) {
         SyncAPToTitleSettings();
     } else if (wasConnected && !g_apConnected) {
         Log("AP: Connection lost\n");
+        /* 1.9.5 Gap 2 — explicit on-screen notify so in-game players see
+         * the disconnect (previously only visible via title-screen button
+         * color or F1 Editor Page 2). 30s debounce prevents notify-spam
+         * on a flapping connection. */
+        DWORD notifyNow = GetTickCount();
+        if (notifyNow - g_apLastDisconnectNotify > 30000) {
+            ShowNotify("AP DISCONNECTED — your checks will queue locally");
+            g_apLastDisconnectNotify = notifyNow;
+        }
+        g_apHadDisconnect = TRUE;   /* mark so reconnect notify fires too */
         /* 1.8.0: swap Connect button back to red (disconnected) */
         if (g_btnConnectBtn && g_btnCellFileRed) {
             *(void**)((BYTE*)g_btnConnectBtn + 0x04) = g_btnCellFileRed;
@@ -1598,6 +1964,8 @@ static void HandleAPPanelClick(int mx, int my) {
             strcpy(g_apStatus, "Disconnecting...");
         } else if (g_apIP[0] && g_apSlot[0]) {
             Log("AP CONNECT: starting bridge and writing command (IP=%s Slot=%s)\n", g_apIP, g_apSlot);
+            /* 1.9.5 Gap 4 — slot-change collision check */
+            CheckSlotChangeOnConnect();
             StartAPBridge();
             WriteAPCommand("connect");
             SaveAPConfig();

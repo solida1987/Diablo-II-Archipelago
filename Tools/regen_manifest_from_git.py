@@ -28,6 +28,12 @@ ORIGINAL_D2_FILES = {
     # circumstance because we cannot redistribute them and raw.github.com
     # has no copy to verify against.
     "d2char.mpq", "d2data.mpq", "d2sfx.mpq",
+    # 1.9.5 fix — Game.exe (vanilla Blizzard 1.10f Game.exe, 90 KB) was
+    # leaking into the manifest. Caught by pre-release audit 2026-05-11.
+    # Imports D2Client/D2Launch/Storm/Fog/all Blizzard DLLs and contains
+    # the "Blizzard Entertainment" signature. Diablo II.exe (36 KB) is
+    # OUR custom stub launcher with no Blizzard strings — safe to ship.
+    "game.exe",
 }
 
 # Runtime/per-character files that may be tracked in git by accident but

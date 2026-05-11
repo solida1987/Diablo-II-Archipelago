@@ -1614,11 +1614,45 @@ static void Coll_ScanPlayerHoldings_Internal(void* pPlayerUnit,
      * GUIDs, which fail the strict check (correct anti-cheat). */
     if (includeStkScan) Coll_ScanStkSidecars();
 
-    /* Regular stash sidecars (ap_stash/shared_stash) deferred to v2 —
+    /* 1.9.5 Bug R9 fix — also scan the mercenary's inventory.
+     * Per the bug report (Maegis): set/unique pieces equipped on the
+     * Act 2 merc (Insight runeword polearm, Tomb Reaver, etc.) were
+     * not counting toward the F1 Collection goal. The merc unit
+     * pointer lives at pPlayer + 0x14C — already proven by
+     * Extra_PollMerc at d2arch_extrachecks.c:743. Its pInventory
+     * holds the merc's 3 equipped slots (helm/armor/weapon).
+     *
+     * Regular stash sidecars (ap_stash/shared_stash) still deferred —
      * those store items as serialized bitstreams that need
-     * ITEMS_GetCompactItemDataFromBitstream + quality-aware routing.
-     * Mercenary inventory scan also deferred to v2 — needs walk of
-     * D2Client unit hash table to find the merc unit by owner ID. */
+     * ITEMS_GetCompactItemDataFromBitstream + quality-aware routing. */
+    {
+        void* pMerc = NULL;
+        __try { pMerc = *(void**)((BYTE*)pPlayerUnit + 0x14C); }
+        __except(EXCEPTION_EXECUTE_HANDLER) { pMerc = NULL; }
+        if (pMerc) {
+            void* pMercInv = NULL;
+            __try { pMercInv = *(void**)((BYTE*)pMerc + COLL_OFF_PINVENTORY); }
+            __except(EXCEPTION_EXECUTE_HANDLER) { pMercInv = NULL; }
+            if (pMercInv) {
+                void* pMItem = NULL;
+                __try { pMItem = s_fnGetFirstItem(pMercInv); }
+                __except(EXCEPTION_EXECUTE_HANDLER) { pMItem = NULL; }
+                int msafety = 0;
+                int mercFound = 0;
+                while (pMItem && msafety++ < 32) {
+                    Coll_ProcessItem(pMItem, requireLegit);
+                    mercFound++;
+                    void* pMNext = NULL;
+                    __try { pMNext = s_fnGetNextItem(pMItem); }
+                    __except(EXCEPTION_EXECUTE_HANDLER) { pMNext = NULL; }
+                    pMItem = pMNext;
+                }
+                if (mercFound > 0) {
+                    Log("Coll: merc scan processed %d items\n", mercFound);
+                }
+            }
+        }
+    }
 }
 
 void Coll_ScanPlayerHoldings(void* pPlayerUnit) {

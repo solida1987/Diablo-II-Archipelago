@@ -19,6 +19,10 @@ ORIGINAL_D2_FILES = {
     "d2music.mpq", "d2speech.mpq", "d2video.mpq", "d2xmusic.mpq",
     "d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll",
     "d2char.mpq", "d2data.mpq", "d2sfx.mpq",
+    # 1.9.5 fix — Game.exe is Blizzard 1.10f game executable (90 KB,
+    # imports D2Client/D2Launch/Storm/Fog). Diablo II.exe (36 KB) is our
+    # custom stub and is safe to ship.
+    "Game.exe",
 }
 
 import re

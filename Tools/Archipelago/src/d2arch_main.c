@@ -188,6 +188,10 @@ static LRESULT CALLBACK HookWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             Log("PACKET LOG: %s\n", g_packetLogEnabled ? "ENABLED" : "DISABLED");
             return 0;
         }
+        /* (Shift+L diagnostic dump and Shift+R rift dev-warp removed
+         *  with the abandoned runtime-extension rift attempt. The
+         *  replacement Maps system uses cube recipes for entry, not
+         *  hotkeys.) */
         /* Shift+0 = toggle D2MOO Debug window (hidden by default) */
         if (wp == '0' && (GetAsyncKeyState(VK_SHIFT) & 0x8000)) {
             HWND hDbg = FindWindowA(NULL, "D2Debugger");

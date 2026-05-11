@@ -12,11 +12,17 @@ import zipfile, os, sys
 # (580 MB) and into the manifest, both EULA-illegal. Users must copy
 # these from their own D2 install. Once the launcher is rebuilt with
 # these added to ORIGINAL_D2_FILES, it will copy them automatically.
+# 1.9.5 fix — Game.exe (vanilla Blizzard 1.10f Game.exe, 90 KB) was
+# leaking into the manifest too. Caught by pre-release audit on 2026-05-11.
+# Contains "Blizzard Entertainment" + imports D2Client/D2Launch/D2Win/
+# D2gfx/Storm/Fog DLLs — it is the Blizzard game executable. Diablo II.exe
+# (36 KB) is OUR custom stub with no Blizzard strings and is safe to ship.
 SKIP_FILES = {
     "D2.LNG", "SmackW32.dll", "binkw32.dll", "d2exp.mpq",
     "d2music.mpq", "d2speech.mpq", "d2video.mpq", "d2xmusic.mpq",
     "d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll",
     "d2char.mpq", "d2data.mpq", "d2sfx.mpq",
+    "Game.exe",  # 1.9.5: Blizzard 1.10f game executable
 }
 SKIP_DIRS = {
     "save", ".git", "crashdump",
@@ -58,6 +64,13 @@ SKIP_NAMES = {
     "ap_death.dat", "ap_goal.dat", "ap_deathlink_event.dat",
     "d2arch_bridge_locations.dat", "Crashdump",
     "START_WITH_LOGGING.bat",  # SessionLogger launcher, dev-only
+    # 1.9.5 (Bug O7): account-wide shared stash is dev test data. The
+    # files were being included in game_package.zip even though the
+    # launcher's manifest correctly omits them, so every fresh install
+    # inherited the dev's test items ("Clean up yo inventory Solida!"
+    # per Maegis). These three files MUST stay out of the release ZIP;
+    # runtime regenerates them empty on first character load.
+    "shared_stash.dat", "shared_stash_ser.dat", "shared_stash_stk.dat",
 }
 SKIP_PREFIXES = ("d2arch_",)
 SKIP_SUFFIXES = (

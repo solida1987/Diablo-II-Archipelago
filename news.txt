@@ -8,6 +8,65 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.5 - Big Community Bug-Fix Release ===
+
+Major bug-fix release addressing 15 community-reported issues plus
+a complete Archipelago connection-system overhaul. No new gameplay
+features in this one — just everything that was broken should now
+work properly.
+
+Headline fixes:
+- Archipelago Launcher's "Generate Template Options" no longer
+  crashes when our apworld is installed (was blocking YAML
+  generation for ALL games)
+- Items no longer disappear when you click a stash tab while
+  holding an item on your cursor
+- Boss-loot rewards (Andariel/Duriel/Mephisto/Diablo/Baal Loot)
+  can now actually be equipped — strength/dex/level requirements
+  are stripped on delivery
+- F1 Collection page now counts items delivered by AP directly to
+  your inventory (used to require you drop them and pick them up)
+- Mercenary's equipped items also count toward Collection now
+  (Insight polearm, Tomb Reaver, Andariel's Visage, etc.)
+- Sacrifice skill now properly drains life on cast (was accidentally
+  set to 3% instead of vanilla 8% in the 1.9.0 data refresh)
+
+Animation softlocks fixed:
+- Barbarian Jump Attack / Whirlwind no longer softlock when assigned
+  to a non-Barbarian character
+- Same fix covers Double Swing / Double Throw, Dragon Claw / Dragon
+  Talon, Assassin Blade Fury and charge-up skills, Amazon javelin
+  throws, Druid Rabies / Hunger, Paladin Smite
+- Native classes still get all of their own skills working as
+  before — these are just blocked from random cross-class pools
+
+Archipelago connection improvements:
+- Auto-recovery if the AP bridge stops responding (heartbeat-based
+  health check + auto-restart, no more manual bridge restarts)
+- On-screen notifications when you get disconnected / reconnected
+- Per-character AP spoiler + checklist text files saved in your
+  Game/Save/ folder — see exactly what's at your locations and
+  what you've received
+- Server/slot change detection — switching the same character to a
+  different multiworld automatically clears the old item history
+- "Force Reconnect" button on F1 Editor — skip the back-off wait
+- Connection error messages now visible in red on the F1 page (no
+  more silent "Connecting..." forever)
+- No more ghost ap_bridge.exe processes left running after game
+  close — old bridges are cleaned up on next launch
+- Checks completed in offline mode are now reliably re-sent on
+  reconnect (atomic file write + republish on every character load)
+- Bridge log file no longer spams — ~70% reduction in log size
+
+Other fixes:
+- Tower Cellar entry via Entrance Shuffle now correctly lands you
+  on Tower Level 1 (was landing on Level 2 stairs)
+- Shared stash no longer ships with random test items from the dev
+  (was "Clean up yo inventory Solida!" per Maegis). Existing players
+  can delete Game/Archipelago/shared_stash*.dat to clear them.
+- Safer behaviour during character respawn if quest state is briefly
+  unreadable (no more accidentally "unlocking" Hell access on a NULL)
+
 === Beta 1.9.4 - Comprehensive Bug Fix Release ===
 
 Massive bug-fix release addressing all community reports from the

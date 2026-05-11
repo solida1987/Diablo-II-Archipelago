@@ -1136,6 +1136,28 @@ BOOL StashUIHandleClick(int ignoredMx, int ignoredMy) {
                 (i < STASH_NUM_AP_TABS) ? "AP" : "SH";
             int num = (i == 0 || i == STASH_NUM_AP_TABS) ? 0 :
                       (i < STASH_NUM_AP_TABS) ? i + 1 : i - STASH_NUM_AP_TABS + 1;
+            /* 1.9.5 Bug 5 fix — refuse the tab swap if the player is
+             * holding an item on cursor. Without this guard, StashSwapPage
+             * relinks the stash grid behind the cursor, then vanilla D2's
+             * click handler tries to drop the cursor item into a grid cell
+             * whose coords no longer correspond to where it was when the
+             * player clicked. The vanilla place fails silently and the
+             * cursor item is cleared by D2 on the next mouse event = item
+             * destroyed. (per Maegis bug report)
+             *
+             * StashSwap_GetPlayerInv and StkFindCursorItem live in
+             * d2arch_stashlogic.c which is unity-included BEFORE this
+             * file (see d2arch.c lines 53-54), so their static linkage
+             * is visible here without a forward declaration. */
+            {
+                void* pCliInv = StashSwap_GetPlayerInv();
+                if (pCliInv && StkFindCursorItem(pCliInv) != NULL) {
+                    Log("StashUI: tab click %d->%d IGNORED — cursor has an item\n",
+                        prev, i);
+                    ShowNotify("Drop item before switching stash tabs");
+                    return TRUE;   /* swallow click, do NOT swap */
+                }
+            }
             if (num)
                 Log("StashUI: switched tab %d -> %d (%s%d)\n", prev, i, label, num);
             else

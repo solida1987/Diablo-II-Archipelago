@@ -51,8 +51,47 @@ SKILL_ID_MAX = 45280  # AP_ITEM_BASE + highest skill D2-id
 # 1.8.5 — gate-key ID range used by the DLL's zone-locking/F4 tracker.
 # These are the per-difficulty gate-boss keys (18 gates × 3 diff = 54 IDs).
 # Kept in sync with d2arch_zones.c GATEKEY_AP_BASE_* constants.
+# Layout: each difficulty occupies 20 IDs starting at a base, but only the
+# first 18 are valid gate keys (the last 2 in each block are unused gaps).
+#   Normal:    46101-46118 valid, 46119-46120 GAP
+#   Nightmare: 46121-46138 valid, 46139-46140 GAP
+#   Hell:      46141-46158 valid
 GATE_KEY_ID_MIN = 46101
 GATE_KEY_ID_MAX = 46158
+GATEKEY_PER_DIFF = 18
+GATEKEY_AP_BASE_NORMAL = 46101
+GATEKEY_AP_BASE_NM     = 46121
+GATEKEY_AP_BASE_HELL   = 46141
+
+
+def decode_gate_key(item_id):
+    """Return (diff_label, slot, gate_name) or None if not a valid gate key.
+    Mirrors GateKey_FromAPId in d2arch_zones.c — accounts for the 2-id gap
+    between difficulty ranges so bogus IDs (46119, 46120, 46139, 46140) are
+    rejected instead of being mislabeled.
+
+    Slot layout within each difficulty:
+        0-3   = Act 1 Gates 1-4
+        4-7   = Act 2 Gates 1-4
+        8-11  = Act 3 Gates 1-4
+        12-13 = Act 4 Gates 1-2 (Act 4 has only 2 gates)
+        14-17 = Act 5 Gates 1-4
+    """
+    if GATEKEY_AP_BASE_NORMAL <= item_id < GATEKEY_AP_BASE_NORMAL + GATEKEY_PER_DIFF:
+        diff_label, slot = "Normal", item_id - GATEKEY_AP_BASE_NORMAL
+    elif GATEKEY_AP_BASE_NM <= item_id < GATEKEY_AP_BASE_NM + GATEKEY_PER_DIFF:
+        diff_label, slot = "Nightmare", item_id - GATEKEY_AP_BASE_NM
+    elif GATEKEY_AP_BASE_HELL <= item_id < GATEKEY_AP_BASE_HELL + GATEKEY_PER_DIFF:
+        diff_label, slot = "Hell", item_id - GATEKEY_AP_BASE_HELL
+    else:
+        return None
+    if   0 <= slot < 4:   gate_name = f"Act 1 Gate {slot + 1}"
+    elif 4 <= slot < 8:   gate_name = f"Act 2 Gate {slot - 3}"
+    elif 8 <= slot < 12:  gate_name = f"Act 3 Gate {slot - 7}"
+    elif 12 <= slot < 14: gate_name = f"Act 4 Gate {slot - 11}"
+    elif 14 <= slot < 18: gate_name = f"Act 5 Gate {slot - 13}"
+    else:                 gate_name = f"Gate Slot {slot}"
+    return (diff_label, slot, gate_name)
 
 # Retry/backoff tuning
 SEND_BACKOFF_SEQ = [1, 2, 4, 8]      # seconds, ceiling applied below
@@ -60,6 +99,13 @@ SEND_BACKOFF_MAX = 8
 CONN_BACKOFF_SEQ = [5, 10, 20, 40, 60]
 CONN_BACKOFF_MAX = 60
 SEND_FAIL_STATUS_THRESHOLD = 10      # consecutive failures before UI warning
+
+# 1.9.5 — heartbeat in ap_status.dat so the DLL can detect a dead bridge
+# process (Gap 1 from AP_LIFECYCLE_AUDIT_2026-05-11.md). Bridge writes a
+# `heartbeat=<unix_timestamp>` line every HEARTBEAT_INTERVAL seconds. DLL
+# treats heartbeat older than ~90s OR file mtime older than ~120s as
+# "ghost-dead" and respawns the bridge.
+HEARTBEAT_INTERVAL = 30              # seconds — write heartbeat this often
 
 
 # ---------------------------------------------------------------------------
@@ -219,6 +265,47 @@ class D2ArchipelagoBridge:
         self.load_skills()
         self.items_received = sum(1 for s in self.skills.values() if s['unlocked'])
 
+        # 1.9.5 — Gap 1: persistent _last_status so the periodic heartbeat
+        # task can re-write the current status without changing it.
+        self._last_status = "disconnected"
+
+        # 1.9.5 — Gap 3: per-character AP spoiler + checklist files. The
+        # spoiler lists what items are at MY locations (so I know what
+        # rewards to look forward to and who they'll go to in a
+        # multiworld). The checklist is a running log of received items.
+        # Both live in Game/Save/ alongside .d2s.
+        self.spoiler_file   = os.path.join(self.save_dir,
+                                           f"d2arch_ap_spoiler_{char_name}.txt")
+        self.checklist_file = os.path.join(self.save_dir,
+                                           f"d2arch_ap_checklist_{char_name}.txt")
+        # location_id -> dict(item_id, item_name, recipient_slot, recipient_name)
+        # populated from LocationInfo packet (response to LocationScouts)
+        self._spoiler_data: dict[int, dict] = {}
+        # location_ids that have been delivered ([RECEIVED] in spoiler)
+        self._spoiler_received_locs: set[int] = set()
+        # slot_info dict from Connected packet: slot -> {"name":, "game":}
+        self.slot_info: dict[int, dict] = {}
+        # 1.9.5 Gap 6 fix — our own slot id, captured from the Connected
+        # packet's top-level "slot" field. Previously we read
+        # `slot_data.get("slot")` which is the wrong place: slot_data is the
+        # per-slot YAML options dict, which has no "slot" key, so it always
+        # returned 0 and the spoiler reported all our own items as
+        # "for Slot0". The real id lives in `packet.slot`.
+        self.my_slot_id: int = 0
+
+        # 1.9.5 Gap 2 fix — event used to break out of the exponential-backoff
+        # sleep inside connect_and_run. main_loop sets it when the player
+        # clicks "Force Reconnect" while the bridge is currently sleeping
+        # between retries. Created here as None so __init__ doesn't require
+        # a running event loop; we lazy-create in the first sleep call.
+        self._force_reconnect_event = None
+
+        # 1.9.5 — Gap 6 surface: snapshot of pending check count + last
+        # error so the DLL can render them in F1 Editor Page 2. Updated
+        # whenever write_status is called.
+        self._last_pending_checks = 0
+        self._last_conn_attempt   = 0
+
     # ------------------------------------------------------------------
     # Logging
     # ------------------------------------------------------------------
@@ -283,6 +370,22 @@ class D2ArchipelagoBridge:
         # If the file doesn't exist yet, processed_locations stays empty —
         # this is correct: the next ReceivedItems replay from the AP server
         # will flood items through to this character.
+
+        # 1.9.5 Gap 3 fix — also repoint the spoiler + checklist sidecar
+        # files to the new character. Without this, mid-session character
+        # swaps would keep appending to the previous character's checklist
+        # and overwriting the wrong spoiler. The in-memory _spoiler_data
+        # and _spoiler_received_locs caches are also reset so the rewrite
+        # of the new char's spoiler doesn't carry over stale entries.
+        self.spoiler_file = os.path.join(
+            self.save_dir, f"d2arch_ap_spoiler_{new_char}.txt")
+        self.checklist_file = os.path.join(
+            self.save_dir, f"d2arch_ap_checklist_{new_char}.txt")
+        self._spoiler_data = {}
+        self._spoiler_received_locs = set()
+        self.log(f"Spoiler+checklist rebound: "
+                 f"{os.path.basename(self.spoiler_file)} / "
+                 f"{os.path.basename(self.checklist_file)}")
 
     def load_skills(self):
         # Try configured state file, fallback to scanning
@@ -384,13 +487,35 @@ class D2ArchipelagoBridge:
     # ------------------------------------------------------------------
     # Status & unlock files
     # ------------------------------------------------------------------
-    def write_status(self, status, send_errors=None, errormsg=None):
+    def write_status(self, status=None, send_errors=None, errormsg=None,
+                     conn_attempt=None, pending_checks=None):
+        """Write status snapshot to ap_status.dat.
+
+        1.9.5 changes:
+          - `status` is now optional; pass None to re-emit the current
+            persistent status (used by _heartbeat_task to refresh the
+            heartbeat without changing state).
+          - Always emits `heartbeat=<unix_timestamp>` so the DLL can
+            detect ghost-dead bridges (process alive but stuck).
+          - Tracks `conn_attempt` + `pending_checks` for F1 UI surface.
+        """
+        if status is not None:
+            self._last_status = status
+        if conn_attempt is not None:
+            self._last_conn_attempt = conn_attempt
+        if pending_checks is not None:
+            self._last_pending_checks = pending_checks
         try:
             lines = [
-                f"status={status}",
+                f"status={self._last_status}",
                 f"items_received={self.items_received}",
                 f"checks_sent={len(self.checked_locations)}",
+                f"heartbeat={int(time.time())}",
             ]
+            if self._last_pending_checks:
+                lines.append(f"pending_checks={self._last_pending_checks}")
+            if self._last_conn_attempt:
+                lines.append(f"conn_attempt={self._last_conn_attempt}")
             if send_errors is not None:
                 lines.append(f"send_errors={send_errors}")
             if errormsg is not None:
@@ -402,6 +527,190 @@ class D2ArchipelagoBridge:
                 logging.warning(f"write_status failed: {e}")
             except Exception:
                 pass
+
+    # ------------------------------------------------------------------
+    # 1.9.5 — Heartbeat task (Gap 1)
+    # ------------------------------------------------------------------
+    async def _heartbeat_task(self):
+        """Refresh ap_status.dat heartbeat every HEARTBEAT_INTERVAL.
+
+        The DLL watches this timestamp to detect a ghost-dead bridge
+        (process alive but stuck in some bad state, OR background task
+        scheduler hung). If the heartbeat hasn't advanced in ~90s the
+        DLL treats the bridge as dead and respawns it.
+        """
+        while not self._stop:
+            try:
+                await asyncio.sleep(HEARTBEAT_INTERVAL)
+                # Update pending_checks counter so the F1 UI stays current
+                pc = len(self.pending_checks) if self.pending_checks else 0
+                self.write_status(pending_checks=pc)
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                try:
+                    self.log(f"heartbeat task error: {e}",
+                             level=logging.WARNING)
+                except Exception:
+                    pass
+
+    # ------------------------------------------------------------------
+    # 1.9.5 Gap 2 fix — interruptible backoff sleep
+    # ------------------------------------------------------------------
+    async def _interruptible_sleep(self, delay):
+        """Sleep up to `delay` seconds, but return early if the caller
+        externally invokes kick_reconnect(). This makes Force Reconnect
+        responsive even when connect_and_run is mid-backoff (otherwise
+        the user could wait up to 60s for the next retry attempt)."""
+        if self._force_reconnect_event is None:
+            try:
+                self._force_reconnect_event = asyncio.Event()
+            except Exception:
+                # No running loop in some edge case — fall back to plain sleep
+                await asyncio.sleep(delay)
+                return
+        try:
+            await asyncio.wait_for(
+                self._force_reconnect_event.wait(),
+                timeout=delay,
+            )
+            # Event was set — clear it for the next call and return early.
+            self._force_reconnect_event.clear()
+            try:
+                self.log("Backoff interrupted by Force Reconnect — retrying now")
+            except Exception:
+                pass
+        except asyncio.TimeoutError:
+            # Normal timeout — the delay expired before any kick.
+            pass
+
+    def kick_reconnect(self):
+        """Break the current backoff sleep (if any) and retry immediately.
+        Safe to call from any task; no-op if no event has been created
+        yet (which means we're not currently sleeping in backoff)."""
+        ev = self._force_reconnect_event
+        if ev is not None:
+            try:
+                ev.set()
+            except Exception:
+                pass
+
+    # ------------------------------------------------------------------
+    # 1.9.5 — AP spoiler + checklist files (Gap 3)
+    # ------------------------------------------------------------------
+    def _resolve_item_name_for_spoiler(self, item_id: int, recipient_slot: int) -> str:
+        """Best-effort item name for spoiler. Uses our own item maps for
+        D2A items, falls back to '(item X from <game>)' for other games."""
+        # Our own item ID ranges (see items.py)
+        if ZONE_KEY_ID_MIN <= item_id <= ZONE_KEY_ID_MAX:
+            return zone_key_name(item_id)
+        if GATE_KEY_ID_MIN <= item_id <= GATE_KEY_ID_MAX:
+            # 1.9.5 Gap 5 fix — use the gap-aware decoder so NM/Hell keys
+            # report the correct slot and bogus IDs in the 2-id gaps don't
+            # masquerade as valid keys.
+            gk = decode_gate_key(item_id)
+            if gk is None:
+                return f"Gate Key (invalid id {item_id})"
+            diff_label, slot, gate_name = gk
+            return f"Gate Key: {gate_name} ({diff_label})"
+        if FILLER_ID_MIN <= item_id <= FILLER_ID_MAX:
+            filler_names = {
+                45500: "Gold", 45501: "Gold Bundle (M)", 45502: "Gold Bundle (L)",
+                45503: "+5 Stat Points", 45504: "+1 Skill Point",
+                45505: "Trap: Monsters", 45506: "Reset Point",
+                45507: "Boss Loot", 45508: "Experience",
+                45511: "Trap: Slow", 45512: "Trap: Weaken", 45513: "Trap: Poison",
+                45514: "Andariel Loot", 45515: "Duriel Loot",
+                45516: "Mephisto Loot", 45517: "Diablo Loot", 45518: "Baal Loot",
+                45519: "Random Charm", 45520: "Random Set Item",
+                45521: "Random Unique",
+            }
+            return filler_names.get(item_id, f"Filler #{item_id}")
+        # Skill range — look up in our skill map
+        if AP_ITEM_BASE <= item_id < AP_ITEM_BASE + 500:
+            skill_id = item_id - AP_ITEM_BASE
+            if skill_id in self.skills:
+                return self.skills[skill_id]['name']
+            return f"Skill ID {skill_id}"
+        # Cross-game item — we don't have the datapackage. Best we can do:
+        info = self.slot_info.get(recipient_slot, {})
+        game = info.get("game", "?")
+        return f"(item {item_id} from {game})"
+
+    def _write_spoiler_file(self):
+        """Write the per-character AP spoiler file. Called whenever
+        _spoiler_data or _spoiler_received_locs changes."""
+        try:
+            # 1.9.5 Gap 6 fix — use the slot id captured from the Connected
+            # packet's top-level "slot" field, not slot_data.get("slot")
+            # which would always be 0.
+            our_slot = int(getattr(self, "my_slot_id", 0))
+            our_name = self.players.get(our_slot, self.slot)
+            lines = [
+                "=" * 70,
+                f"D2Archipelago — AP Slot Spoiler",
+                f"Character: {self.char_name}",
+                f"Slot: {our_name} (#{our_slot})",
+                f"Server: {self.server}",
+                f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}",
+                f"Items received: {self.items_received}",
+                f"Locations at MY slot: {len(self._spoiler_data)}",
+                f"Of these, RECEIVED so far: {len(self._spoiler_received_locs)}",
+                "=" * 70,
+                "",
+                "Items at locations YOU need to check (your slot's check list):",
+                "Status: [RECVD] = already delivered, [PENDING] = still to find",
+                "",
+            ]
+            for loc_id in sorted(self._spoiler_data.keys()):
+                entry = self._spoiler_data[loc_id]
+                status = "[RECVD]" if loc_id in self._spoiler_received_locs else "[PENDING]"
+                lines.append(
+                    f"  {status}  Loc {loc_id:>6} -> {entry['item_name']:<40} "
+                    f"recipient: {entry['recipient_name']}"
+                )
+            lines.append("")
+            lines.append("=" * 70)
+            _atomic_write_text(self.spoiler_file, "\n".join(lines) + "\n")
+            self.log(f"Wrote AP spoiler ({len(self._spoiler_data)} locs, "
+                     f"{len(self._spoiler_received_locs)} received) -> "
+                     f"{os.path.basename(self.spoiler_file)}")
+        except Exception as e:
+            self.log(f"Failed to write spoiler file: {e}",
+                     level=logging.WARNING)
+
+    def _append_to_checklist(self, item_name: str, sender_name: str,
+                             ap_location_id: int):
+        """Append a received item to the per-character checklist file.
+
+        File grows append-only with one human-readable line per receive.
+        Player can open this anytime to see what they've gotten.
+
+        1.9.5 Gap 13 fix — ap_location_id=0 is rendered as "(event)" to
+        accommodate non-item events like DeathLink bounces."""
+        try:
+            ts = time.strftime("%Y-%m-%d %H:%M:%S")
+            if ap_location_id and ap_location_id > 0:
+                loc_part = f"@ loc {ap_location_id}"
+            else:
+                loc_part = "@ (event)"
+            line = (f"[{ts}] RECV  {item_name:<40} from {sender_name or '?':<20} "
+                    f"{loc_part}\n")
+            # Ensure file has header on first write
+            if not os.path.exists(self.checklist_file):
+                hdr = (
+                    "=" * 70 + "\n"
+                    f"D2Archipelago — AP Checklist for character '{self.char_name}'\n"
+                    f"Server: {self.server} | Slot: {self.slot}\n"
+                    "Each line is one received AP item — chronological log.\n"
+                    "=" * 70 + "\n\n"
+                )
+                with open(self.checklist_file, "w", encoding="utf-8") as f:
+                    f.write(hdr)
+            with open(self.checklist_file, "a", encoding="utf-8") as f:
+                f.write(line)
+        except Exception as e:
+            self.log(f"Failed to append checklist: {e}", level=logging.WARNING)
 
     def write_unlock(self, ap_item_id, item_name=None, sender_name=None,
                      ap_location_id=0):
@@ -452,7 +761,12 @@ class D2ArchipelagoBridge:
         label = item_name if item_name else f"item {ap_item_id}"
         from_part = f" from {sender_name}" if sender_name else ""
         loc_part = f" loc={ap_location_id}" if ap_location_id else ""
-        self.log(f"UNLOCK written: {label} (id={ap_item_id}){from_part}{loc_part}")
+        # 1.9.5 Bug 15 fix — was INFO, now DEBUG. Redundant with the
+        # surrounding UNLOCKED/RECEIVED log lines that already say
+        # everything important. This was firing per item on every
+        # ReceivedItems replay.
+        self.log(f"UNLOCK written: {label} (id={ap_item_id}){from_part}{loc_part}",
+                 level=logging.DEBUG)
         return True
 
     # ------------------------------------------------------------------
@@ -487,8 +801,13 @@ class D2ArchipelagoBridge:
         # bare location_id — see _load_processed_set docstring.
         dedup_key = (sender_slot_id, ap_location_id)
         if ap_location_id > 0 and dedup_key in self.processed_locations:
+            # 1.9.5 Bug 15 fix — was INFO, now DEBUG. AP server replays the
+            # full ReceivedItems set on every reconnect, so this line fires
+            # thousands of times per session. The actual delivery (UNLOCKED
+            # line) is what the user cares about.
             self.log(f"DEDUP: skipping already-processed (slot={sender_slot_id}, "
-                     f"loc={ap_location_id}) (item {ap_item_id})")
+                     f"loc={ap_location_id}) (item {ap_item_id})",
+                     level=logging.DEBUG)
             return
 
         # --- Zone Key branch ---
@@ -500,6 +819,12 @@ class D2ArchipelagoBridge:
                 if ap_location_id > 0:
                     self._append_processed(sender_slot_id, ap_location_id)
                 self.items_received += 1
+                # 1.9.5 — checklist + spoiler updates
+                self._append_to_checklist(name, sender_name, ap_location_id)
+                if ap_location_id > 0:
+                    self._spoiler_received_locs.add(ap_location_id)
+                    if self._spoiler_data:  # only rewrite if we have scout data
+                        self._write_spoiler_file()
             return
 
         # --- Gate Key branch (1.9.0) ---
@@ -509,19 +834,35 @@ class D2ArchipelagoBridge:
         # bridge log was misleading and the unlock line wrote a
         # nonsense item-name.
         if GATE_KEY_ID_MIN <= ap_item_id <= GATE_KEY_ID_MAX:
-            # Decode (diff, slot) for a clean log line. 58 keys per diff
-            # group (NORMAL=46101..46118, NM=46119..46138, HELL=...).
-            offset = ap_item_id - GATE_KEY_ID_MIN
-            if offset < 18:    diff_label, slot = "Normal", offset
-            elif offset < 38:  diff_label, slot = "Nightmare", offset - 18
-            else:              diff_label, slot = "Hell", offset - 38
-            name = f"Gate Key #{slot} ({diff_label})"
+            # 1.9.5 Gap 5/12 fix — use the gap-aware decoder so the log line
+            # and the checklist entry both show the actual gate (Act/Gate)
+            # and the right difficulty. The previous offset arithmetic
+            # treated NM keys as if they started at 46119 (the gap) instead
+            # of 46121, so every NM key was logged as a Nightmare key from
+            # the WRONG slot, and Hell keys were similarly off-by-2.
+            gk = decode_gate_key(ap_item_id)
+            if gk is None:
+                # ID in the GATE_KEY_ID_MIN..GATE_KEY_ID_MAX envelope but
+                # inside one of the gaps (46119, 46120, 46139, 46140).
+                # The DLL's GateKey_FromAPId would also reject these, so
+                # do not write_unlock — fall through to log + ignore.
+                self.log(f"GATE KEY: invalid id {ap_item_id} (gap range) — skipping",
+                         level=logging.WARNING)
+                return
+            diff_label, slot, gate_name = gk
+            name = f"Gate Key: {gate_name} ({diff_label})"
             self.log(f"GATE KEY: {name}")
             if self.write_unlock(ap_item_id, name, sender_name=sender_name,
                                   ap_location_id=ap_location_id):
                 if ap_location_id > 0:
                     self._append_processed(sender_slot_id, ap_location_id)
                 self.items_received += 1
+                # 1.9.5 — checklist + spoiler updates
+                self._append_to_checklist(name, sender_name, ap_location_id)
+                if ap_location_id > 0:
+                    self._spoiler_received_locs.add(ap_location_id)
+                    if self._spoiler_data:
+                        self._write_spoiler_file()
             return
 
         # --- Filler branch ---
@@ -558,6 +899,12 @@ class D2ArchipelagoBridge:
                 if ap_location_id > 0:
                     self._append_processed(sender_slot_id, ap_location_id)
                 self.items_received += 1
+                # 1.9.5 — checklist + spoiler updates
+                self._append_to_checklist(name, sender_name, ap_location_id)
+                if ap_location_id > 0:
+                    self._spoiler_received_locs.add(ap_location_id)
+                    if self._spoiler_data:
+                        self._write_spoiler_file()
             return
 
         # --- Skill branch ---
@@ -571,13 +918,23 @@ class D2ArchipelagoBridge:
             name = skill['name']
         else:
             name = f"Skill ID {skill_id}"
-            self.log(f"Skill ID {skill_id} (AP item {ap_item_id}) -> written to unlocks file")
+            # 1.9.5 Bug 15 fix — was INFO, now DEBUG. Redundant with the
+            # UNLOCK written line that fires immediately after. Together
+            # they were doubling per-skill log volume on every reconnect.
+            self.log(f"Skill ID {skill_id} (AP item {ap_item_id}) -> written to unlocks file",
+                     level=logging.DEBUG)
 
         if self.write_unlock(ap_item_id, name, sender_name=sender_name,
                                   ap_location_id=ap_location_id):
             if ap_location_id > 0:
                 self._append_processed(sender_slot_id, ap_location_id)
             self.items_received += 1
+            # 1.9.5 — checklist + spoiler updates
+            self._append_to_checklist(name, sender_name, ap_location_id)
+            if ap_location_id > 0:
+                self._spoiler_received_locs.add(ap_location_id)
+                if self._spoiler_data:
+                    self._write_spoiler_file()
 
     # ------------------------------------------------------------------
     # Check polling
@@ -853,6 +1210,9 @@ class D2ArchipelagoBridge:
 
             # Start polling tasks. `_stop` is managed by the outer
             # connect_and_run loop and by shutdown(); do not reset here.
+            # 1.9.5 Gap 8 fix — heartbeat task is now started at the
+            # outer connect_and_run scope (so it covers handshake +
+            # backoff). We no longer create one here.
             poll_task = asyncio.create_task(self.poll_checks())
             death_task = asyncio.create_task(self.poll_death())
             goal_task = asyncio.create_task(self.poll_goal())
@@ -878,56 +1238,87 @@ class D2ArchipelagoBridge:
         exponential backoff (5,10,20,40,60s). Writes `status=reconnecting`
         during retries. The persisted processed_ap_ids set is preserved
         across reconnects so filler/zone-key dedup survives.
+
+        1.9.5 Gap 8 fix — the heartbeat task is started at the OUTER scope
+        so it runs across the entire bridge lifetime, including the wss/ws
+        handshake and the backoff sleep between attempts. Previously the
+        heartbeat lived inside _connect_once and stopped firing during
+        handshake/backoff, which could make the DLL ghost-detect a healthy
+        bridge as dead on slow connections.
         """
         conn_attempt = 0
 
-        while not self._stop:
-            try:
-                # Prefer wss, fall back to ws if TLS fails on first attempt.
+        # 1.9.5 Gap 8 fix — outer heartbeat task. It only writes heartbeat
+        # (via write_status with no positional arg) and pending_checks; it
+        # doesn't depend on self.ws or self.authenticated. Safe to run from
+        # the first moment of the session through to shutdown.
+        outer_hb_task = asyncio.create_task(self._heartbeat_task())
+
+        try:
+            while not self._stop:
                 try:
-                    result = await self._connect_once("wss")
-                except (ssl.SSLError, InvalidStatusCode, OSError) as tls_err:
-                    self.log(f"WSS failed: {tls_err}; trying WS fallback...",
-                             level=logging.WARNING)
-                    result = await self._connect_once("ws")
+                    # Prefer wss, fall back to ws if TLS fails on first attempt.
+                    try:
+                        result = await self._connect_once("wss")
+                    except (ssl.SSLError, InvalidStatusCode, OSError) as tls_err:
+                        self.log(f"WSS failed: {tls_err}; trying WS fallback...",
+                                 level=logging.WARNING)
+                        result = await self._connect_once("ws")
 
-                # If we successfully authenticated at any point during the
-                # session, reset the connection-retry counter so the next
-                # disconnect gets a fresh 5s backoff instead of the previous
-                # ceiling.
-                if self.authenticated:
-                    conn_attempt = 0
+                    # If we successfully authenticated at any point during the
+                    # session, reset the connection-retry counter so the next
+                    # disconnect gets a fresh 5s backoff instead of the previous
+                    # ceiling.
+                    if self.authenticated:
+                        conn_attempt = 0
 
-                # Clean exit from the session loop.
-                if result == "closed" and not self._stop:
-                    self.log("Connection closed by server; will attempt reconnect.")
+                    # Clean exit from the session loop.
+                    if result == "closed" and not self._stop:
+                        self.log("Connection closed by server; will attempt reconnect.")
+                        conn_attempt = min(conn_attempt + 1, len(CONN_BACKOFF_SEQ) - 1)
+                        delay = CONN_BACKOFF_SEQ[conn_attempt]
+                        # 1.9.5 — pass conn_attempt so F1 UI can show "attempt N/5"
+                        self.write_status("reconnecting", conn_attempt=conn_attempt + 1)
+                        self.log(f"Reconnecting in {delay}s (attempt {conn_attempt + 1})...")
+                        # 1.9.5 Gap 2 — interruptible sleep so Force Reconnect kicks in
+                        await self._interruptible_sleep(delay)
+                        continue
+                    # External stop requested
+                    return
+
+                except ConnectionClosed as e:
                     conn_attempt = min(conn_attempt + 1, len(CONN_BACKOFF_SEQ) - 1)
                     delay = CONN_BACKOFF_SEQ[conn_attempt]
-                    self.write_status("reconnecting")
-                    self.log(f"Reconnecting in {delay}s (attempt {conn_attempt + 1})...")
-                    await asyncio.sleep(delay)
+                    self.log(f"ConnectionClosed: {e}. Reconnecting in {delay}s.",
+                             level=logging.WARNING)
+                    self.write_status("reconnecting", conn_attempt=conn_attempt + 1)
+                    # 1.9.5 Gap 2 — interruptible sleep so Force Reconnect kicks in
+                    await self._interruptible_sleep(delay)
                     continue
-                # External stop requested
-                return
-
-            except ConnectionClosed as e:
-                conn_attempt = min(conn_attempt + 1, len(CONN_BACKOFF_SEQ) - 1)
-                delay = CONN_BACKOFF_SEQ[conn_attempt]
-                self.log(f"ConnectionClosed: {e}. Reconnecting in {delay}s.",
-                         level=logging.WARNING)
-                self.write_status("reconnecting")
-                await asyncio.sleep(delay)
-                continue
+                except asyncio.CancelledError:
+                    raise
+                except Exception as e:
+                    conn_attempt = min(conn_attempt + 1, len(CONN_BACKOFF_SEQ) - 1)
+                    delay = CONN_BACKOFF_SEQ[conn_attempt]
+                    self.log(f"Connect error: {e}. Retry in {delay}s.",
+                             level=logging.ERROR)
+                    self.write_status("error", errormsg=str(e)[:100],
+                                      conn_attempt=conn_attempt + 1)
+                    # 1.9.5 Gap 2 — interruptible sleep so Force Reconnect kicks in
+                    await self._interruptible_sleep(delay)
+                    continue
+        finally:
+            # Clean up the outer heartbeat task on exit (clean return, stop
+            # requested, or exception). The inner _connect_once may also
+            # spawn its own short-lived heartbeat task for legacy reasons;
+            # both stop on _stop=True.
+            outer_hb_task.cancel()
+            try:
+                await outer_hb_task
             except asyncio.CancelledError:
-                raise
-            except Exception as e:
-                conn_attempt = min(conn_attempt + 1, len(CONN_BACKOFF_SEQ) - 1)
-                delay = CONN_BACKOFF_SEQ[conn_attempt]
-                self.log(f"Connect error: {e}. Retry in {delay}s.",
-                         level=logging.ERROR)
-                self.write_status("error", errormsg=str(e)[:100])
-                await asyncio.sleep(delay)
-                continue
+                pass
+            except Exception:
+                pass
 
     async def handle_message(self, raw):
         try:
@@ -943,15 +1334,35 @@ class D2ArchipelagoBridge:
             if cmd == "Connected":
                 self.authenticated = True
                 self.slot_data = packet.get("slot_data", {})
+                # 1.9.5 Gap 6 fix — our slot id is at the packet top level,
+                # NOT inside slot_data. Capturing it here lets the spoiler
+                # writer reliably distinguish "items for me" from "items for
+                # other players" when scouting locations in a multiworld.
+                try:
+                    self.my_slot_id = int(packet.get("slot", 0))
+                except (ValueError, TypeError):
+                    self.my_slot_id = 0
                 checked = packet.get("checked_locations", [])
                 # Server-side ack: we can safely consider these already sent.
                 self.checked_locations.update(checked)
+                # 1.9.5: mark these locations as RECEIVED in the spoiler too
+                self._spoiler_received_locs.update(checked)
 
                 # Parse player info from Connected packet
                 players_list = packet.get("players", [])
                 for p in players_list:
                     if isinstance(p, dict):
                         self.players[p.get("slot", 0)] = p.get("alias", p.get("name", "???"))
+
+                # 1.9.5 — capture slot_info (slot -> {name, game}) so the
+                # spoiler can label cross-game items with their game name.
+                slot_info_dict = packet.get("slot_info", {})
+                if isinstance(slot_info_dict, dict):
+                    for slot_key, info in slot_info_dict.items():
+                        try:
+                            self.slot_info[int(slot_key)] = info
+                        except (ValueError, TypeError):
+                            pass
 
                 self.log(f"Authenticated! {len(checked)} checks done, {len(self.players)} players")
                 self.write_status("authenticated")
@@ -1036,6 +1447,14 @@ class D2ArchipelagoBridge:
                         player_name = self.players.get(player_slot, f"Player {player_slot}")
                         body_lines.append(f"{loc_id}={player_name}")
 
+                        # 1.9.5 — capture for spoiler file
+                        self._spoiler_data[loc_id] = {
+                            "item_id":         item_id,
+                            "item_name":       self._resolve_item_name_for_spoiler(item_id, player_slot),
+                            "recipient_slot":  player_slot,
+                            "recipient_name":  player_name,
+                        }
+
                         # 1.8.5 — also record item placements for the DLL F4
                         # tracker. We store BOTH legacy zone-keys (46001-46038)
                         # AND the new gate-keys (46101-46158) so the F4 tracker
@@ -1048,7 +1467,8 @@ class D2ArchipelagoBridge:
                         is_zone_key = ZONE_KEY_ID_MIN <= item_id <= ZONE_KEY_ID_MAX
                         is_gate_key = GATE_KEY_ID_MIN <= item_id <= GATE_KEY_ID_MAX
                         if is_zone_key or is_gate_key:
-                            our_slot = self.slot_data.get("slot", 0) if isinstance(self.slot_data, dict) else 0
+                            # 1.9.5 Gap 6 fix — same slot id capture issue.
+                            our_slot = int(getattr(self, "my_slot_id", 0))
                             our_name = self.players.get(our_slot, f"Slot{our_slot}")
                             value = f"{loc_id}|{our_slot}|{our_name}|{player_slot}"
                             if self._item_locations.get(item_id) != value:
@@ -1067,6 +1487,9 @@ class D2ArchipelagoBridge:
                                            "\n".join(item_lines) + "\n" if item_lines else "")
                         self.log(f"Updated ap_item_locations.dat (+{new_keys} keys, "
                                  f"total={len(self._item_locations)})")
+
+                    # 1.9.5 — write the human-readable spoiler file
+                    self._write_spoiler_file()
                 except Exception as e:
                     self.log(f"Failed to write location owners: {e}",
                              level=logging.ERROR)
@@ -1089,6 +1512,20 @@ class D2ArchipelagoBridge:
                     # Trap does NOT dedup — incoming death bounces are events,
                     # not persistent AP items. Bypass process_item entirely.
                     self.write_unlock(45505, "Death Link Trap")
+                    # 1.9.5 Gap 13 fix — also append to checklist so the
+                    # player can review who's been killing them. DeathLinks
+                    # don't have an AP location id (they're bouncers, not
+                    # locations), so ap_location_id is 0 — the checklist
+                    # writer renders that as "(event)" instead of a loc id.
+                    try:
+                        cause_short = (cause or "Died").strip()
+                        self._append_to_checklist(
+                            f"Death Link Trap (from {source}: {cause_short})",
+                            source, 0,
+                        )
+                    except Exception as e:
+                        self.log(f"DeathLink checklist append failed: {e}",
+                                 level=logging.WARNING)
 
             elif cmd == "InvalidPacket":
                 text = packet.get('text', '?')
@@ -1177,14 +1614,21 @@ async def main_loop(game_dir):
     bridge = None
     last_cmd_mtime = 0
 
-    # Write initial status
+    # Write initial status (includes heartbeat from 1.9.5 onwards)
+    status_path = os.path.join(arch_dir, "ap_status.dat")
     try:
         _atomic_write_text(
-            os.path.join(arch_dir, "ap_status.dat"),
-            "status=disconnected\nitems_received=0\nchecks_sent=0\n",
+            status_path,
+            f"status=disconnected\nitems_received=0\nchecks_sent=0\n"
+            f"heartbeat={int(time.time())}\n",
         )
     except Exception:
         pass
+
+    # 1.9.5 — pre-bridge idle heartbeat. When no bridge instance exists,
+    # we still need to keep ap_status.dat fresh so the DLL doesn't
+    # ghost-detect us. Counter wraps every HEARTBEAT_INTERVAL ticks.
+    pre_bridge_hb_ticks = 0
 
     while not _SHUTDOWN_REQUESTED:
         cmd = read_command(cmd_file)
@@ -1212,16 +1656,111 @@ async def main_loop(game_dir):
                     bridge = D2ArchipelagoBridge(server, slot, password, char,
                                                   arch_dir, deathlink=deathlink)
                     clear_command(cmd_file)
+                    # 1.9.5 Gap 2 fix — spawn bridge as a task and poll
+                    # commands concurrently so a Force Reconnect (or a
+                    # credential change) issued during the lifetime of
+                    # this bridge can interrupt the backoff sleep or
+                    # tear down the bridge entirely.
+                    bridge_run_task = asyncio.create_task(
+                        bridge.connect_and_run())
                     try:
-                        await bridge.connect_and_run()
+                        while not _SHUTDOWN_REQUESTED and not bridge_run_task.done():
+                            try:
+                                await asyncio.wait_for(
+                                    asyncio.shield(bridge_run_task),
+                                    timeout=COMMAND_POLL_INTERVAL,
+                                )
+                            except asyncio.TimeoutError:
+                                pass
+                            if bridge_run_task.done():
+                                break
+
+                            cmd2 = read_command(cmd_file)
+                            if cmd2 and cmd2.get('_mtime', 0) > last_cmd_mtime:
+                                last_cmd_mtime = cmd2.get('_mtime', 0)
+                                act2 = cmd2.get('action', '')
+                                if act2 == 'connect':
+                                    new_server = cmd2.get('server', 'localhost:38281')
+                                    new_slot = cmd2.get('slot', '')
+                                    new_password = cmd2.get('password', '')
+                                    new_char = cmd2.get('char', '')
+                                    new_dl = cmd2.get('deathlink', '0') == '1'
+                                    same_creds = (
+                                        new_server == bridge.server
+                                        and new_slot == bridge.slot
+                                        and new_password == bridge.password
+                                        and new_char == bridge.char_name
+                                        and new_dl == bridge.deathlink
+                                    )
+                                    if same_creds:
+                                        ts2 = time.strftime("%H:%M:%S")
+                                        print(f"[{ts2}] Force Reconnect "
+                                              f"(same creds) — kicking backoff",
+                                              flush=True)
+                                        bridge.kick_reconnect()
+                                        clear_command(cmd_file)
+                                    else:
+                                        ts2 = time.strftime("%H:%M:%S")
+                                        print(f"[{ts2}] New connect with "
+                                              f"different creds — restarting "
+                                              f"bridge", flush=True)
+                                        bridge._stop = True
+                                        bridge.kick_reconnect()
+                                        try:
+                                            await bridge.shutdown()
+                                        except Exception:
+                                            pass
+                                        try:
+                                            await bridge_run_task
+                                        except Exception:
+                                            pass
+                                        bridge = D2ArchipelagoBridge(
+                                            new_server, new_slot,
+                                            new_password, new_char,
+                                            arch_dir, deathlink=new_dl)
+                                        clear_command(cmd_file)
+                                        bridge_run_task = asyncio.create_task(
+                                            bridge.connect_and_run())
+                                elif act2 == 'disconnect':
+                                    bridge._stop = True
+                                    bridge.kick_reconnect()
+                                    try:
+                                        await bridge.shutdown()
+                                    except Exception:
+                                        pass
+                                    try:
+                                        await bridge_run_task
+                                    except Exception:
+                                        pass
+                                    bridge = None
+                                    bridge_run_task = None
+                                    clear_command(cmd_file)
+                                    ts2 = time.strftime("%H:%M:%S")
+                                    print(f"[{ts2}] Disconnected by user",
+                                          flush=True)
+                                    break
                     except asyncio.CancelledError:
+                        if bridge:
+                            try:
+                                await bridge.shutdown()
+                            except Exception:
+                                pass
                         raise
                     except Exception as e:
                         ts2 = time.strftime("%H:%M:%S")
                         print(f"[{ts2}] Bridge error: {e}", flush=True)
                     finally:
+                        # Ensure bridge task is fully drained before returning
+                        if bridge_run_task and not bridge_run_task.done():
+                            try:
+                                await bridge_run_task
+                            except Exception:
+                                pass
                         if bridge:
-                            await bridge.shutdown()
+                            try:
+                                await bridge.shutdown()
+                            except Exception:
+                                pass
                         bridge = None
                         ts2 = time.strftime("%H:%M:%S")
                         print(f"[{ts2}] Disconnected. Waiting for new Connect command...",
@@ -1238,6 +1777,24 @@ async def main_loop(game_dir):
                 clear_command(cmd_file)
                 ts2 = time.strftime("%H:%M:%S")
                 print(f"[{ts2}] Disconnected by user", flush=True)
+
+        # 1.9.5 — pre-bridge idle heartbeat. When `bridge is None` (no
+        # active session), refresh ap_status.dat every HEARTBEAT_INTERVAL
+        # ticks (~30s with COMMAND_POLL_INTERVAL=1s) so the DLL doesn't
+        # ghost-detect the bridge as dead. Bridge-active heartbeats are
+        # handled by D2ArchipelagoBridge._heartbeat_task.
+        if bridge is None:
+            pre_bridge_hb_ticks += 1
+            if pre_bridge_hb_ticks >= HEARTBEAT_INTERVAL:
+                pre_bridge_hb_ticks = 0
+                try:
+                    _atomic_write_text(
+                        status_path,
+                        f"status=disconnected\nitems_received=0\nchecks_sent=0\n"
+                        f"heartbeat={int(time.time())}\n",
+                    )
+                except Exception:
+                    pass
 
         await asyncio.sleep(COMMAND_POLL_INTERVAL)
 

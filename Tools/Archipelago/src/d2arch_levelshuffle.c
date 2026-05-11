@@ -99,7 +99,14 @@ static const DungeonSet g_sets[] = {
     { 17, 1, { 19 },                  1, 0, "Mausoleum"             },
     {  6, 1, { 11, 15 },              2, 0, "Hole"                  },
     {  7, 1, { 12, 16 },              2, 0, "Pit"                   },
-    { 20, 1, { 21, 22, 23, 24, 25 }, 5, 0, "Tower Cellar"           },
+    /* 1.9.5 bug O3 fix: Forgotten Tower L1 is level 20 (entry from Black
+     * Marsh = level 6 via Vis2). Previously this set declared
+     * surfaceParent=20 (wrong — that's Tower L1 itself) and members[]
+     * started at 21 (Tower L2). When the shuffle picked Tower as the
+     * destination, LEVEL_WarpUnit warped to level 21's default spawn
+     * point = the staircase-from-above tile = "Tower Level 2 stairs"
+     * (per Maegis bug report). Fix: surfaceParent=6, members[0]=20. */
+    {  6, 1, { 20, 21, 22, 23, 24, 25 }, 6, 0, "Forgotten Tower"     },
     {  4, 1, { 38 },                  1, 0, "Tristram (portal)"     },
     /* Act 2 */
     { 40, 2, { 47, 48, 49 },          3, 0, "A2 Sewers"             },
@@ -270,16 +277,24 @@ static BOOL IsActBossDead(void* pQuestFlags, int d2QuestId) {
 }
 
 /* Read pQuestFlags via pGame->pQuestControl->pQuestFlags chain.
- * Same offsets as CheckQuestFlags() in d2arch_gameloop.c. */
+ * Same offsets as CheckQuestFlags() in d2arch_gameloop.c.
+ *
+ * 1.9.5 fix — return 1 (act-1 only) on all transient NULL paths
+ * instead of 5 (all acts unlocked). Previously a brief NULL on
+ * pQuestControl during character respawn could let the player wander
+ * acts they hadn't unlocked, corrupting gate state. Fail-CLOSED is
+ * strictly safer than fail-open: worst case is the player has to
+ * walk back to act 1 town for a frame; vs. fail-open which could
+ * mid-game-corrupt their quest state. */
 static int GetHighestUnlockedAct(void) {
-    if (!g_cachedPGame || !fnGetQuestState) return 5;  /* fail open */
+    if (!g_cachedPGame || !fnGetQuestState) return 1;  /* fail closed */
     void* pQuestFlags = NULL;
     __try {
         DWORD pQuestControl = *(DWORD*)(g_cachedPGame + 0x10F4);
-        if (!pQuestControl) return 5;
+        if (!pQuestControl) return 1;
         pQuestFlags = *(void**)(pQuestControl + 0x0C);
-    } __except(EXCEPTION_EXECUTE_HANDLER) { return 5; }
-    if (!pQuestFlags) return 5;
+    } __except(EXCEPTION_EXECUTE_HANDLER) { return 1; }
+    if (!pQuestFlags) return 1;
 
     int act = 1;
     if (IsActBossDead(pQuestFlags, ACT_BOSS_QUEST_ANDARIEL)) act = 2;

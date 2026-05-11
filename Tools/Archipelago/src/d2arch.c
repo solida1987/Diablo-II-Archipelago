@@ -90,4 +90,7 @@
 #include "d2arch_questlog.c"    /* Quest book + tracker UI              (~713 lines) */
 #include "d2arch_ap.c"          /* AP bridge, connection, DC6 loading   (~747 lines) */
 #include "d2arch_drawall.c"     /* Skill tree render, DrawAll()        (~2062 lines) */
+/* Rift/Reset experiments removed 2026-05-05 — see
+ * Research/RIFT_AND_RESET_FAILURE_2026-05-05.md for full postmortem.
+ * Per-level mid-game reset is fundamentally impossible in D2 1.10f. */
 #include "d2arch_main.c"        /* WndProc, InitAPI, DllMain           (~1111 lines) */

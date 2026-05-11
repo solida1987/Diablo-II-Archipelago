@@ -1084,9 +1084,9 @@ Story + hunts only (~140 locations). Less side-grinding.
 | `check_cow_level` | toggle | false | true/false | 1.9.2 — 9 cow-level slots |
 | `check_merc_milestones` | toggle | false | true/false | 1.9.2 — 6 mercenary slots |
 | `check_hellforge_runes` | toggle | false | true/false | 1.9.2 — 12 Hellforge+High Rune slots |
-| `check_npc_dialogue` | toggle | false | true/false | 1.9.2 — 81 NPC slots (DLL detection 1.9.3) |
-| `check_runeword_crafting` | toggle | false | true/false | 1.9.2 — 50 runeword slots (DLL detection 1.9.3) |
-| `check_cube_recipes` | toggle | false | true/false | 1.9.2 — 135 cube slots (DLL detection 1.9.3) |
+| `check_npc_dialogue` | toggle | false | true/false | 1.9.2 — 81 NPC slots (DLL detection shipped in 1.9.2) |
+| `check_runeword_crafting` | toggle | false | true/false | 1.9.2 — 50 runeword slots (DLL detection shipped in 1.9.2) |
+| `check_cube_recipes` | toggle | false | true/false | 1.9.2 — 135 cube slots (DLL detection shipped in 1.9.2) |
 | `death_link` | toggle | false | true/false | DeathLink broadcast |
 
 ### AP-internal settings (set by Archipelago itself, not user)
@@ -1219,5 +1219,5 @@ Act 2 trivial. Keep at 1-3x if you want vanilla difficulty pacing.
 
 ---
 
-*Document version: 1.9.2 (in development) | Last updated: 2026-05-03*
+*Document version: 1.9.5 | Last updated: 2026-05-11*
 *For questions or bug reports: see the Discord link in the launcher.*
