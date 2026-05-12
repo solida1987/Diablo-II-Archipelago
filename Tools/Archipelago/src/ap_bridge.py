@@ -400,8 +400,9 @@ class D2ArchipelagoBridge:
                 self.log(f"State file not found: {self.state_file}")
                 return
         past_assignments = False
+        skipped = 0
         with open(self.state_file, 'r') as f:
-            for line in f:
+            for line_num, line in enumerate(f, 1):
                 line = line.strip()
                 if line == "assignments=":
                     past_assignments = True
@@ -409,13 +410,47 @@ class D2ArchipelagoBridge:
                 if not past_assignments or not line:
                     continue
                 parts = line.split(',')
-                if len(parts) >= 4:
-                    name, cls, unlocked, skill_id = parts[0], parts[1], int(parts[2]), int(parts[3])
-                    self.skills[skill_id] = {
-                        'name': name, 'cls': cls, 'unlocked': unlocked,
-                        'ap_id': AP_ITEM_BASE + skill_id
-                    }
-        self.log(f"Loaded {len(self.skills)} skills from state file")
+                if len(parts) < 4:
+                    # Lines like quest_X_Y=1, areakills_N=M, pendingGold=N etc.
+                    # appear after the assignments block in the state file —
+                    # they have no commas and are skipped silently.
+                    continue
+                # 1.9.5.1 hot-fix — robust int() parsing. A single corrupted
+                # line was crashing the entire bridge with `ValueError:
+                # invalid literal for int() with base 10: '1:0'` (Alphena
+                # bug report 2026-05-11). Now we log + skip the bad line
+                # and keep the bridge alive.
+                try:
+                    name = parts[0]
+                    cls = parts[1]
+                    unlocked = int(parts[2])
+                    skill_id = int(parts[3])
+                except (ValueError, IndexError) as e:
+                    skipped += 1
+                    if skipped <= 5:
+                        self.log(
+                            f"load_skills: skipping malformed line {line_num} "
+                            f"({line!r}): {e}",
+                            level=logging.WARNING,
+                        )
+                    elif skipped == 6:
+                        self.log(
+                            f"load_skills: more malformed lines suppressed",
+                            level=logging.WARNING,
+                        )
+                    continue
+                self.skills[skill_id] = {
+                    'name': name, 'cls': cls, 'unlocked': unlocked,
+                    'ap_id': AP_ITEM_BASE + skill_id,
+                }
+        if skipped > 0:
+            self.log(
+                f"Loaded {len(self.skills)} skills from state file "
+                f"({skipped} malformed lines skipped)",
+                level=logging.WARNING,
+            )
+        else:
+            self.log(f"Loaded {len(self.skills)} skills from state file")
 
     # ------------------------------------------------------------------
     # Processed-location persistence (1.7.1: location-based dedup)
