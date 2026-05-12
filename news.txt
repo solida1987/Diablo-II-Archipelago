@@ -8,6 +8,27 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.6 - Hot-Fix on top of 1.9.5 ===
+
+Hot-fix release that unblocks two issues some players hit on 1.9.5:
+
+- The Archipelago bridge could crash on startup if your character's
+  saved state file had even one corrupted line in it. Reported by
+  Alphena. The bridge now gracefully skips bad lines instead of
+  taking down the entire connection. If your AP Connect button
+  refused to turn green on 1.9.5, try again on 1.9.6.
+
+- The launcher's "Files keep failing to download" error after the
+  1.9.5 hot-fix. The cached manifest from before the hot-fix had
+  stale SHA256 checksums that no longer matched the new file bytes,
+  so the launcher gave up after 3 retries. 1.9.6 ships as a clean
+  version bump with a fresh manifest so the launcher can verify
+  cleanly without any leftover SHA confusion.
+
+Everything else from 1.9.5 is included — see the 1.9.5 patch notes
+for the full community bug-fix list (15 fixes covering item loss,
+animation softlocks, AP integration, EULA cleanup, etc.).
+
 === Beta 1.9.5 - Big Community Bug-Fix Release ===
 
 Major bug-fix release addressing 15 community-reported issues plus
