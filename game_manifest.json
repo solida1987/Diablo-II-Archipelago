@@ -265,7 +265,7 @@
     },
     {
       "path": "ap_bridge_dist/_internal/base_library.zip",
-      "sha256": "922aa3450c134e4e4ae15772c655d3bae106fd8a31799ae96b72ac2b2d7701f7",
+      "sha256": "494555784e0715342488043c580a7b0aef8579d2085a055d8e38addcb961d9c8",
       "size": 1402457
     },
     {
@@ -365,8 +365,8 @@
     },
     {
       "path": "ap_bridge_dist/ap_bridge.exe",
-      "sha256": "7f063f9bcd7da8dbc210b8f961284a15171a096c7b09476d0bc388e5b8299bae",
-      "size": 2887126
+      "sha256": "dcc4eafef72bfa9350143afbbd1eaeb317ad2d79ab87b6e6c3cdc13be353159d",
+      "size": 2887560
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
