@@ -1219,5 +1219,5 @@ Act 2 trivial. Keep at 1-3x if you want vanilla difficulty pacing.
 
 ---
 
-*Document version: 1.9.7 | Last updated: 2026-05-12*
+*Document version: 1.9.8 | Last updated: 2026-05-13*
 *For questions or bug reports: see the Discord link in the launcher.*

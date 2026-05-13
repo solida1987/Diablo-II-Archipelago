@@ -197,19 +197,23 @@ public class MainForm : Form
 	private Button _btnBrowseD2Original;
 
 	// Files that must be copied from the user's original D2 installation
-	// 1.9.7 fix: added d2char/d2data/d2sfx (caught leaking 2026-05-01) and Game.exe
-	// (caught leaking 2026-05-12). Without these in the copy list the install
-	// completes "successfully" but the game can't launch — D2.DetoursLauncher
-	// reports "The path Game.exe does not point to a file" and the install is
-	// missing the 3 large MPQs from the Blizzard data set.
+	// 1.9.7 fix: added d2char/d2data/d2sfx to the copy list (caught leaking
+	// 2026-05-01). These are version-INDEPENDENT data MPQs — 1.14 versions
+	// work fine with 1.10f code.
+	//
+	// 1.9.8 lesson: Game.exe was briefly added in 1.9.7 — REVERTED in 1.9.8.
+	// Game.exe is VERSION-SPECIFIC (1.10f loader = 90 KB; 1.14 loader = 3.5 MB,
+	// binary-incompatible with our mod). We MUST ship our own 1.10f Game.exe
+	// in game_package.zip; copying from user's install causes
+	// "Game version is not supported" error from D2.DetoursLauncher.
+	// Same applies to all D2*.dll files — those are 1.10f binaries we ship.
 	// MUST stay in sync with GameDownloader.cs ORIGINAL_D2_FILES.
 	private static readonly string[] ORIGINAL_D2_FILES = new[]
 	{
 		"D2.LNG", "SmackW32.dll", "binkw32.dll", "d2exp.mpq",
 		"d2music.mpq", "d2speech.mpq", "d2video.mpq", "d2xmusic.mpq",
 		"d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll",
-		"d2char.mpq", "d2data.mpq", "d2sfx.mpq",
-		"Game.exe"
+		"d2char.mpq", "d2data.mpq", "d2sfx.mpq"
 	};
 
 	private Image? _sprLogo;

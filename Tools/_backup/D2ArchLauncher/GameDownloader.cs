@@ -20,17 +20,19 @@ public class GameDownloader
 	private readonly HttpClient _http;
 
 	// Original Blizzard files - NOT downloaded from GitHub (copied from user's D2 install)
-	// 1.9.7 fix: added d2char/d2data/d2sfx (caught leaking 2026-05-01) and Game.exe
-	// (caught leaking 2026-05-12). Without these in the launcher's copy list, users
-	// got installs with missing files and "Game.exe does not point to a file" errors
-	// when trying to launch (per Dewsader/Alphena bug reports).
+	// 1.9.7 fix: added d2char/d2data/d2sfx (caught leaking 2026-05-01).
+	// These are version-INDEPENDENT data MPQs — 1.14 versions work with 1.10f code.
+	//
+	// 1.9.8 lesson: Game.exe was briefly here in 1.9.7 — REVERTED in 1.9.8.
+	// Game.exe is the 1.10f loader binary (90 KB) — must be SHIPPED, NOT copied
+	// from user's 1.14 install (3.5 MB binary-incompatible). Causes
+	// "Game version is not supported" if copied wrong.
 	private static readonly HashSet<string> ORIGINAL_D2_FILES = new(StringComparer.OrdinalIgnoreCase)
 	{
 		"D2.LNG", "SmackW32.dll", "binkw32.dll", "d2exp.mpq",
 		"d2music.mpq", "d2speech.mpq", "d2video.mpq", "d2xmusic.mpq",
 		"d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll",
-		"d2char.mpq", "d2data.mpq", "d2sfx.mpq",
-		"Game.exe"
+		"d2char.mpq", "d2data.mpq", "d2sfx.mpq"
 	};
 
 	public bool IsCancelled { get; set; }

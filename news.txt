@@ -8,6 +8,30 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.8 - Game.exe Version Mismatch Fix ===
+
+If you tried to install 1.9.7 fresh and got "Game version is not
+supported!" — this release fixes that.
+
+What was broken: 1.9.7 added Game.exe to the launcher's "copy from
+your D2 install" list to save download size. But Diablo II 1.10f
+and 1.14 have BINARY-INCOMPATIBLE Game.exe files (90 KB vs 3.5 MB).
+Most modern D2 installs are patched to 1.14 by Blizzard's auto-
+patcher, so the launcher copied the wrong-version Game.exe and the
+mod refused to launch.
+
+Fix: Game.exe is back in the game package (we ship our own 1.10f
+version, 90 KB). The launcher no longer copies it from your install.
+Same for all D2*.dll files — those are 1.10f binaries the mod is
+built around.
+
+Big data MPQs (d2char, d2data, d2sfx + the original 11 files) are
+still copied from your D2 install — those are version-independent
+and 1.14 versions work with 1.10f code.
+
+Net result: package size unchanged from 1.9.7 (~92 MB), fresh
+installs work, "Game version is not supported" gone.
+
 === Beta 1.9.7 - Critical Installer Hot-Fix ===
 
 If you tried to install 1.9.5 or 1.9.6 fresh and got the error

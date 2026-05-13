@@ -12,17 +12,22 @@ import zipfile, os, sys
 # (580 MB) and into the manifest, both EULA-illegal. Users must copy
 # these from their own D2 install. Once the launcher is rebuilt with
 # these added to ORIGINAL_D2_FILES, it will copy them automatically.
-# 1.9.5 fix — Game.exe (vanilla Blizzard 1.10f Game.exe, 90 KB) was
-# leaking into the manifest too. Caught by pre-release audit on 2026-05-11.
-# Contains "Blizzard Entertainment" + imports D2Client/D2Launch/D2Win/
-# D2gfx/Storm/Fog DLLs — it is the Blizzard game executable. Diablo II.exe
-# (36 KB) is OUR custom stub with no Blizzard strings and is safe to ship.
+#
+# 1.9.5 -> 1.9.8 lesson learned: Game.exe is a VERSION-SPECIFIC 1.10f
+# loader binary (90 KB). It MUST be shipped from us — copying from the
+# user's D2 install gets the 1.14 version (3.5 MB) which is binary-
+# incompatible with our 1.10f mod (D2.DetoursLauncher reports
+# "Game version is not supported"). We've always shipped Game.exe in
+# 1.9.4 and earlier. The 1.9.5 audit suggested skipping it for EULA
+# reasons but that broke fresh installs. Reverted in 1.9.8.
+# Same applies to Diablo II.exe and all D2*.dll files — they're 1.10f
+# binaries the mod is built around.
 SKIP_FILES = {
     "D2.LNG", "SmackW32.dll", "binkw32.dll", "d2exp.mpq",
     "d2music.mpq", "d2speech.mpq", "d2video.mpq", "d2xmusic.mpq",
     "d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll",
     "d2char.mpq", "d2data.mpq", "d2sfx.mpq",
-    "Game.exe",  # 1.9.5: Blizzard 1.10f game executable
+    # Game.exe deliberately NOT in this list — see header comment above.
 }
 SKIP_DIRS = {
     "save", ".git", "crashdump",
