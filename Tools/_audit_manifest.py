@@ -17,7 +17,9 @@ forbidden = [
     "d2exp.mpq", "d2music.mpq", "d2speech.mpq", "d2video.mpq",
     "d2xmusic.mpq", "d2xtalk.mpq", "d2xvideo.mpq", "ijl11.dll",
     "d2char.mpq", "d2data.mpq", "d2sfx.mpq",
-    "Game.exe",
+    # Game.exe deliberately NOT here — it's a 1.10f loader binary the
+    # mod is built around; we ship it. See _pack_game.py SKIP_FILES
+    # comment for full rationale (1.9.8 lesson learned).
 ]
 forbidden_lc = {f.lower() for f in forbidden}
 

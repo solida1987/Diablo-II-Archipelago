@@ -1,7 +1,7 @@
 {
-  "version": "Beta-1.9.7",
-  "version_display": "Beta 1.9.7",
-  "file_count": 889,
+  "version": "Beta-1.9.8",
+  "version_display": "Beta 1.9.8",
+  "file_count": 890,
   "files": [
     {
       "path": "ap_bridge_dist/_internal/_asyncio.pyd",
@@ -370,8 +370,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "17f6718ffb69c0703231081363c554ee198b33a26f272d235b36fa6c3efea979",
-      "size": 46619
+      "sha256": "dfd11874a01f8e37ac3c69a98526e8aca53169287cc0180f660c65438b5d8e05",
+      "size": 46620
     },
     {
       "path": "apworld/diablo2_archipelago/__init__.py",
@@ -380,7 +380,7 @@
     },
     {
       "path": "apworld/diablo2_archipelago/archipelago.json",
-      "sha256": "25ac6851b2894285f15af28eebb203807c1c26213808758ed435caa22ce38bd0",
+      "sha256": "6759ae314c6d2f2e053ecd3c3f4c13747b2e9fd678bbc2302acee9dd3e11e173",
       "size": 231
     },
     {
@@ -685,12 +685,12 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "0f7c628bbabbcd18b81c1aead3dd35fd3bcde90a92336b932f27f9b07aebdf09",
+      "sha256": "0b435aa178bdf4ef856cbc67c8ddac4de72b754165a57aa1420d5c8fc7ae3e96",
       "size": 121856
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "71b8460f23d7682fcfd34d52338274bcf32e05b8ec199045b2872a8631c33db2",
+      "sha256": "094193b4a77425a9caf49d91c75a3e8ab40f7be5506306531c77956c9e1cfc36",
       "size": 704000
     },
     {
@@ -4384,13 +4384,18 @@
       "size": 188476
     },
     {
+      "path": "Game.exe",
+      "sha256": "1ea46ed66d3b9c12965edf13b6d8141cf570249d53991ecadab4892ed8f99ea9",
+      "size": 90112
+    },
+    {
       "path": "glide3x.dll",
       "sha256": "64f9ceb7ae55361dd4e7f339e407b97c4ef27bd40e0f7fc6772c5fda9a4a062f",
       "size": 2838528
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "71b8460f23d7682fcfd34d52338274bcf32e05b8ec199045b2872a8631c33db2",
+      "sha256": "094193b4a77425a9caf49d91c75a3e8ab40f7be5506306531c77956c9e1cfc36",
       "size": 704000
     },
     {
