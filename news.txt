@@ -8,6 +8,28 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.7 - Critical Installer Hot-Fix ===
+
+If you tried to install 1.9.5 or 1.9.6 fresh and got the error
+"(D2.DetoursLauncher): The path Game.exe does not point to a file"
+when launching — this release fixes that.
+
+What was broken: We made the game package smaller by stripping out
+Blizzard files we can't redistribute (Game.exe, d2char.mpq,
+d2data.mpq, d2sfx.mpq), but the launcher's "files to copy from your
+own D2 install" list was never updated to include those four files.
+So the launcher downloaded an incomplete game and never copied the
+missing files. Install looked successful but the game wouldn't
+launch.
+
+Fix: Launcher rebuilt with the four files added to its copy list.
+Fresh installs of 1.9.7 just work, and updating from 1.9.6 will
+silently heal any missing files.
+
+Everything else from 1.9.5 + 1.9.6 carries over (15 community bug
+fixes, AP lifecycle hardening, bridge parser robustness, etc.).
+See patch_notes_1.9.5.md / patch_notes_1.9.6.md for the full list.
+
 === Beta 1.9.6 - Hot-Fix on top of 1.9.5 ===
 
 Hot-fix release that unblocks two issues some players hit on 1.9.5:
