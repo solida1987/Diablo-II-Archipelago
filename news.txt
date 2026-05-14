@@ -8,6 +8,36 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.9 - Custom Goal Fixes ===
+
+Three coordinated bugs in the Custom Goal feature are now fixed.
+
+If you tried Custom Goal in 1.9.2 through 1.9.8 and noticed the goal
+never actually completed — that's because the DLL's settings parser
+was silently turning every Custom Goal seed into a Full Nightmare
+seed (a single line of off-by-one math). The bug was completely
+invisible: the F1 menu showed "Custom" but the win check ran on
+Baal Nightmare. Fixed.
+
+If you picked a narrow Custom Goal like "kill Andariel on Normal"
+in a multiworld and afterwards saw other players asking you to
+press !release for items stuck in your slot — that's because the
+apworld was generating a full 700-location pool regardless of your
+selected toggles. Other players' progression items got placed at
+your out-of-scope Hell zones with no incentive for you to visit.
+Now the apworld computes scope from the selected toggles: narrow
+goals get narrow location pools (Andariel Normal now generates 70
+locations instead of ~700, Baal Normal 223, etc.). Multiworld
+items stop getting stranded.
+
+If you picked Uber Mephisto / Diablo / Baal or the full Pandemonium
+event as your Custom Goal target — those checks could never fire
+because the DLL handlers for them existed but had no callers.
+Wired up.
+
+These three fixes together make Custom Goal usable end-to-end for
+the first time since the feature shipped in 1.9.2.
+
 === Beta 1.9.8 - Game.exe Version Mismatch Fix ===
 
 If you tried to install 1.9.7 fresh and got "Game version is not

@@ -8,6 +8,162 @@ The launcher requires you to point to your existing Diablo II + Lord of
 Destruction installation. Original game files are copied from your own
 install automatically. Only Diablo II Classic is supported (NOT Resurrected).
 
+=== Beta 1.9.9 - Custom Goal Fixes ===
+
+Three coordinated bugs in the Custom Goal feature are now fixed.
+
+If you tried Custom Goal in 1.9.2 through 1.9.8 and noticed the goal
+never actually completed — that's because the DLL's settings parser
+was silently turning every Custom Goal seed into a Full Nightmare
+seed (a single line of off-by-one math). The bug was completely
+invisible: the F1 menu showed "Custom" but the win check ran on
+Baal Nightmare. Fixed.
+
+If you picked a narrow Custom Goal like "kill Andariel on Normal"
+in a multiworld and afterwards saw other players asking you to
+press !release for items stuck in your slot — that's because the
+apworld was generating a full 700-location pool regardless of your
+selected toggles. Other players' progression items got placed at
+your out-of-scope Hell zones with no incentive for you to visit.
+Now the apworld computes scope from the selected toggles: narrow
+goals get narrow location pools (Andariel Normal now generates 70
+locations instead of ~700, Baal Normal 223, etc.). Multiworld
+items stop getting stranded.
+
+If you picked Uber Mephisto / Diablo / Baal or the full Pandemonium
+event as your Custom Goal target — those checks could never fire
+because the DLL handlers for them existed but had no callers.
+Wired up.
+
+These three fixes together make Custom Goal usable end-to-end for
+the first time since the feature shipped in 1.9.2.
+
+=== Beta 1.9.8 - Game.exe Version Mismatch Fix ===
+
+If you tried to install 1.9.7 fresh and got "Game version is not
+supported!" — this release fixes that.
+
+What was broken: 1.9.7 added Game.exe to the launcher's "copy from
+your D2 install" list to save download size. But Diablo II 1.10f
+and 1.14 have BINARY-INCOMPATIBLE Game.exe files (90 KB vs 3.5 MB).
+Most modern D2 installs are patched to 1.14 by Blizzard's auto-
+patcher, so the launcher copied the wrong-version Game.exe and the
+mod refused to launch.
+
+Fix: Game.exe is back in the game package (we ship our own 1.10f
+version, 90 KB). The launcher no longer copies it from your install.
+Same for all D2*.dll files — those are 1.10f binaries the mod is
+built around.
+
+Big data MPQs (d2char, d2data, d2sfx + the original 11 files) are
+still copied from your D2 install — those are version-independent
+and 1.14 versions work with 1.10f code.
+
+Net result: package size unchanged from 1.9.7 (~92 MB), fresh
+installs work, "Game version is not supported" gone.
+
+=== Beta 1.9.7 - Critical Installer Hot-Fix ===
+
+If you tried to install 1.9.5 or 1.9.6 fresh and got the error
+"(D2.DetoursLauncher): The path Game.exe does not point to a file"
+when launching — this release fixes that.
+
+What was broken: We made the game package smaller by stripping out
+Blizzard files we can't redistribute (Game.exe, d2char.mpq,
+d2data.mpq, d2sfx.mpq), but the launcher's "files to copy from your
+own D2 install" list was never updated to include those four files.
+So the launcher downloaded an incomplete game and never copied the
+missing files. Install looked successful but the game wouldn't
+launch.
+
+Fix: Launcher rebuilt with the four files added to its copy list.
+Fresh installs of 1.9.7 just work, and updating from 1.9.6 will
+silently heal any missing files.
+
+Everything else from 1.9.5 + 1.9.6 carries over (15 community bug
+fixes, AP lifecycle hardening, bridge parser robustness, etc.).
+See patch_notes_1.9.5.md / patch_notes_1.9.6.md for the full list.
+
+=== Beta 1.9.6 - Hot-Fix on top of 1.9.5 ===
+
+Hot-fix release that unblocks two issues some players hit on 1.9.5:
+
+- The Archipelago bridge could crash on startup if your character's
+  saved state file had even one corrupted line in it. Reported by
+  Alphena. The bridge now gracefully skips bad lines instead of
+  taking down the entire connection. If your AP Connect button
+  refused to turn green on 1.9.5, try again on 1.9.6.
+
+- The launcher's "Files keep failing to download" error after the
+  1.9.5 hot-fix. The cached manifest from before the hot-fix had
+  stale SHA256 checksums that no longer matched the new file bytes,
+  so the launcher gave up after 3 retries. 1.9.6 ships as a clean
+  version bump with a fresh manifest so the launcher can verify
+  cleanly without any leftover SHA confusion.
+
+Everything else from 1.9.5 is included — see the 1.9.5 patch notes
+for the full community bug-fix list (15 fixes covering item loss,
+animation softlocks, AP integration, EULA cleanup, etc.).
+
+=== Beta 1.9.5 - Big Community Bug-Fix Release ===
+
+Major bug-fix release addressing 15 community-reported issues plus
+a complete Archipelago connection-system overhaul. No new gameplay
+features in this one — just everything that was broken should now
+work properly.
+
+Headline fixes:
+- Archipelago Launcher's "Generate Template Options" no longer
+  crashes when our apworld is installed (was blocking YAML
+  generation for ALL games)
+- Items no longer disappear when you click a stash tab while
+  holding an item on your cursor
+- Boss-loot rewards (Andariel/Duriel/Mephisto/Diablo/Baal Loot)
+  can now actually be equipped — strength/dex/level requirements
+  are stripped on delivery
+- F1 Collection page now counts items delivered by AP directly to
+  your inventory (used to require you drop them and pick them up)
+- Mercenary's equipped items also count toward Collection now
+  (Insight polearm, Tomb Reaver, Andariel's Visage, etc.)
+- Sacrifice skill now properly drains life on cast (was accidentally
+  set to 3% instead of vanilla 8% in the 1.9.0 data refresh)
+
+Animation softlocks fixed:
+- Barbarian Jump Attack / Whirlwind no longer softlock when assigned
+  to a non-Barbarian character
+- Same fix covers Double Swing / Double Throw, Dragon Claw / Dragon
+  Talon, Assassin Blade Fury and charge-up skills, Amazon javelin
+  throws, Druid Rabies / Hunger, Paladin Smite
+- Native classes still get all of their own skills working as
+  before — these are just blocked from random cross-class pools
+
+Archipelago connection improvements:
+- Auto-recovery if the AP bridge stops responding (heartbeat-based
+  health check + auto-restart, no more manual bridge restarts)
+- On-screen notifications when you get disconnected / reconnected
+- Per-character AP spoiler + checklist text files saved in your
+  Game/Save/ folder — see exactly what's at your locations and
+  what you've received
+- Server/slot change detection — switching the same character to a
+  different multiworld automatically clears the old item history
+- "Force Reconnect" button on F1 Editor — skip the back-off wait
+- Connection error messages now visible in red on the F1 page (no
+  more silent "Connecting..." forever)
+- No more ghost ap_bridge.exe processes left running after game
+  close — old bridges are cleaned up on next launch
+- Checks completed in offline mode are now reliably re-sent on
+  reconnect (atomic file write + republish on every character load)
+- Bridge log file no longer spams — ~70% reduction in log size
+
+Other fixes:
+- Tower Cellar entry via Entrance Shuffle now correctly lands you
+  on Tower Level 1 (was landing on Level 2 stairs)
+- Shared stash no longer ships with random test items from the dev
+  (was "Clean up yo inventory Solida!" per Maegis). Existing players
+  can delete Game/Archipelago/shared_stash*.dat to clear them.
+- Safer behaviour during character respawn if quest state is briefly
+  unreadable (no more accidentally "unlocking" Hell access on a NULL)
+
 === Beta 1.9.4 - Comprehensive Bug Fix Release ===
 
 Massive bug-fix release addressing all community reports from the

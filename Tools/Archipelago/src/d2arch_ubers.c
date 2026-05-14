@@ -317,6 +317,25 @@ void Ubers_OnUnitDeathScan(void* pGame, void* pUnit, DWORD txtId, DWORD unitId) 
     Log("UBERS: death-scan recorded kill (set=%d txtId=%u unitId=%08X)\n",
         set, txtId, unitId);
 
+    /* 1.9.9 — Wire Custom Goal (goal=4) uber-kill detection. Each finale
+     * uber kill maps to a per-target bit in the custom-goal bitmap so
+     * the AP win condition can require killing them individually. The
+     * three buffed uber monIds are 704/705/709 — uberId is the index
+     * into the (Mephisto/Diablo/Baal) tuple Custom Goal expects.
+     *
+     * Mini-ubers (Izual/Andariel/Duriel — set=1) don't have Custom Goal
+     * targets of their own; only the finale ubers do. */
+    if (set == 2) {
+        int uberId = -1;
+        if (txtId == UBER_MONID_MEPHISTO)      uberId = 0;
+        else if (txtId == UBER_MONID_DIABLO)   uberId = 1;
+        else if (txtId == UBER_MONID_BAAL)     uberId = 2;
+        if (uberId >= 0) {
+            extern void CustomGoal_OnUberKilled(int);
+            CustomGoal_OnUberKilled(uberId);
+        }
+    }
+
     if (set == 2 && Ubers_FinaleAllDead()) {
         ShowNotify("Hellfire Torch has appeared!");
         Ubers_DropHellfireTorch(pGame, pUnit);
@@ -324,6 +343,14 @@ void Ubers_OnUnitDeathScan(void* pGame, void* pUnit, DWORD txtId, DWORD unitId) 
         {
             extern void Stats_OnPandemoniumRunComplete(void);
             Stats_OnPandemoniumRunComplete();
+        }
+        /* 1.9.9 — Wire Custom Goal finale-complete event. Fires once all
+         * three finale ubers are down AND the Hellfire Torch has been
+         * spawned. This is the "Pandemonium Complete" Custom Goal target
+         * (CGT_HELLFIRE_TORCH_COMPLETE). */
+        {
+            extern void CustomGoal_OnHellfireTorchComplete(void);
+            CustomGoal_OnHellfireTorchComplete();
         }
     }
 }

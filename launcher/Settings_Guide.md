@@ -13,9 +13,73 @@ Read this if you want to understand:
 
 ---
 
-## 1. Quick start — three preset profiles
+## 0. Setting up the apworld + generating a YAML
+
+If this is your first time, here's the order:
+
+1. **Get the apworld.** Our launcher (Diablo II Archipelago.exe) writes
+   `diablo2_archipelago.apworld` into the folder you set as
+   "Archipelago Custom Worlds Folder" in the launcher's Settings page.
+   Default is `%ProgramData%\Archipelago\custom_worlds\` if you haven't
+   changed it. The file gets re-deployed every time you click PLAY,
+   so it's always up to date with the DLL you're running.
+
+2. **Drop the apworld into Archipelago.** If the launcher's custom-
+   worlds folder is the same as Archipelago's `custom_worlds/`, you're
+   already done. Otherwise, copy `diablo2_archipelago.apworld` into
+   `<Archipelago install>\custom_worlds\` (or double-click the file —
+   ArchipelagoLauncher.exe will install it for you).
+
+3. **Generate your YAML.** Run `ArchipelagoLauncher.exe`, click
+   **Options Creator**, pick "Diablo II Archipelago" from the dropdown,
+   set the options you want (or paste a profile from section 1 below),
+   and save the YAML to your `Players/` folder.
+
+4. **Generate the multiworld.** Click **Generate** in the launcher, OR
+   run `ArchipelagoGenerate.exe`. The output `.zip` lands in `output/`.
+
+5. **Host or upload.** Solo: run `ArchipelagoServer.exe <output.zip>`.
+   Multiworld: upload the zip at https://archipelago.gg/uploads.
+
+6. **Connect from the game.** In the in-game F1 → AP page, type the
+   server address (e.g. `archipelago.gg:38281`), your slot name from
+   the YAML, and the room password if any. Wait for the GREEN
+   indicator before clicking Single Player.
+
+If you just want to try the mod without Archipelago, skip steps 3-6
+and play in standalone mode — the DLL works without an AP server,
+quest rewards just deliver locally instead of going to the multiworld.
+
+---
+
+## 1. Quick start — four preset profiles
 
 If you don't want to read 30 pages, pick a profile:
+
+### "2-hour async-friendly run"
+
+```yaml
+skill_hunting: true
+zone_locking: false
+goal: full_normal
+xp_multiplier: 5
+quest_hunting: true
+quest_kill_zones: false
+quest_exploration: false
+quest_waypoints: true
+quest_level_milestones: false
+collect_set_*: false   # see Collection section to disable in bulk
+collect_rune_*: false
+collection_target_gems: false
+```
+
+Designed to be beatable in roughly 2 hours by an experienced player.
+Story quests + waypoints + hunt quests stay on (these give you skills).
+Kill-zone, exploration, and milestone quests are off so you don't have
+to grind. Collection goal is off — your win condition is **kill Baal
+Normal**. XP is 5× so you outscale the early acts. ~80 locations,
+fast generation, no zone gating, no boss/monster shuffle. Best for
+async multiworlds where one player's Diablo II can't hold up the rest.
 
 ### "Just play D2 with skill randomization" (default)
 
@@ -134,7 +198,7 @@ beat Andariel → Act 2, beat Duriel → Act 3, etc.
 
 ## 3. Goal mode (`goal`)
 
-Determines the win condition. Four options:
+Determines the win condition. Five options as of 1.9.2:
 
 ### `full_normal` (0) — beat Baal Normal
 
@@ -155,40 +219,150 @@ Determines the win condition. Four options:
 - Win = "Eve of Destruction (Hell)" reached
 - Longest seed; most spheres
 
-### `collection` (3) — fill the F1 Collection book
+### `gold_collection` (3) — reach a lifetime-gold target
 
-- Difficulty scope: Normal-only quest locations + 110 Collection
-  locations layered on top
-- Locations: ~225-333 depending on which Collection toggles are on
-- Win = the in-game DLL fires goal-complete when every targeted
-  collection slot is checked (per `Coll_IsGoalComplete()`)
-- **Difficulty progression is optional** — you can play any
-  difficulty. Some Collection items only drop in higher difficulties
-  (Hellfire Torch, top runes Sur+) so you'll naturally play Hell to
-  finish, but it's not enforced
-- For AP fill purposes, this mode is treated as Normal-difficulty
-  scope so quest-location count stays manageable
+*Renamed in 1.9.2 from `collection`. The old name still parses as
+an alias for backward compatibility.*
+
+- Difficulty scope: Normal-only quest locations
+- Locations: ~225 (the F1 Collection page no longer drives goal —
+  Collection toggles below still control whether their items show
+  in the F1 book and on the AP location list, but win condition is
+  pure gold)
+- Win = lifetime gold counter on F1 Collection page reaches the
+  `collection_gold_target` setting (any value 0..100M)
+- **Difficulty progression is optional** — play any difficulty
+- Set `collection_gold_target` > 0 or the goal trivially completes
+
+### `custom` (4) — build your own win condition (1.9.2)
+
+AP-side only — standalone defaults to Full Normal because the
+title-screen UI doesn't have room for the 54-checkbox picker.
+
+- Pick any combination of 54 individual targets (10 subsystems,
+  15 act bosses × diff, 7 cow king + ubers, 10 super-uniques,
+  12 bulk object/check completions) plus an optional
+  `custom_goal_gold_target`
+- Goal completes when **ALL selected targets** are achieved AND
+  lifetime gold reaches the optional gold target
+- Empty selection + 0 gold = trivially complete (falls back to
+  Full Normal behaviour)
+- Difficulty scope: full pool (Normal+NM+Hell) generated for AP
+  fill purposes since the user can pick targets across all 3 diffs
+- See section 4b for the full target list
 
 ---
 
-## 4. Collection goal — sub-settings
+## 4. Gold Collection sub-settings
 
-Only meaningful when `goal: collection`. These let you pick exactly
-which items count toward your win.
+Only meaningful when `goal: gold_collection`.
 
-### `collection_target_gems` (default: `true`)
+### `collection_gold_target` (default: `1000000`)
 
-All-or-nothing toggle for **35 gems** (7 colors × 5 grades:
-Chipped/Flawed/Normal/Flawless/Perfect). When ON, every individual
-gem pickup (35 unique slots) fires an AP check. There's no
-per-grade or per-color granularity for gems.
+Lifetime-gold threshold. Range: 0 to 100,000,000. The F1 Collection
+page shows a monotonic gold counter that only counts gold pickup
+(from ground) + quest-reward gold — vendor-sale revenue is
+excluded. The goal requires reaching this value.
 
-### `collection_gold_target` (default: `0`)
+### `collection_target_gems` (moved 1.9.2)
 
-Optional lifetime-gold threshold. Range: 0 to 100,000,000. The F1
-Collection page shows a monotonic gold counter that only counts
-gold pickup (from ground) + quest-reward gold — vendor-sale revenue
-is excluded. If non-zero, the goal requires this much gold collected.
+In 1.9.2 this toggle moved out of the Goal section and into the
+Collection — Gems group. It controls whether the 35 individual gem
+pickups count toward the F1 Collection book + Custom Goal's
+"include collection" subsystem. No longer a goal-mode-specific
+setting.
+
+---
+
+## 4b. Custom Goal targets (1.9.2 — AP only)
+
+Only meaningful when `goal: custom`. Each option below is a
+standalone Toggle checkbox in the Options Creator. The goal
+completes when **every checked target is achieved AND lifetime gold
+reaches `custom_goal_gold_target`**.
+
+The 54 toggles are organised into 5 collapsed groups in the
+Options Creator UI:
+
+### Subsystem includes (10 toggles)
+
+Bulk completion gates — each one means "win requires the entire
+subsystem to be complete":
+
+- `custom_goal_subsystem_skill_hunting` — unlock every skill in
+  your seeded skill pool (up to 210)
+- `custom_goal_subsystem_collection` — fill the F1 Collection book
+  per the existing collect_set_*/collect_rune_*/collect_special_*/
+  gems toggles. Mix of items required is configured in those
+  collection groups (so you can combine "Custom Goal: include
+  Collection" with "only collect 5 specific runes")
+- `custom_goal_subsystem_hunt_quests` — complete every Hunt
+  super-unique quest across all 3 difficulties (~42 total)
+- `custom_goal_subsystem_kill_zone_quests` — complete every
+  kill-zone quest across all 3 difficulties
+- `custom_goal_subsystem_exploration_quests` — every "Reach <area>"
+  exploration quest across all 3 difficulties
+- `custom_goal_subsystem_waypoints` — activate every waypoint
+  across all 3 difficulties (~38 × 3 = 114)
+- `custom_goal_subsystem_level_milestones` — reach every level
+  milestone (5/10/15/.../99) across all 3 difficulties
+- `custom_goal_subsystem_story_normal/nightmare/hell` — three
+  separate toggles, one per difficulty, requiring every story
+  quest on that difficulty (Den of Evil through Eve of Destruction)
+
+### Act Boss kills (15 toggles)
+
+`custom_goal_kill_<boss>_<diff>` for each of the 15
+combinations:
+
+- Andariel Normal/Nightmare/Hell
+- Duriel Normal/Nightmare/Hell
+- Mephisto Normal/Nightmare/Hell
+- Diablo Normal/Nightmare/Hell
+- Baal Normal/Nightmare/Hell
+
+### Cow King + Pandemonium ubers (7 toggles)
+
+- `custom_goal_kill_cow_king_normal/nightmare/hell` — Cow King in
+  the Moo Moo Farm per difficulty
+- `custom_goal_kill_uber_mephisto/diablo/baal` — individual Uber
+  kills in the Pandemonium event
+- `custom_goal_hellfire_torch_complete` — complete one full
+  Pandemonium run (all 3 ubers + Hellfire Torch drop)
+
+### Famous Super-Uniques (10 toggles)
+
+`custom_goal_kill_<su>` for popular super-uniques:
+
+Bishibosh (Cold Plains), Corpsefire (Den of Evil),
+Rakanishu (Stony Field), Griswold (Tristram),
+Pindleskin (Nihlathak's Temple), Nihlathak (Halls of Vaught),
+The Summoner (Arcane Sanctuary), Radament (Sewers Level 3),
+Izual (Plains of Despair), Council Member (Travincal)
+
+### Bulk object/check completions (12 toggles)
+
+For when you want "complete every X check" as your goal. Requires
+the matching `check_*` toggle (see sections 9b/9c) to be ON or the
+counters never bump:
+
+- `custom_goal_all_shrines/urns/barrels/chests/set_pickups/
+  gold_milestones` (1.9.0 bonus check categories)
+- `custom_goal_all_cow_level_checks/merc_milestones/
+  hellforge_runes/npc_dialogue/runeword_crafting/cube_recipes`
+  (1.9.2 extra check categories)
+
+### `custom_goal_gold_target` (default: `0`)
+
+Range 0..100M. Optional gold threshold ON TOP of every selected
+target. Set to 0 if you don't want gold to gate the goal.
+
+### Win logic
+
+`custom goal complete = (all required targets fired) AND
+(lifetime gold >= custom_goal_gold_target)`. Empty target set + 0
+gold = trivially complete = behaves like Full Normal (DLL falls
+through to standard goal handling).
 
 ### `collect_set_*` (32 toggles, default: all `true`)
 
@@ -335,16 +509,28 @@ vanilla.
 
 ## 8. Shuffles
 
-### `monster_shuffle` (default: `false`)
+### `monster_shuffle` (default: `false`) — **EXPERIMENTAL / unbalanced**
 
 Shuffles monster types across zones at a per-character seed. Each
 character gets a different layout. SuperUnique bosses keep their
 zones (so hunting quests still work) but normal monster types swap.
 
-### `boss_shuffle` (default: `false`)
+⚠️ **Experimental:** difficulty scaling is currently uneven — you
+can hit Hell-tier monster groups in Act 1 zones, or trivial Act 1
+monsters in Act 5. Will be balanced before the stable release.
+
+### `boss_shuffle` (default: `false`) — **EXPERIMENTAL**
 
 Shuffles SuperUnique boss placements. Combined with monster_shuffle
 this can radically change the feel of each act.
+
+⚠️ **Experimental:** bosses keep their location's stats AND
+resistances (e.g. whoever replaces Andariel inherits her -50% fire
+resist). Only the boss's skills change. Some pairings can be
+brutal — Act 1 Baal-clone keeps Baal's stats; Act 2 Diablo in the
+tiny Duriel arena is very dangerous. Pair with `entrance_shuffle:
+true` so you can grind higher-level zones for gear before the
+gnarly fights.
 
 ### `entrance_shuffle` (default: `false`)
 
@@ -558,6 +744,107 @@ stack on the right.
 
 ---
 
+## 9c. Extra check categories (1.9.2 — opt-in)
+
+Six MORE check categories on top of the 1.9.0 bonus checks. Each is
+independently toggleable from the title screen and the apworld YAML.
+All default OFF so existing characters don't get surprise side-quests
+when they update.
+
+### `check_cow_level` (9 slots, AP IDs 65300-65308)
+
+Adds nine AP locations covering the Moo Moo Farm:
+
+- **First entry per difficulty (3 slots)** — fired the first time you
+  step into the Cow Level on Normal / Nightmare / Hell.
+- **Cow King kill per difficulty (3 slots)** — fired when you kill the
+  Cow King super-unique on each difficulty.
+- **Lifetime cow-kill milestones (3 slots)** — fired when your
+  character has killed 100 / 500 / 1,000 Hell Bovines (any difficulty).
+
+In standalone mode each fire grants a flat 1,000 gold reward.
+
+### `check_merc_milestones` (6 slots, 65310-65315)
+
+Six AP locations rewarding mercenary investment:
+
+- **First Mercenary Hired (1 slot)** — fired the first time you hire
+  a merc from any of the four NPCs (Kashya / Greiz / Asheara / Qual-Kehk).
+- **Resurrects 5 / 10 / 25 / 50 (4 slots)** — fired at each lifetime
+  resurrection threshold.
+- **Mercenary Reaches Level 30 (1 slot)** — fired the first time we
+  observe `fnGetStat(pMerc, 12, 0) >= 30` on the per-tick merc poll.
+
+### `check_hellforge_runes` (12 slots, 65320-65331)
+
+Twelve AP locations covering Hellforge use and high-rune drops:
+
+- **Hellforge Used per difficulty (3 slots)** — fired when you smash
+  Mephisto's soulstone on the Hellforge in Hell Act 4 on each
+  difficulty.
+- **High Rune drops per tier per difficulty (9 slots)** — fired the
+  first time you observe a rune from each of three tiers in your
+  inventory:
+  - Tier 0 = Pul / Um / Mal / Ist / Gul (r21–r25)
+  - Tier 1 = Vex / Ohm / Lo / Sur / Ber (r26–r30)
+  - Tier 2 = Jah / Cham / Zod (r31–r33)
+  Each tier × each difficulty = 9 slots.
+
+### `check_npc_dialogue` (81 slots, 65400-65480)
+
+First dialogue with each major NPC across 3 difficulties (27 NPCs ×
+3 = 81 slots). The NPC roster matches the act vendor list:
+
+- **Act 1**: Akara, Charsi, Gheed, Kashya, Warriv, Cain
+- **Act 2**: Atma, Drognan, Elzix, Fara, Greiz, Lysander, Meshif, Jerhyn
+- **Act 3**: Alkor, Asheara, Hratli, Ormus, Cain (A3)
+- **Act 4**: Tyrael, Halbu, Jamella
+- **Act 5**: Anya, Larzuk, Malah, Nihlathak, Qual-Kehk
+
+Detection runs per game tick — when D2Client UIVar 0x06 (the active
+NPC dialogue unit pointer) transitions to a new NPC, we look up
+its MonStats hcIdx and map to the npcIdx. Only the 27 NPCs above
+fire checks; minor NPCs (act guards, decorative villagers) are
+ignored. Cain's six hcIdx variants across acts fold into two
+logical slots (A1 Cain pre-rescue, A3+ Cain post-rescue).
+
+### `check_runeword_crafting` (50 slots, 65500-65549)
+
+Sequential 1st through 50th runeword craft. Detection hangs off
+the existing `Coll_ProcessItem` IFLAG_RUNEWORD 0→1 transition —
+when a runeword is completed, we fire the next sequential slot.
+The internal counter persists across saves so a game crash doesn't
+restart it.
+
+### `check_cube_recipes` (135 slots, 65600-65734)
+
+Sequential 1st through 135th successful Horadric Cube transmute.
+Detection extends the existing `TradeBtn_Hook` on case 24
+(TRADEBTN_TRANSMUTE) — the trampoline returns non-zero on a
+matched recipe (zero on no-match), so failed transmutes don't
+bump the counter. Like runewords, the counter persists across saves.
+
+### Summary
+
+| Toggle key | Slots | Range | Detection |
+|---|---|---|---|
+| `check_cow_level` | 9 | 65300-65308 | Area enter / Cow King kill / lifetime kill counter |
+| `check_merc_milestones` | 6 | 65310-65315 | Per-tick merc poll (hire / unitId-change / level-30) |
+| `check_hellforge_runes` | 12 | 65320-65331 | OperateHandler case 49 / Coll_ProcessItem rune slot |
+| `check_npc_dialogue` | 81 | 65400-65480 | Per-tick UIVar 0x06 poll, hcIdx → NPC mapping |
+| `check_runeword_crafting` | 50 | 65500-65549 | Coll_ProcessItem IFLAG_RUNEWORD 0→1 transition |
+| `check_cube_recipes` | 135 | 65600-65734 | TradeBtn_Hook on successful TRANSMUTE |
+
+Total: **293 new locations** when all six are enabled. Combined with
+the 1.9.0 bonus categories you can push past 2,100 total locations
+on a single character.
+
+The F1 Overview page gets a new "EXTRA CHECKS" section that shows
+your progress per enabled category, and the Item Log on the AP page
+appends the same rows to its "Total Checks" sum.
+
+---
+
 ## 10. Death link (`death_link`)
 
 Standard AP DeathLink. When ON, your character dying broadcasts a
@@ -756,9 +1043,18 @@ Story + hunts only (~140 locations). Less side-grinding.
 |---|---|---|---|---|
 | `skill_hunting` | toggle | true | true/false | Skill randomization mode |
 | `zone_locking` | toggle | false | true/false | Gate-key progression |
-| `goal` | choice | full_normal | normal/nightmare/hell/collection | Win condition |
-| `collection_target_gems` | toggle | true | true/false | Gems in Collection goal |
-| `collection_gold_target` | range | 0 | 0..100M | Lifetime gold target |
+| `goal` | choice | full_normal | full_normal/full_nightmare/full_hell/gold_collection/custom | Win condition (1.9.2 added `custom`) |
+| `collection_target_gems` | toggle | true | true/false | Gems count toward F1 Collection book + custom_goal subsystem_collection |
+| `collection_gold_target` | range | 1000000 | 0..100M | Lifetime gold target (only for goal=gold_collection) |
+| `custom_goal_gold_target` | range | 0 | 0..100M | 1.9.2 — Lifetime gold req on top of custom goal targets |
+| `custom_goal_subsystem_*` (10) | toggle | false | true/false | 1.9.2 — Custom goal: include skill_hunting / collection / hunt_quests / kill_zone_quests / exploration_quests / waypoints / level_milestones / story_normal / story_nightmare / story_hell |
+| `custom_goal_kill_<boss>_<diff>` (15) | toggle | false | true/false | 1.9.2 — Custom goal act-boss kills (Andariel/Duriel/Mephisto/Diablo/Baal × 3 diff) |
+| `custom_goal_kill_cow_king_<diff>` (3) | toggle | false | true/false | 1.9.2 — Custom goal Cow King × 3 diff |
+| `custom_goal_kill_uber_<name>` (3) | toggle | false | true/false | 1.9.2 — Custom goal Uber Mephisto/Diablo/Baal |
+| `custom_goal_hellfire_torch_complete` | toggle | false | true/false | 1.9.2 — Custom goal full Pandemonium run |
+| `custom_goal_kill_<su>` (10) | toggle | false | true/false | 1.9.2 — Custom goal Bishibosh/Corpsefire/Rakanishu/Griswold/Pindleskin/Nihlathak/Summoner/Radament/Izual/Council |
+| `custom_goal_all_<bonus>` (6) | toggle | false | true/false | 1.9.2 — Custom goal bulk bonus check completions |
+| `custom_goal_all_<extra>` (6) | toggle | false | true/false | 1.9.2 — Custom goal bulk extra check completions |
 | `collect_set_*` (32) | toggle | true | true/false | Per-set Collection target |
 | `collect_rune_*` (33) | toggle | true | true/false | Per-rune Collection target |
 | `collect_special_*` (10) | toggle | true | true/false | Per-special Collection target |
@@ -779,6 +1075,18 @@ Story + hunts only (~140 locations). Less side-grinding.
 | `monster_shuffle` | toggle | false | true/false | Per-character monster type shuffle |
 | `boss_shuffle` | toggle | false | true/false | Per-character SuperUnique boss shuffle |
 | `traps_enabled` | toggle | true | true/false | Trap filler items |
+| `check_shrines` | toggle | false | true/false | 1.9.0 — 50 shrine checks/diff |
+| `check_urns` | toggle | false | true/false | 1.9.0 — 100 urn checks/diff |
+| `check_barrels` | toggle | false | true/false | 1.9.0 — 100 barrel checks/diff |
+| `check_chests` | toggle | false | true/false | 1.9.0 — 200 chest checks/diff |
+| `check_set_pickups` | toggle | false | true/false | 1.9.0 — 127 set-piece checks |
+| `check_gold_milestones` | toggle | false | true/false | 1.9.0 — 17 gold-milestone checks |
+| `check_cow_level` | toggle | false | true/false | 1.9.2 — 9 cow-level slots |
+| `check_merc_milestones` | toggle | false | true/false | 1.9.2 — 6 mercenary slots |
+| `check_hellforge_runes` | toggle | false | true/false | 1.9.2 — 12 Hellforge+High Rune slots |
+| `check_npc_dialogue` | toggle | false | true/false | 1.9.2 — 81 NPC slots (DLL detection shipped in 1.9.2) |
+| `check_runeword_crafting` | toggle | false | true/false | 1.9.2 — 50 runeword slots (DLL detection shipped in 1.9.2) |
+| `check_cube_recipes` | toggle | false | true/false | 1.9.2 — 135 cube slots (DLL detection shipped in 1.9.2) |
 | `death_link` | toggle | false | true/false | DeathLink broadcast |
 
 ### AP-internal settings (set by Archipelago itself, not user)
@@ -820,6 +1128,18 @@ you're writing a tracker or a custom client.
 | 50032-50064 | Collection: 33 runes | 33 |
 | 50065-50099 | Collection: 35 gems | 35 |
 | 50100-50109 | Collection: 10 specials | 10 |
+| 60000-60149 | 1.9.0 — Shrines (50 × 3 diff) | 150 |
+| 60200-60499 | 1.9.0 — Urns (100 × 3 diff) | 300 |
+| 60500-60799 | 1.9.0 — Barrels (100 × 3 diff) | 300 |
+| 60800-61399 | 1.9.0 — Chests (200 × 3 diff) | 600 |
+| 65000-65016 | 1.9.0 — Gold milestones (7+5+5) | 17 |
+| 65100-65226 | 1.9.0 — Set piece pickups | 127 |
+| 65300-65308 | 1.9.2 — Cow Level expansion | 9 |
+| 65310-65315 | 1.9.2 — Mercenary milestones | 6 |
+| 65320-65331 | 1.9.2 — Hellforge + High Runes | 12 |
+| 65400-65480 | 1.9.2 — NPC Dialogue (27 × 3 diff) | 81 |
+| 65500-65549 | 1.9.2 — Runeword Crafting | 50 |
+| 65600-65734 | 1.9.2 — Cube Recipes | 135 |
 
 ---
 
@@ -860,6 +1180,23 @@ A: No, generation is fully offline (just `ArchipelagoGenerate.exe
 --player_files_path`). Internet is only needed for hosting the
 multiworld server during play.
 
+**Q: Where did the apworld go? I can't find it after the latest update.**
+A: Our launcher writes it to whichever folder you set as
+"Archipelago Custom Worlds Folder" in the launcher's Settings page.
+Default is `%ProgramData%\Archipelago\custom_worlds\`. The file
+gets re-deployed every time you click PLAY. Generating a YAML still
+works the normal Archipelago way: `ArchipelagoLauncher.exe →
+Options Creator → save to Players/ → Generate`. See section 0
+above for the full step-by-step.
+
+**Q: Can this game be finished in ~2 hours?**
+A: Yes, with the right settings. Use the "2-hour async-friendly run"
+profile in section 1 — `goal: full_normal`, `xp_multiplier: 5`,
+disable kill-zone / exploration / milestone quests, no Collection
+goal. Skill Hunting stays on. ~80 locations, fast generation, no
+zone gating. Fits comfortably in a 1.5-2.5 hour window for an
+experienced player; longer if you're rusty.
+
 **Q: What's the maximum XP multiplier safe for vanilla balance?**
 A: 5x is a comfortable middle ground; 10x makes everything past
 Act 2 trivial. Keep at 1-3x if you want vanilla difficulty pacing.
@@ -882,5 +1219,5 @@ Act 2 trivial. Keep at 1-3x if you want vanilla difficulty pacing.
 
 ---
 
-*Document version: 1.9.0 | Last updated: 2026-04-30*
+*Document version: 1.9.9 | Last updated: 2026-05-14*
 *For questions or bug reports: see the Discord link in the launcher.*

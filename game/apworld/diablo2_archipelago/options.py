@@ -214,6 +214,248 @@ _CUSTOM_GOAL_CLASSES = [
 
 
 # ============================================================
+# 1.9.9 — Custom Goal scope tables (driven by selected toggles).
+#
+# These three dicts let `__init__.py` shrink the seed scope to the
+# minimum needed for the selected Custom Goal targets, instead of
+# always generating the full 700-location 3-difficulty pool. The
+# old (1.9.2-1.9.8) behaviour generated everything regardless of
+# which targets were picked, which:
+#   - made AP fill place items at locations the player would never
+#     visit (Hell Act 5 zones for an Andariel Normal goal)
+#   - in multiworld, stranded other players' progression items at
+#     those out-of-scope slots, requiring `!release` to recover
+#
+# 1.9.9 fix: compute (max_act, max_diff) from the union of all
+# selected toggles' scopes, then propagate to `get_active_locations()`
+# and `create_regions()` so the location pool matches what the
+# player will actually traverse.
+#
+# Three lookup tables:
+#   _CUSTOM_GOAL_SCOPE          — csv_token -> (min_act, max_diff)
+#                                 used to compute the seed's overall scope
+#   _CUSTOM_GOAL_TARGET_LOCATIONS — csv_token -> AP location name
+#                                 used by set_rules() to AND-of-reachable
+#   _CUSTOM_GOAL_SUBSYSTEM_PROXY  — csv_token -> AP location name (proxy)
+#                                 fallback for subsystem/bulk toggles that
+#                                 don't bind to a single AP location
+#
+# Rule for max_act when max_diff > 0:
+# To physically reach a higher-difficulty kill, the player must beat
+# Baal on every lower difficulty (D2's hard-coded act/diff transitions).
+# So if any selected target has max_diff > 0, force max_act = 5 to
+# include the prereq chain on lower diffs.
+# ============================================================
+
+_CUSTOM_GOAL_SCOPE = {
+    # ----- Subsystems (10) -----
+    "subsystem_skill_hunting":      (5, 2),  # full pool spans 3 diffs
+    "subsystem_collection":         (5, 2),  # items drop on all diffs
+    "subsystem_hunt_quests":        (5, 2),
+    "subsystem_kill_zone_quests":   (5, 2),
+    "subsystem_exploration_quests": (5, 2),
+    "subsystem_waypoints":          (5, 2),
+    "subsystem_level_milestones":   (5, 2),  # L75 = Hell-tier
+    "subsystem_story_normal":       (5, 0),
+    "subsystem_story_nightmare":    (5, 1),
+    "subsystem_story_hell":         (5, 2),
+    # ----- Act bosses × difficulty (15) -----
+    "kill_andariel_normal":     (1, 0),
+    "kill_andariel_nightmare":  (1, 1),
+    "kill_andariel_hell":       (1, 2),
+    "kill_duriel_normal":       (2, 0),
+    "kill_duriel_nightmare":    (2, 1),
+    "kill_duriel_hell":         (2, 2),
+    "kill_mephisto_normal":     (3, 0),
+    "kill_mephisto_nightmare":  (3, 1),
+    "kill_mephisto_hell":       (3, 2),
+    "kill_diablo_normal":       (4, 0),
+    "kill_diablo_nightmare":    (4, 1),
+    "kill_diablo_hell":         (4, 2),
+    "kill_baal_normal":         (5, 0),
+    "kill_baal_nightmare":      (5, 1),
+    "kill_baal_hell":           (5, 2),
+    # ----- Cow King × diff (3) — needs Baal kill same diff first -----
+    "kill_cow_king_normal":     (5, 0),
+    "kill_cow_king_nightmare":  (5, 1),
+    "kill_cow_king_hell":       (5, 2),
+    # ----- Pandemonium ubers (4) — Hell access required for keys -----
+    "kill_uber_mephisto":       (5, 2),
+    "kill_uber_diablo":         (5, 2),
+    "kill_uber_baal":           (5, 2),
+    "hellfire_torch_complete":  (5, 2),
+    # ----- Famous super-uniques (10) — all reachable on Normal -----
+    "kill_bishibosh":           (1, 0),
+    "kill_corpsefire":          (1, 0),
+    "kill_rakanishu":           (1, 0),
+    "kill_griswold":            (1, 0),
+    "kill_pindleskin":          (5, 0),
+    "kill_nihlathak_su":        (5, 0),
+    "kill_summoner":            (2, 0),
+    "kill_radament":            (2, 0),
+    "kill_izual":               (4, 0),
+    "kill_council":             (3, 0),
+    # ----- Bulk bonus checks (6) -----
+    "all_shrines":              (5, 2),
+    "all_urns":                 (5, 2),
+    "all_barrels":              (5, 2),
+    "all_chests":               (5, 2),
+    "all_set_pickups":          (5, 0),  # set pieces drop on Normal too
+    "all_gold_milestones":      (5, 2),
+    # ----- Bulk extra checks (6) -----
+    "all_cow_level_checks":     (5, 2),
+    "all_merc_milestones":      (5, 0),
+    "all_hellforge_runes":      (5, 2),
+    "all_npc_dialogue":         (5, 2),
+    "all_runeword_crafting":    (5, 2),
+    "all_cube_recipes":         (5, 2),
+}
+assert len(_CUSTOM_GOAL_SCOPE) == len(_CUSTOM_GOAL_DEFS), (
+    f"Custom Goal scope table missing entries: "
+    f"{set(t for t,*_ in _CUSTOM_GOAL_DEFS) - set(_CUSTOM_GOAL_SCOPE)}"
+)
+
+# csv_token -> AP location name (must exist in locations.py location_table).
+# Used by set_rules() to build the completion lambda. Only the 32 toggles
+# with a 1:1 AP location mapping live here — the 22 subsystem/bulk toggles
+# fall through to _CUSTOM_GOAL_SUBSYSTEM_PROXY.
+_CUSTOM_GOAL_TARGET_LOCATIONS = {
+    # 15 act bosses × diff
+    "kill_andariel_normal":     "Sisters to the Slaughter",
+    "kill_andariel_nightmare":  "Sisters to the Slaughter (Nightmare)",
+    "kill_andariel_hell":       "Sisters to the Slaughter (Hell)",
+    "kill_duriel_normal":       "Seven Tombs",
+    "kill_duriel_nightmare":    "Seven Tombs (Nightmare)",
+    "kill_duriel_hell":         "Seven Tombs (Hell)",
+    "kill_mephisto_normal":     "The Guardian",
+    "kill_mephisto_nightmare":  "The Guardian (Nightmare)",
+    "kill_mephisto_hell":       "The Guardian (Hell)",
+    "kill_diablo_normal":       "Terror's End",
+    "kill_diablo_nightmare":    "Terror's End (Nightmare)",
+    "kill_diablo_hell":         "Terror's End (Hell)",
+    "kill_baal_normal":         "Eve of Destruction",
+    "kill_baal_nightmare":      "Eve of Destruction (Nightmare)",
+    "kill_baal_hell":           "Eve of Destruction (Hell)",
+    # 3 Cow King × diff — uses extra-check locations created when
+    # check_cow_level=true. Custom Goal toggle requires that option.
+    "kill_cow_king_normal":     "Cow King Killed",
+    "kill_cow_king_nightmare":  "Cow King Killed (Nightmare)",
+    "kill_cow_king_hell":       "Cow King Killed (Hell)",
+    # 4 Pandemonium ubers — no native AP location; use Hell Baal kill as
+    # access proxy (all 4 require Hell access for the keys + portal).
+    "kill_uber_mephisto":       "Eve of Destruction (Hell)",
+    "kill_uber_diablo":         "Eve of Destruction (Hell)",
+    "kill_uber_baal":           "Eve of Destruction (Hell)",
+    "hellfire_torch_complete":  "Eve of Destruction (Hell)",
+    # 10 Famous super-uniques — most map to "Hunt: <name>" locations
+    "kill_bishibosh":           "Hunt: Bishibosh",
+    "kill_corpsefire":          "Hunt: Corpsefire",
+    "kill_rakanishu":           "Hunt: Rakanishu",
+    "kill_griswold":            "Hunt: Griswold",
+    "kill_pindleskin":          "Hunt: Pindleskin",
+    # Nihlathak boss is gated behind the Anya rescue (Betrayal of Harrogath).
+    # No "Hunt: Nihlathak" location exists.
+    "kill_nihlathak_su":        "Betrayal of Harrogath",
+    "kill_summoner":            "Hunt: The Summoner",
+    "kill_radament":            "Hunt: Radament",
+    # Izual = story quest 301 "The Fallen Angel"
+    "kill_izual":               "The Fallen Angel",
+    # Council = story quest 203 "Blade of Old Religion" (built when council dies)
+    "kill_council":             "Blade of Old Religion",
+}
+
+# csv_token -> AP location name proxy. Used for the 22 subsystem/bulk
+# toggles that don't bind to a single AP location — the DLL handles
+# their actual completion check; the AP-side lambda just needs the
+# proxy reachable to satisfy fill logic.
+_CUSTOM_GOAL_SUBSYSTEM_PROXY = {
+    # Subsystems — match each one to the AP location representing
+    # its scope reach (so AP fill ensures the player can physically
+    # traverse far enough to satisfy the subsystem in-game).
+    "subsystem_skill_hunting":      "Eve of Destruction (Hell)",
+    "subsystem_collection":         "Eve of Destruction (Hell)",
+    "subsystem_hunt_quests":        "Eve of Destruction (Hell)",
+    "subsystem_kill_zone_quests":   "Eve of Destruction (Hell)",
+    "subsystem_exploration_quests": "Eve of Destruction (Hell)",
+    "subsystem_waypoints":          "Eve of Destruction (Hell)",
+    "subsystem_level_milestones":   "Eve of Destruction (Hell)",
+    "subsystem_story_normal":       "Eve of Destruction",
+    "subsystem_story_nightmare":    "Eve of Destruction (Nightmare)",
+    "subsystem_story_hell":         "Eve of Destruction (Hell)",
+    # Bulk bonus checks
+    "all_shrines":                  "Eve of Destruction (Hell)",
+    "all_urns":                     "Eve of Destruction (Hell)",
+    "all_barrels":                  "Eve of Destruction (Hell)",
+    "all_chests":                   "Eve of Destruction (Hell)",
+    "all_set_pickups":              "Eve of Destruction",
+    "all_gold_milestones":          "Eve of Destruction (Hell)",
+    # Bulk extra checks
+    "all_cow_level_checks":         "Eve of Destruction (Hell)",
+    "all_merc_milestones":          "Eve of Destruction",
+    "all_hellforge_runes":          "Eve of Destruction (Hell)",
+    "all_npc_dialogue":             "Eve of Destruction (Hell)",
+    "all_runeword_crafting":        "Eve of Destruction (Hell)",
+    "all_cube_recipes":             "Eve of Destruction (Hell)",
+}
+
+
+def compute_custom_goal_scope(options) -> tuple:
+    """Return (max_act, max_diff) for the slot's selected Custom Goal toggles.
+
+    Walks the 54 toggles. For each enabled one, looks up its scope
+    requirement and takes the max across all. If no toggles are selected,
+    returns (1, 0) — a trivial Act 1 Normal scope so AP fill produces a
+    valid (if uninteresting) seed instead of erroring out.
+
+    Special rule: if any toggle requires max_diff > 0, force max_act = 5
+    on the seed because reaching higher difficulties physically requires
+    beating Baal on every lower diff (D2's hard-coded act/diff transitions).
+    Without that, the prereq chain isn't in the location pool and AP fill
+    can't validate higher-diff reachability.
+    """
+    max_act = 0
+    max_diff = 0
+    for csv_tok, field, _disp, _doc in _CUSTOM_GOAL_DEFS:
+        opt = getattr(options, field, None)
+        if opt is None or not opt.value:
+            continue
+        scope = _CUSTOM_GOAL_SCOPE.get(csv_tok)
+        if scope is None:
+            continue
+        if scope[0] > max_act:
+            max_act = scope[0]
+        if scope[1] > max_diff:
+            max_diff = scope[1]
+
+    # Custom-goal-gold-target only: a player who picks no targets but
+    # sets a gold goal still wants the seed to generate something.
+    # Default to trivial Act 1 Normal scope.
+    if max_act == 0:
+        max_act = 1
+        max_diff = 0
+
+    # Multi-diff goals need the prereq chain on lower diffs (Baal kills
+    # gate diff transitions in D2). Force max_act=5 so the chain exists.
+    if max_diff > 0:
+        max_act = 5
+
+    return (max_act, max_diff)
+
+
+def custom_goal_target_location(csv_tok: str) -> str | None:
+    """Look up the AP location name a Custom Goal toggle binds to.
+
+    Falls through to a subsystem/bulk proxy if no 1:1 binding exists.
+    Returns None for unknown tokens (defensive — should never happen
+    with valid _CUSTOM_GOAL_DEFS entries).
+    """
+    loc = _CUSTOM_GOAL_TARGET_LOCATIONS.get(csv_tok)
+    if loc is not None:
+        return loc
+    return _CUSTOM_GOAL_SUBSYSTEM_PROXY.get(csv_tok)
+
+
+# ============================================================
 # Collection Goal sub-targets (only meaningful when Goal=Collection)
 # ============================================================
 

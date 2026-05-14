@@ -25,6 +25,8 @@ from .options import (
     OPTION_GROUPS,
     _COLL_SETS, _COLL_RUNES, _COLL_SPECIALS,
     _CUSTOM_GOAL_DEFS,
+    compute_custom_goal_scope,
+    custom_goal_target_location,
 )
 from .locations import COLL_LOCATIONS, COLL_LOC_BASE
 from .regions import create_regions
@@ -105,7 +107,12 @@ class Diablo2ArchipelagoWorld(World):
     # (game, data_version); without this bump, Universal Tracker /
     # spoiler clients can keep stale name<->id maps and fail to
     # resolve the new location names.
-    data_version = 3
+    # 1.9.9: bumped from 3 to 4 to invalidate cached generation
+    # behaviour. Goal=4 (Custom) now uses scope-aware location
+    # generation (was: always full 700-location pool) — same
+    # location IDs but the active set per slot differs by selected
+    # toggles, so clients should re-fetch to see the right set.
+    data_version = 4
 
     item_name_to_id = {name: data[0] for name, data in item_table.items()}
     location_name_to_id = location_table.copy()
@@ -139,14 +146,28 @@ class Diablo2ArchipelagoWorld(World):
         targets are satisfied), so for AP fill purposes we generate
         Normal-difficulty quest locations only. The 110 collection
         locations are added separately at the end of this function.
+
+        1.9.9 — Goal=4 (Custom): scope is now computed from the union
+        of selected sub-target toggles. Single-target goals like "kill
+        Andariel Normal" generate ~50 locations (Act 1 Normal only)
+        instead of the previous ~700. Multi-difficulty goals force
+        max_act=5 because reaching higher diffs requires beating Baal
+        on every lower diff (D2's hard-coded act/diff transitions).
+        See options.compute_custom_goal_scope() for the rule details.
         """
         goal = self.options.goal.value  # 0-4
-        max_act = 5                     # always full game
         if goal == 3:
+            max_act = 5                 # full pool
             num_difficulties = 1        # Collection mode: Normal-only quest locations
         elif goal == 4:
-            num_difficulties = 3        # Custom: generate full pool, DLL filters at runtime
+            # 1.9.9: shrink scope to selected Custom Goal toggles instead
+            # of always generating the full 700-location 3-diff pool. See
+            # compute_custom_goal_scope() in options.py for the rule.
+            scope_act, scope_diff = compute_custom_goal_scope(self.options)
+            max_act = scope_act
+            num_difficulties = scope_diff + 1
         else:
+            max_act = 5                 # 0/1/2: full game
             num_difficulties = goal + 1 # 1, 2, or 3
 
         # Goal quest is always Baal (Eve of Destruction, quest_id 406)
@@ -401,12 +422,15 @@ class Diablo2ArchipelagoWorld(World):
         zone_keys_in_pool = []
         if zone_locking:
             # Goal=3 (Collection) treats as Normal-only for AP fill purposes.
-            # Goal=4 (Custom) generates full pool — DLL filters by required targets.
+            # Goal=4 (Custom) — 1.9.9: scope-aware, mirrors get_active_locations.
             goal_val = self.options.goal.value
             if goal_val == 3:
                 num_difficulties = 1
             elif goal_val == 4:
-                num_difficulties = 3
+                # 1.9.9 — match get_active_locations() scope so we don't
+                # add gate keys for difficulties the player won't visit.
+                _scope_act, _scope_diff = compute_custom_goal_scope(self.options)
+                num_difficulties = _scope_diff + 1
             else:
                 num_difficulties = goal_val + 1  # 0-2 -> 1-3 diffs
             for ap_id, name, act, classification in GATE_KEY_ITEMS:
@@ -640,8 +664,24 @@ class Diablo2ArchipelagoWorld(World):
         purposes we use Eve of Destruction Normal as a placeholder
         (always trivially reachable through skill-hunt fill).
 
+        1.9.9 — Goal=4 (Custom): build the completion lambda from the
+        union of selected sub-target toggles. AND-of-reachable across
+        every selected toggle's bound AP location (or proxy for
+        subsystem/bulk toggles that don't bind to a single AP location).
+        The DLL is the source of truth for the actual goal-complete
+        check (CustomGoal_IsComplete walks the required-vs-fired
+        bitmap); the AP-side condition just needs to be reachable so
+        AP fill knows the slot is solvable.
+
         Victory = Eve of Destruction on the chosen difficulty.
         """
+        # 1.9.9 — Goal=4 (Custom) handled separately from the simple-
+        # boss-kill logic below. Builds the completion lambda from the
+        # union of selected sub-target toggles.
+        if self.options.goal.value == 4:
+            self._set_rules_custom_goal()
+            return
+
         goal_diff = self.options.goal.value  # 0/1/2/3
         # Collection mode (3) maps to Normal for the AP victory location.
         if goal_diff == 3:
@@ -679,6 +719,80 @@ class Diablo2ArchipelagoWorld(World):
                     state.can_reach_location(loc, p)
                 )
             )
+
+    def _set_rules_custom_goal(self) -> None:
+        """1.9.9 — Build completion_condition for Goal=4 (Custom Goal).
+
+        Walks every enabled custom_goal_* toggle, looks up the AP
+        location it binds to (via custom_goal_target_location() — that
+        function falls back to a subsystem/bulk proxy when there is no
+        1:1 binding), and ANDs them all together via state.can_reach_location.
+
+        Validates that every resolved location actually exists in the
+        slot's active location set (so a toggle that requires
+        check_cow_level=true doesn't crash AP fill if the user enabled
+        kill_cow_king_normal without check_cow_level).
+
+        If no toggles resolve to a real location (e.g. user picked only
+        bulk targets but disabled the underlying check_* options), falls
+        back to "Sisters to the Slaughter" (Andariel Normal) as a trivial
+        completion condition. This means the seed will instantly be
+        winnable AP-side; the DLL's CustomGoal_IsComplete still gates
+        the actual in-game win, so standalone behaviour is unchanged.
+        """
+        # Build a set of all locations the slot will actually create.
+        # Used to filter out custom-goal targets whose underlying
+        # category was toggled OFF.
+        active_loc_names = {
+            name for (_, name, _, _, _, _) in self.get_active_locations()
+        }
+
+        target_locs: list[str] = []
+        for csv_tok, field, _disp, _doc in _CUSTOM_GOAL_DEFS:
+            opt = getattr(self.options, field, None)
+            if opt is None or not opt.value:
+                continue
+            ap_loc = custom_goal_target_location(csv_tok)
+            if not ap_loc:
+                continue  # unknown token — silently skip (defensive)
+            if ap_loc not in active_loc_names:
+                # Toggle's target location wasn't generated. E.g. user
+                # picked kill_cow_king_normal but check_cow_level=false
+                # so "Cow King Killed" doesn't exist. Skip — the DLL
+                # will gate this target on its own; we just can't
+                # express it AP-side without the location.
+                continue
+            target_locs.append(ap_loc)
+
+        # Dedupe while preserving order — multiple toggles can share
+        # the same proxy location (e.g. all 4 Pandemonium targets all
+        # proxy to "Eve of Destruction (Hell)").
+        seen: set[str] = set()
+        target_locs = [l for l in target_locs if not (l in seen or seen.add(l))]
+
+        if not target_locs:
+            # User selected no resolvable targets (e.g. only gold target
+            # set, or selected only bulk subsystems whose check_* options
+            # are off). Trivial Andariel Normal completion so AP fill
+            # has SOMETHING to evaluate. The DLL still gates the actual
+            # win on the CustomGoal_IsComplete bitmap, so this is safe.
+            target_locs = ["Sisters to the Slaughter"]
+            if "Sisters to the Slaughter" not in active_loc_names:
+                # Truly degenerate case — no Act 1 quests at all? Pick
+                # any single active progression-class location as the
+                # fallback so completion_condition isn't dangling.
+                fallback = next(iter(active_loc_names), None)
+                if fallback:
+                    target_locs = [fallback]
+
+        # Final completion lambda: AND every selected target reachable.
+        def custom_goal_complete(state, locs=tuple(target_locs), p=self.player):
+            for loc in locs:
+                if not state.can_reach_location(loc, p):
+                    return False
+            return True
+
+        self.multiworld.completion_condition[self.player] = custom_goal_complete
 
     def fill_slot_data(self) -> dict[str, Any]:
         """Data sent to the client/bridge. Bridge writes to ap_settings.dat.

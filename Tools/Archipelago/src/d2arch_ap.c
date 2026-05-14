@@ -912,8 +912,17 @@ static void LoadAPSettings(void) {
         if (sscanf(line, "goal=%d", &ival) == 1 && ival >= 0 && ival <= 14) {
             /* 1.8.0: accept both new (0-2) and legacy (0-14) encoding.
              * Legacy 0-14 was act_scope*3 + diff; extract diff via %3.
-             * 1.9.0: goal=3 (Collection) passes through directly. */
+             * 1.9.0: goal=3 (Collection) passes through directly.
+             * 1.9.2: goal=4 (Custom) added — also passes through directly.
+             *        BUG (1.9.8 and earlier): the old `else` branch mapped
+             *        goal=4 to (4 % 3) = 1, silently turning Custom into
+             *        Full Nightmare. CustomGoal_IsComplete() at
+             *        d2arch_gameloop.c:2209 then never fired and the
+             *        custom-goal feature was completely dead under AP mode.
+             *        1.9.9 fix: handle 3 and 4 explicitly before the
+             *        legacy modulo fallback. */
             if (ival == 3)       g_apGoal = 3;          /* Collection mode */
+            else if (ival == 4)  g_apGoal = 4;          /* Custom Goal mode */
             else                 g_apGoal = (ival <= 2) ? ival : (ival % 3);
         }
         /* Legacy goal_scope/difficulty_scope parsing removed 1.8.0 — apworlds

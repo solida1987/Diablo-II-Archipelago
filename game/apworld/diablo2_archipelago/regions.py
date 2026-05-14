@@ -421,21 +421,32 @@ def _build_gate_region_tree(world, menu_region, active_locations, max_act, num_d
 def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
     """Create regions with access rules based on game mode toggles.
     1.8.0: game_mode deprecated; only skill_hunting + zone_locking matter.
-    Goal is now 0/1/2 (Normal/NM/Hell); act scope always = full game. """
+    Goal is now 0/1/2 (Normal/NM/Hell); act scope always = full game.
+
+    1.9.9: Goal=4 (Custom) now uses computed scope from selected
+    sub-target toggles instead of always generating the full
+    3-difficulty 5-act region tree. See compute_custom_goal_scope()
+    in options.py for the rule.
+    """
     multiworld = world.multiworld
     player = world.player
     zone_locking = bool(world.options.zone_locking.value)
 
     goal = world.options.goal.value    # 0-4: scope, gold_collection, or custom
-    max_act = 5                         # always full game
     # 1.9.0 — Goal=3 (Gold Collection) treats as Normal-only for region/fill.
-    # 1.9.2 — Goal=4 (Custom) generates full pool — DLL filters at runtime.
-    # DLL handles the actual goal-complete condition at runtime in both cases.
+    # 1.9.9 — Goal=4 (Custom) now scope-aware (was: full pool, DLL filters).
     if goal == 3:
+        max_act = 5
         num_diffs = 1
     elif goal == 4:
-        num_diffs = 3
+        # 1.9.9 — match get_active_locations() so the region tree
+        # covers exactly what the player will traverse.
+        from .options import compute_custom_goal_scope
+        scope_act, scope_diff = compute_custom_goal_scope(world.options)
+        max_act = scope_act
+        num_diffs = scope_diff + 1
     else:
+        max_act = 5                     # 0/1/2: always full game
         num_diffs = goal + 1            # 1, 2, or 3
 
     active_locations = world.get_active_locations()
@@ -614,16 +625,35 @@ def create_regions(world: "Diablo2ArchipelagoWorld") -> None:
     ]
     active_loc_names = {name for (_, name, _, _, _, _) in active_locations}
 
+    # 1.9.9 — Determine which difficulty variants of each boss kill exist
+    # in the slot. For goal=4 (Custom), narrower scopes may not generate
+    # NM/Hell variants — referencing them in the lambda would raise
+    # KeyError during fill. Only check variants that actually exist.
+    def _boss_has_diff(base_loc: str, diff: int) -> bool:
+        if diff == 0:
+            return base_loc in active_loc_names
+        suffix = " (Nightmare)" if diff == 1 else " (Hell)"
+        return (base_loc + suffix) in active_loc_names
+
     for from_act, to_act, boss_loc in boss_connections:
         if from_act in act_regions and to_act in act_regions:
             if boss_loc in active_loc_names:
+                # Build a list of every diff variant of this boss kill
+                # that's present in the active set. ANY of them satisfies
+                # the act transition (player can advance the act on any
+                # difficulty they've reached).
+                variants = []
+                if _boss_has_diff(boss_loc, 0):
+                    variants.append(boss_loc)
+                if _boss_has_diff(boss_loc, 1):
+                    variants.append(boss_loc + " (Nightmare)")
+                if _boss_has_diff(boss_loc, 2):
+                    variants.append(boss_loc + " (Hell)")
                 act_regions[from_act].connect(
                     act_regions[to_act],
                     f"Act {from_act} -> Act {to_act}",
-                    lambda state, loc=boss_loc, p=player, ds=goal: (
-                        state.can_reach_location(loc, p)
-                        or (ds >= 1 and state.can_reach_location(loc + " (Nightmare)", p))
-                        or (ds >= 2 and state.can_reach_location(loc + " (Hell)", p))
+                    lambda state, vs=tuple(variants), p=player: any(
+                        state.can_reach_location(v, p) for v in vs
                     ),
                 )
             else:
