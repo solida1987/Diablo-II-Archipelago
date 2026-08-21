@@ -1,0 +1,52 @@
+Diablo II Archipelago and the Multiworld Launcher
+Copyright 2026 Marco Jonas Christiansen (solida1987)
+
+This product includes software developed by the project's own authors,
+licensed under the Apache License, Version 2.0 (see LICENSE).
+
+SCOPE
+-----
+The Apache License covers this project's own source code and assets only.
+
+This package is distributed together with a small number of independent
+open-source components, each of which remains under its own licence and
+copyright. Those components are NOT licensed under the Apache License, and
+nothing in LICENSE grants any right over them:
+
+  D2.Detours ............ MIT              (c) 2017 Lectem
+  D2MOO ................. MIT              (c) 2020-2025 The Phrozen Keep community
+
+Each component is described in full -- what it does, which files it provides,
+its author and its source -- in THIRD-PARTY-NOTICES.md. The complete text of
+every licence is in the licenses/ directory.
+
+Anyone redistributing this package must keep this file, THIRD-PARTY-NOTICES.md,
+the licenses/ directory and the components' own copyright notices intact.
+
+NOT DISTRIBUTED WITH THIS PACKAGE
+---------------------------------
+cnc-ddraw (MIT, (c) github.com/FunkyFr3sh) is REQUIRED and is not included
+either. Diablo II 1.10's own DirectDraw does not initialise on modern Windows,
+so the game cannot start without a wrapper. It is MIT and could have been
+shipped; it is not, because this project distributes nobody else's binaries.
+The launcher looks for it, adopts one from the player's own Diablo II folder if
+it is there, and refuses to start with instructions if it is not.
+Get it from https://github.com/FunkyFr3sh/cnc-ddraw
+
+Earlier versions of this package also contained d2gl (GPL-3.0), SlashGaming
+Diablo II Free Resolution (AGPL-3.0-or-later) and DSOAL (LGPL-2.1). Bundling
+them was a mistake: distributing a copyleft program in the same package as this
+one raises obligations that this project cannot honour, and the question of how
+far those obligations reach is not one to settle by guessing.
+
+They are optional graphics and sound add-ons, not part of the mod. They are no
+longer distributed here. The README explains what each one does, where to
+download it from its own author, and how to install it -- the same way the
+player already supplies their own copy of Diablo II. The game runs without
+them.
+
+BLIZZARD ENTERTAINMENT
+----------------------
+No files belonging to Blizzard Entertainment are distributed with this project.
+Diablo II and Diablo II: Lord of Destruction are trademarks of Blizzard
+Entertainment. This project is not affiliated with Blizzard Entertainment.
