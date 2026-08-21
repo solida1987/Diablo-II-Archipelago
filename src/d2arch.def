@@ -1,0 +1,6 @@
+LIBRARY D2Archipelago
+EXPORTS
+    DllPostLoadHook @1
+    D2Arch_Init @2
+    D2Arch_OnDrawGameUI @3
+    D2Arch_OnUnload @4
