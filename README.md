@@ -4,6 +4,15 @@ A randomizer mod for **Diablo II: Lord of Destruction (1.10f)** with [Archipelag
 
 Randomizes skill unlocks across a quest system spanning all 5 Acts and 3 difficulties. Complete quests, hunts, zone clears and more to earn skills from any of the 7 character classes. Play solo with your own settings, or connect to an Archipelago multiworld server for cross-game randomization.
 
+## Following the project & feedback
+
+- **Discord** — the launcher's community server: **[join here](https://discord.com/invite/hwCcPDv5E9)**.
+  The same invite sits in the right-hand panel of the launcher itself. This is
+  the place to follow the project, give feedback and report bugs, and talk to
+  the people who play and test it.
+- **Source** — the mod's C source is in [`src/`](src/), the launcher plugin in
+  [`plugin/`](plugin/), and both ship with every release.
+
 ## The Multiworld Launcher is required
 
 This mod is a **plugin** for the
@@ -260,17 +269,6 @@ Everything is driven from the launcher — pick **Diablo II Archipelago**, then 
 All panel keys can be rebound in the launcher's keybinding settings.
 
 ---
-
-## Following the project & feedback
-
-- **Discord** — the launcher's community server: **[join here](https://discord.com/invite/hwCcPDv5E9)**.
-  The same invite sits in the right-hand panel of the launcher itself. This is
-  the place to follow the project and talk to the people who play and test it.
-- **Bug reports** — the tracker lives on
-  [BetaHub](https://app.betahub.io/projects/pr-1475268655/issues). GitHub
-  issues on this repository are read too.
-- **Source** — the mod's C source is in [`src/`](src/), the launcher plugin in
-  [`plugin/`](plugin/), and both ship with every release.
 
 ## Known issues
 
