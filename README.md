@@ -295,6 +295,7 @@ All panel keys can be rebound in the launcher's keybinding settings.
 
 - **solida1987** — project lead, game systems, quest design, AP integration
 - **Maegis** — evil minion bookkeeping and answer man
+- **KleinTimmi** — found the main-menu graphics-handle leak (fixed in v3.8.9), testing, and an eye for details the rest of us walk past
 - **D2MOO Team** — open-source Diablo II reimplementation
 - **Archipelago Community** — multiworld framework and support
 - **Diablo II Modding Community** — research, tools and documentation
