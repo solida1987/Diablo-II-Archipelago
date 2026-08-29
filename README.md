@@ -46,10 +46,12 @@ know that before downloading than after.
 
 **INSTALL.md** on the release walks the same road in more detail.
 
-> **One thing the launcher cannot supply for you:** a DirectDraw wrapper. The
-> 2003 engine will not open a window on Windows 10 or 11 without one, so the
-> launcher checks for it before it starts the game and stops with instructions
-> if it is missing. Most people already have one and never notice —
+> **One requirement stands apart:** a DirectDraw wrapper. The 2003 engine will
+> not open a window on Windows 10 or 11 without one, so the launcher checks for
+> it before it starts the game. If your own Diablo II folder has a `ddraw.dll`
+> it is copied across for you; otherwise **Get missing components** on the
+> game's page can fetch D2GL — a wrapper in its own right — after you approve
+> that download. Most people already have one and never notice —
 > [details below](#required-a-directdraw-wrapper-cnc-ddraw).
 
 ### Requirements
@@ -112,6 +114,13 @@ them out is what carries obligations.
 
 All three are optional. Skip them and the game still runs, just at the original
 resolution and without 3D sound.
+
+The easy road: press **Get missing components** on the game's page in the
+launcher. It offers each of the three separately — naming the author, the
+licence, the exact files and the project's own page — and downloads it from
+that author's own releases only after you say yes to that component. The
+manual steps below reach the same result by hand, and explain which files
+matter if something looks wrong.
 
 Everything goes in the **same place**: your game folder, the one holding
 `Diablo II.exe`. The launcher opens it for you from **Open game folder**. No
@@ -227,7 +236,7 @@ Everything is driven from the launcher — pick **Diablo II Archipelago**, then 
 - **Goals:** finish on Normal / Nightmare / Hell, a **Collection** goal, or build your own **Custom** win condition.
 - **Skill Editor** (key 5) and **Skill Tree** (S) — assign and spend points on your unlocked skills.
 - **Quest Book** (key 6) — scrollable log with filter tabs and act/difficulty selection.
-- **Monster Shuffle**, **Boss Shuffle**, **Shop Shuffle**, **Entrance Shuffle** (all optional).
+- **Monster Shuffle**, **Super-Unique Shuffle**, **Shop Shuffle**, **Entrance Shuffle** (all optional).
 - **Zone-Locking mode** — zone keys gate area access for exploration-focused runs.
 - **XP multiplier**, expanded inventory/stash/cube, and settings ready for
   the optional HD renderer (see above).
@@ -251,6 +260,30 @@ Everything is driven from the launcher — pick **Diablo II Archipelago**, then 
 All panel keys can be rebound in the launcher's keybinding settings.
 
 ---
+
+## Following the project & feedback
+
+- **Discord** — the launcher's community server: **[join here](https://discord.com/invite/hwCcPDv5E9)**.
+  The same invite sits in the right-hand panel of the launcher itself. This is
+  the place to follow the project and talk to the people who play and test it.
+- **Bug reports** — the tracker lives on
+  [BetaHub](https://app.betahub.io/projects/pr-1475268655/issues). GitHub
+  issues on this repository are read too.
+- **Source** — the mod's C source is in [`src/`](src/), the launcher plugin in
+  [`plugin/`](plugin/), and both ship with every release.
+
+## Known issues
+
+- **Act-boss shuffle is temporarily disabled** (since v3.8.6). A shuffled act
+  boss could stop attacking for good once the player broke line of sight,
+  leaving a run that cannot be finished. The option returns when that is fixed;
+  super-unique shuffle is unaffected.
+- A fresh character can start with the wrong right-click skill — a Sorceress
+  holding Fire Arrow instead of her staff's Fire Bolt. Since v3.8.8 this cannot
+  crash the game any more, but the wrong skill still appears; under
+  investigation.
+- The quest tracker HUD's **Book** button can draw slightly outside its bar.
+  Cosmetic.
 
 ## Built With
 
