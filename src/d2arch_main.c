@@ -1203,6 +1203,16 @@ static DWORD WINAPI MainThread(LPVOID param) {
                     if (onMenu && !wasOnMenu) {
                         /* Just RETURNED to main menu - recreate everything */
                         Sleep(300);
+                        /* Free the previous handles BEFORE reloading (KleinTimmi,
+                         * 2026-08-29): this reload ran on every menu return and
+                         * leaked 5 D2Win cel handles per save&quit cycle. Same
+                         * free-then-reload pattern as the editor nav buttons
+                         * (2.8.9); EdCelFree __try-guards and NULLs the slot. */
+                        EdCelFree(&g_btnCellFile);
+                        EdCelFree(&g_btnCellFileRed);
+                        EdCelFree(&g_btnCellFileGreen);
+                        EdCelFree(&g_btnCellFileWide);
+                        EdCelFree(&g_btnCellFileWideRed);
                         if (fnCellFileLoad) {
                             g_btnCellFile        = fnCellFileLoad("data\\global\\ui\\CharSelect\\settings_toggle", 0);
                             g_btnCellFileRed     = fnCellFileLoad("data\\global\\ui\\CharSelect\\settings_toggle_red", 0);

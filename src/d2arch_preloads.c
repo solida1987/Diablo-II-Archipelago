@@ -436,15 +436,8 @@ static const char* Preload_ZoneName(int areaId) {
 }
 
 /* Check if a zone is "always open" (portal-only, town, Cow Level, etc.) */
-static BOOL Preload_IsAlwaysOpen(int areaId) {
-    for (int i = 0; i < g_alwaysOpenCount; i++) {
-        if (g_alwaysOpenZones[i] == areaId) return TRUE;
-    }
-    /* Towns are also always open */
-    if (areaId == 1 || areaId == 40 || areaId == 75 ||
-        areaId == 103 || areaId == 109) return TRUE;
-    return FALSE;
-}
+/* (Preload_IsAlwaysOpen deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* Look up which region (1..5) a zone belongs to, within a given act. */
 static int Preload_GetZoneRegion(int act, int areaId) {

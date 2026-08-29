@@ -53,7 +53,7 @@ public class D2Plugin : IGamePlugin
 
     public string GameId      => Experimental ? "diablo2_archipelago_experimental" : "diablo2_archipelago";
     public string DisplayName => Experimental ? "Diablo II: LoD (Experimental)"   : "Diablo II: Lord of Destruction";
-    public string Subtitle    => Experimental ? "Randomiser Mod — Experimental"   : "Randomiser Mod";
+    public string Subtitle    => Experimental ? "Randomizer Mod — Experimental"   : "Randomizer Mod";
     // Icon reuses the stable art for both channels (no separate experimental icon).
     public string IconPath    => Path.Combine(AppContext.BaseDirectory, "Assets", "diablo2_archipelago.png");
 
@@ -1461,6 +1461,37 @@ public class D2Plugin : IGamePlugin
         foreach (string r in restored)
             if (r.StartsWith("data/global/excel/", StringComparison.OrdinalIgnoreCase))
                 D2DataFiles.RefreshBackupFile(GameDirectory, Path.GetFileName(r));
+
+        // ⚠ The manifest MUST be refreshed from the same tag the files came from.
+        //
+        // Repair pulls the LATEST package. If the local manifest is older, the
+        // files it just wrote will not match it — so the very next launch finds
+        // the same "wrong size" files, downloads the same 9.9 MB package, and
+        // repairs them again. Forever.
+        //
+        // A tester hit exactly that: every launch spent 75 seconds re-downloading
+        // and repairing five files that were already correct, because nothing
+        // ever told the manifest what had happened. Rewriting it here is what
+        // makes a repair actually finish.
+        if (restored.Count > 0)
+        {
+            try
+            {
+                string manifestJson = await _http.GetStringAsync(
+                    DownloadUrl(tag, "game_manifest.json"), ct);
+                File.WriteAllText(Path.Combine(GameDirectory, "game_manifest.json"),
+                                  manifestJson);
+                progress.Report((100, $"Restored {restored.Count} file(s); "
+                                    + "install record updated."));
+            }
+            catch (Exception)
+            {
+                // The files ARE repaired; only the record of them is stale. Worth
+                // saying nothing about here rather than turning a successful
+                // repair into a reported failure — the next verify simply runs
+                // again.
+            }
+        }
 
         return (restored, wanted.ToList()); // leftover = not present in the package
     }

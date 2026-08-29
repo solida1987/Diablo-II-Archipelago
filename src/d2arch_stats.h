@@ -162,9 +162,9 @@ void Stats_OnGameTick(void* pPlayerUnit);
 
 /* Event hooks — called from elsewhere in the codebase. */
 void Stats_OnMonsterKill(int txtId, int typeFlag, int currentArea, int currentDifficulty);
-void Stats_OnPlayerDeath(void);
+/* (declaration removed 2026-08-29 with the dead definition) */
 void Stats_OnQuestComplete(void);
-void Stats_OnCubeTransmute(void);
+/* (declaration removed 2026-08-29 with the dead definition) */
 void Stats_OnGoldDelta(int64_t delta, int currentArea);
 void Stats_OnItemPickedUp(int quality, int slotIdx);  /* slotIdx is the Coll slot if any */
 void Stats_OnActComplete(int difficulty, int actIdx);

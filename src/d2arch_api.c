@@ -172,6 +172,8 @@ static WinDrawCellFile_t fnCelDraw = NULL;
 /* matching free for ARCHIVE_LoadCellFile (D2Win ord 10039). */
 typedef void (__fastcall *WinFreeCellFile_t)(void* cellFile);
 static WinFreeCellFile_t fnCelFree = NULL;
+/* defined in d2arch_editor.c (later in the unity build): __try-guarded fnCelFree + NULLs the slot */
+static void EdCelFree(void** pSlot);
 /* Session generation — bumped by OnCharacterLoad each time a character is (re)loaded (incl. */
 int g_celSessionGen = 0;
 
@@ -515,14 +517,11 @@ static void* CreateToggleBtn(int x, int y, const wchar_t* label, int* valuePtr) 
     return CreateToggleBtnWFC(x, y, 130, 1, NULL, label, valuePtr);
 }
 /* Width-only customisation (font stays at 1, default cellfile) */
-static void* CreateToggleBtnW(int x, int y, int width, const wchar_t* label, int* valuePtr) {
-    return CreateToggleBtnWFC(x, y, width, 1, NULL, label, valuePtr);
-}
+/* (CreateToggleBtnW deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 /* Width + font customisation (default cellfile) */
-static void* CreateToggleBtnWF(int x, int y, int width, int fontIdx,
-                               const wchar_t* label, int* valuePtr) {
-    return CreateToggleBtnWFC(x, y, width, fontIdx, NULL, label, valuePtr);
-}
+/* (CreateToggleBtnWF deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* Check if main menu is active by looking for SINGLE PLAYER button */
 /* Check if a specific button exists in D2Win control list */
@@ -553,39 +552,22 @@ static BOOL IsMainMenuActive(void) {
 static BOOL g_apButtonsVisible = FALSE;
 static int  g_apButtonOrigY[MAX_TITLE_BTNS] = {0};
 
-static void SetButtonsVisible(BOOL bShow) {
-    if (bShow == g_apButtonsVisible) return;
-    g_apButtonsVisible = bShow;
-    for (int i = 0; i < g_titleBtnCount; i++) {
-        if (!g_titleBtns[i]) continue;
-        int* pY = (int*)((BYTE*)g_titleBtns[i] + 0x10);
-        if (bShow) {
-            *pY = g_apButtonOrigY[i];
-            /* Restore cellfile pointer in case D2Win cleared it */
-            void** ppCell = (void**)((BYTE*)g_titleBtns[i] + 0x04);
-            int type = *(int*)((BYTE*)g_titleBtns[i] + 0x00);
-            if (type == D2WIN_BUTTON && *ppCell == NULL) {
-                /* Restore appropriate cellfile */
-                if (g_titleBtnVals[i] != NULL) {
-                    /* Toggle button - restore based on ON/OFF state */
-                    *ppCell = *g_titleBtnVals[i] ? g_btnCellFile : g_btnCellFileRed;
-                } else {
-                    *ppCell = g_btnCellFile;
-                }
-            }
-        } else {
-            g_apButtonOrigY[i] = *pY;
-            *pY = -5000;
-        }
-    }
-}
+/* (SetButtonsVisible deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* The key list on the main menu (left of the logo). */
 static void CreateHelpPanel(void) {
     if (!fnButtonCreate || !fnCellFileLoad) return;
     if (GetPrivateProfileIntA("settings", "ShowMenuHelp", 1, ts_iniPath) == 0) return;
 
-    void* cel = fnCellFileLoad("data\\global\\ui\\CharSelect\\ap_help", 0);
+    /* Free-then-reload (2026-08-29): this runs on EVERY menu return (before
+     * the launcher gate, so for every player) and used to leak one cel handle
+     * per return. The old button was already destroyed by the visibility loop
+     * when we get here, so freeing the old cel cannot dangle. */
+    static void* s_helpCel = NULL;
+    EdCelFree(&s_helpCel);
+    s_helpCel = fnCellFileLoad("data\\global\\ui\\CharSelect\\ap_help", 0);
+    void* cel = s_helpCel;
     if (!cel) { Log("HELP PANEL: ap_help cellfile missing — panel skipped\n"); return; }
 
     /* 800x600 menu space. The Diablo II logo starts near x=225 and the settings toggles (non-launcher mode only) start at y=310, so a 210x256 panel with its top at y=30 clears both. The +HELP_H is not a fudge: D2 draws a cel with the given y as its BOTTOM edge, which is why the mod's own panels pass y+height (see the tab draws in d2arch_editor.c). Without it a 256-tall panel asked to sit at y=14 put 242 rows above the top of the screen and showed only its bottom border. HelpY stays the TOP edge, which is what anyone editing the ini would expect. */
@@ -822,11 +804,21 @@ static void TitleSettings_CreateButtons(void) {
         HMODULE hW2 = GetModuleHandleA("D2Win.dll");
         ControlCreate_t fnCtrlCreate = hW2 ? (ControlCreate_t)GetProcAddress(hW2, (LPCSTR)10017) : NULL;
 
-        /* Load editbox cellfiles */
-        void* cellLabel = fnCellFileLoad ? fnCellFileLoad("data\\global\\ui\\CharSelect\\editbox_label", 0) : NULL;
-        /* Grey input box background (130x35) */
-        void* cellInput = fnCellFileLoad ? fnCellFileLoad("data\\global\\ui\\CharSelect\\editbox_input", 0) : NULL;
-        if (!cellInput) cellInput = g_btnCellFile; /* fallback to yellow toggle */
+        /* Load editbox cellfiles — free-then-reload (2026-08-29, same leak
+         * family as the toggle cels: reloaded per menu return, never freed).
+         * The fallback below deliberately stays OUT of the static slots so we
+         * can never free g_btnCellFile twice. */
+        static void* s_editLblCel = NULL;
+        static void* s_editInpCel = NULL;
+        EdCelFree(&s_editLblCel);
+        EdCelFree(&s_editInpCel);
+        if (fnCellFileLoad) {
+            s_editLblCel = fnCellFileLoad("data\\global\\ui\\CharSelect\\editbox_label", 0);
+            /* Grey input box background (130x35) */
+            s_editInpCel = fnCellFileLoad("data\\global\\ui\\CharSelect\\editbox_input", 0);
+        }
+        void* cellLabel = s_editLblCel;
+        void* cellInput = s_editInpCel ? s_editInpCel : g_btnCellFile; /* fallback to yellow toggle */
 
         /* Helper to create label + input pair */
         #define MAKE_AP_FIELD(labelText, iniKey, iniDefault, yOff) \

@@ -359,17 +359,15 @@ void Stats_OnMonsterKill(int txtId, int typeFlag, int currentArea, int currentDi
     (void)txtId;
 }
 
-void Stats_OnPlayerDeath(void) {
-    g_charStats.playerDeaths++;
-}
+/* (Stats_OnPlayerDeath deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 void Stats_OnQuestComplete(void) {
     g_charStats.questsCompleted++;
 }
 
-void Stats_OnCubeTransmute(void) {
-    g_charStats.cubeTransmutes++;
-}
+/* (Stats_OnCubeTransmute deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* Stamp the act-completion time on the named act/difficulty if not already set. */
 void Stats_OnActComplete(int difficulty, int actIdx) {

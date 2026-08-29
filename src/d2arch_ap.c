@@ -81,10 +81,8 @@ static void GetCurrentSeedKeyAndSrc(char* key, size_t n, char* src, size_t sn) {
     strncpy(src, "slot", sn - 1); src[sn - 1] = 0;
 }
 
-static void GetCurrentSeedKey(char* key, size_t n) {
-    char src[16];
-    GetCurrentSeedKeyAndSrc(key, n, src, sizeof(src));
-}
+/* (GetCurrentSeedKey deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* TRUE only when the two stamps are comparable AND genuinely differ. */
 static BOOL SeedStampSaysDifferentWorld(const char* fileKey, const char* fileSrc,
@@ -2617,10 +2615,8 @@ static void __declspec(naked) EndSceneHook(void) {
 
 /* ARCHIPELAGO SKILL TREE PANEL — 30 skills, single page, no tabs Replaces the vanilla 3-tab skill tree entirely. */
 
-/* Skill tree panel DC6 resources */
-static void* g_sklTreeBg = NULL;      /* Background cell file */
-static void* g_sklIconFile = NULL;    /* Skill icon cell file */
-static BOOL  g_sklTreeLoaded = FALSE;
+/* (g_sklTreeBg/g_sklIconFile/g_sklTreeLoaded deleted 2026-08-29 together with
+ * the never-called LoadSkillTreeAssets in d2arch_drawall.c.) */
 
 /* D2CMP ordinal 10024: CelFileNormalize Converts raw DC6 file data (read from disk) into a D2CellFileStrc with resolved pointers. */
 typedef void (__stdcall *CelFileNormalize_t)(void* pRawFile, void** ppOutFile,

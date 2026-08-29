@@ -185,15 +185,8 @@ static BOOL GateKey_FromAPId(int apId, int* outDiff, int* outSlot) {
 }
 
 /* Get AP item ID for (diff, act, gate_idx). */
-static int GateKey_ToAPId(int diff, int act, int gate_idx) {
-    int slot = GateKey_SlotFromActGate(act, gate_idx);
-    if (slot < 0) return 0;
-    int base = (diff == 0) ? GATEKEY_AP_BASE_NORMAL :
-               (diff == 1) ? GATEKEY_AP_BASE_NM :
-               (diff == 2) ? GATEKEY_AP_BASE_HELL : 0;
-    if (!base) return 0;
-    return base + slot;
-}
+/* (GateKey_ToAPId deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* Lock zones R2..R5 for all 5 acts based on current difficulty's preloads. */
 static void InitZoneLocks_FromPreloads(void) {

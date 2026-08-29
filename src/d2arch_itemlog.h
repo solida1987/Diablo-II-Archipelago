@@ -18,7 +18,7 @@ typedef struct {
 void ItemLogInit(void);
 void ItemLogAdd(int direction, int color, const wchar_t* what, const wchar_t* source);
 void ItemLogAddA(int direction, int color, const char* what, const char* source);  /* ANSI convenience */
-void ItemLogClear(void);
+/* (declaration removed 2026-08-29 with the dead definition) */
 int  ItemLogCount(void);
 const ItemLogEntry* ItemLogGet(int reverseIndex);  /* 0 = newest */
 

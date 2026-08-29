@@ -17,11 +17,8 @@ static void Log(const char* fmt, ...);
 static int g_verboseInput = 0;
 
 /* Helper: check if a directory exists */
-static BOOL DirExists(const char* path) {
-    if (!path || !path[0]) return FALSE;
-    DWORD attr = GetFileAttributesA(path);
-    return (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY));
-}
+/* (DirExists deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* Helper: ensure trailing backslash on a path */
 static void EnsureTrailingSlash(char* path, int maxLen) {

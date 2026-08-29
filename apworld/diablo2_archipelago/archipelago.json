@@ -1,7 +1,7 @@
 {
     "game": "Diablo II Archipelago",
     "authors": ["solida1987", "ꓘicka (AP logic)", "Zoë (AP logic)"],
-    "world_version": "3.8.8",
+    "world_version": "3.8.9",
     "minimum_ap_version": "0.5.0",
     "compatible_version": 7,
     "version": 7,

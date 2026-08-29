@@ -32,25 +32,25 @@ internal static class D2RandomizeProgress
             return;
         }
 
-        var ov = new D2ProgressOverlay("Randomiserer verden…");
+        var ov = new D2ProgressOverlay("Randomizing the world…");
         ov.Detail($"Seed {seed}");
         ov.Show();
         try
         {
-            await StepAsync(ov, "Tager backup af originale tabeller…", 12,
+            await StepAsync(ov, "Backing up the original tables…", 12,
                 () => D2DataFiles.EnsureBackup(gameDir), 300);
-            await StepAsync(ov, "Genererer randomiserede tabeller…", 48,
+            await StepAsync(ov, "Generating randomized tables…", 48,
                 () => D2DataFiles.GenerateForSeed(s, seed, seedFolder, gameDir), 550);
-            await StepAsync(ov, "Lægger seedets tabeller over spillet…", 78,
+            await StepAsync(ov, "Applying the seed's tables to the game…", 78,
                 () => D2DataFiles.ApplySeed(seedFolder, gameDir), 350);
 
             (int ok, int total) v = (0, 0);
-            await StepAsync(ov, "Bekræfter at alt er flyttet på plads…", 94,
+            await StepAsync(ov, "Verifying everything is in place…", 94,
                 () => v = D2DataFiles.VerifyApplied(seedFolder, gameDir), 350);
 
             bool good = v.total > 0 && v.ok == v.total;
             ov.Done(good
-                ? $"✓ Randomisering klar — {v.ok}/{v.total} tabeller på plads"
+                ? $"✓ Randomization ready — {v.ok}/{v.total} tables in place"
                 : "✓ Klar — starter spillet");
             await Task.Delay(850);
         }
@@ -86,13 +86,13 @@ internal static class D2RandomizeProgress
             D2ProgressOverlay? ov = null;
             try
             {
-                ov = new D2ProgressOverlay("Nulstiller installation…");
+                ov = new D2ProgressOverlay("Restoring the installation…");
                 ov.Show();
-                await StepAsync(ov, "Sætter tekstfiler tilbage til standard…", 55,
+                await StepAsync(ov, "Restoring the default text files…", 55,
                     () => D2DataFiles.RestorePristine(gameDir), 380);
 
                 (int ok, int total) v = (0, 0);
-                await StepAsync(ov, "Bekræfter ren installation…", 90,
+                await StepAsync(ov, "Verifying a clean installation…", 90,
                     () => v = D2DataFiles.VerifyPristine(gameDir), 320);
 
                 bool good = v.total > 0 && v.ok == v.total;

@@ -1,31 +1,13 @@
-static WORD GetSkillIdFromStruct(void* pSkill) {
-    if (!pSkill) return 0;
-    void* pSkillsTxt = *(void**)pSkill;  /* First field = pSkillsTxt */
-    if (!pSkillsTxt) return 0;
-    return *(WORD*)pSkillsTxt;  /* First field of SkillsTxt = wSkillId */
-}
+/* (GetSkillIdFromStruct deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* Send packet 0x3C to switch the right-click skill */
-static void SwitchRightSkill(WORD skillId) {
-    BYTE pkt[9];
-    pkt[0] = 0x3C;
-    *(WORD*)&pkt[1] = skillId;
-    pkt[3] = 0;
-    pkt[4] = 0x00;  /* 0x00 = right hand */
-    *(DWORD*)&pkt[5] = 0xFFFFFFFF;  /* no item */
-    SendGamePacket(9, pkt);
-}
+/* (SwitchRightSkill deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* Send packet 0x0C to cast right-click skill at mouse location */
-static void CastRightSkillAtMouse(void) {
-    if (!pMouseX || !pMouseY) return;
-    BYTE pkt[5];
-    pkt[0] = 0x0C;
-    /* D2 uses world coordinates, but mouse position from D2Client is already world coords */
-    *(WORD*)&pkt[1] = (WORD)(*pMouseX);
-    *(WORD*)&pkt[3] = (WORD)(*pMouseY);
-    SendGamePacket(5, pkt);
-}
+/* (CastRightSkillAtMouse deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* UI State */
 static BOOL g_initialized  = FALSE;
@@ -322,14 +304,8 @@ void SimulateKey(BYTE vk, BOOL down) {
     SendInput(1, &inp, sizeof(INPUT));
 }
 
-static void SimulateClick(DWORD downFlag, DWORD upFlag) {
-    INPUT inp[2] = {0};
-    inp[0].type = INPUT_MOUSE;
-    inp[0].mi.dwFlags = downFlag;
-    inp[1].type = INPUT_MOUSE;
-    inp[1].mi.dwFlags = upFlag;
-    SendInput(2, inp, sizeof(INPUT));
-}
+/* (SimulateClick deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 static void ProcessController(void) {
     XINPUT_STATE state;

@@ -1,33 +1,8 @@
 
-static void LoadSkillTreeAssets(void) {
-    char dc6Path[MAX_PATH];
-
-    if (g_sklTreeLoaded) return;
-    g_sklTreeLoaded = TRUE;
-
-    /* Load skill tree background DC6 from disk using D2CMP_CelFileNormalize.
-     * This is the same path D2Win's ARCHIVE_LoadCellFileWithFileSize uses:
-     *   1. Read raw DC6 file into memory
-     *   2. Call D2CMP ordinal 10024 (CelFileNormalize) to resolve pointers
-     *   3. Use the resulting D2CellFileStrc with D2Gfx ordinal 10072 (CelDraw)
-     *
-     * Place DC6 files in: <Game.exe dir>\data\global\ui\SPELLS\
-     */
-
-    if (BuildDC6Path(dc6Path, MAX_PATH, "skltree_a_back.DC6")) {
-        g_sklTreeBg = LoadDC6FromDisk(dc6Path);
-        Log("SkillTree: bg=%p from disk\n", g_sklTreeBg);
-    }
-
-    if (BuildDC6Path(dc6Path, MAX_PATH, "Skillicon.DC6")) {
-        g_sklIconFile = LoadDC6FromDisk(dc6Path);
-        Log("SkillTree: icons=%p from disk\n", g_sklIconFile);
-    }
-
-    if (!g_sklTreeBg) {
-        Log("SkillTree: WARNING - background DC6 not loaded, will use fallback rectangles\n");
-    }
-}
+/* (LoadSkillTreeAssets was deleted 2026-08-29: it had ZERO call sites, so
+ * g_sklTreeBg/g_sklIconFile were always NULL -- the skill tree draws from the
+ * caches further down. Freeing "leaks" in it, as a tester patch proposed,
+ * therefore did nothing; see docs/BUILDPLAN_2026-08-29.md part 1.) */
 
 /* Draw a loaded cel file using D2Gfx Ordinal 10072 (CelDraw). */
 static void DrawCel(void* pCelFile, int frame, int x, int y) {
@@ -296,22 +271,8 @@ static void CalcSkillDamage(SkillFullData* sd, int level, int* outMin, int* outM
 }
 
 /* Parse synergy skill names from formula like "(skill('Fire Bolt'.blvl)+skill('Meteor'.blvl))*par8" */
-static int ParseSynergyNames(const char* formula, char names[][40], int maxNames) {
-    int count = 0;
-    const char* p = formula;
-    while (p && count < maxNames) {
-        const char* start = strstr(p, "skill('");
-        if (!start) break;
-        start += 7;
-        const char* end = strstr(start, "'");
-        if (!end || end - start >= 39) break;
-        memcpy(names[count], start, end - start);
-        names[count][end - start] = 0;
-        count++;
-        p = end + 1;
-    }
-    return count;
-}
+/* (ParseSynergyNames deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 static void DrawSkillTooltip(int skillId, int mx, int my) {
     if (!fnText || !fnFont || skillId < 0 || skillId >= 400) return;
@@ -3358,8 +3319,14 @@ cheat_menu_done:
     if (g_zoneLockingOn) {
         int curArea = GetCurrentArea();
         if (curArea > 0 && curArea < MAX_AREA_ID) {
-            /* COMBINED-MODE reachability. */
-            BOOL esRedirected = (g_entranceShuffleEnabled && g_currentSetIdx >= 0);
+            /* COMBINED-MODE reachability. 2026-08-29: membership test instead
+             * of `g_currentSetIdx >= 0` -- that context is wiped by every
+             * save&quit, so a relog inside a shuffled zone-locked dungeon got
+             * the player kicked to town. A pooled interior is only physically
+             * reachable through whatever entrance the shuffle assigned it, so
+             * exempting it is always sound; pinned sets keep normal locking. */
+            BOOL esRedirected = (g_entranceShuffleEnabled && g_entranceShuffleApplied &&
+                                 AreaInPooledShuffledSet(curArea));
             if (IsAreaLocked(curArea) && esRedirected) {
                 static DWORD s_lastEsExempt = 0;
                 DWORD nowEx = GetTickCount();

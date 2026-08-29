@@ -934,36 +934,8 @@ BOOL StashUIHandleClick(int ignoredMx, int ignoredMy) {
 }
 
 /* Old tab-rect click path below is unreachable (new logic above returns). */
-static BOOL StashUIHandleClick_OLD(int mx, int my) {
-    int i;
-    if (!g_stashOpen) return FALSE;
+/* (StashUIHandleClick_OLD deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
 
-    StashUIRecomputeAnchor();
-    StashUIComputeTabLayout();
-
-    for (i = 0; i < s_tabRectCount; i++) {
-        StashUITabRect* rc = &s_tabRects[i];
-        if (StashUIPointInRect(mx, my, rc->x, rc->y, rc->w, rc->h)) {
-            StashAccess acc = StashGetAccess(rc->globalIndex);
-            if (acc == STASH_ACCESS_NONE || acc == STASH_ACCESS_LOCKED) {
-                Log("StashUI: click on locked/invisible tab %d (acc=%d)\n",
-                    rc->globalIndex, (int)acc);
-                return TRUE;
-            }
-            g_activeStashTab = rc->globalIndex;
-            Log("StashUI: active tab -> %d\n", g_activeStashTab);
-            return TRUE;
-        }
-    }
-
-    /* Click inside the panel frame but not on a tab — still consume it so the player doesn't accidentally command their character through the overlay. */
-    if (StashUIPointInRect(mx, my, s_stashPanelX, s_stashPanelY,
-                           STASHUI_PANEL_W, STASHUI_PANEL_H)) {
-        return TRUE;
-    }
-
-    return FALSE;
-}
 
 /* Keyboard hook. 1.8.0: hotkey removed per user request. Only ESC is handled — lets the native stash close propagate to our overlay without waiting for the next UIVar poll. */
 void StashUIHandleKey(int vk) {

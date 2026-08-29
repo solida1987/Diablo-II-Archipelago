@@ -605,25 +605,8 @@ static void RenderZoneTracker(void) {
 
 /* In-book entry point — invoked from d2arch_editor.c page-3 dispatch. */
 #if 0
-static void Editor_RenderZonesPage_Legacy(int mx, int my, BOOL clicked) {
-    if (!fnRect || !fnText || !fnFont) return;
-    RenderInitFromIni();
-    static int s_zonesLoaded = 0;
-    static int s_zPx = 50, s_zPy = 56, s_zPw = 720, s_zPh = 504;
-    INI_HOT_RELOAD_GUARD(s_zonesLoaded);
-    if (!s_zonesLoaded) {
-        s_zonesLoaded = 1;
-        char ini[MAX_PATH]; GetArchDir(ini, MAX_PATH); strcat(ini, "d2arch.ini");
-        s_zPx = GetPrivateProfileIntA("EditorZonesPage", "PanelX",  50,  ini);
-        s_zPy = GetPrivateProfileIntA("EditorZonesPage", "PanelY",  56,  ini);
-        s_zPw = GetPrivateProfileIntA("EditorZonesPage", "PanelW",  720, ini);
-        s_zPh = GetPrivateProfileIntA("EditorZonesPage", "PanelH",  504, ini);
-    }
-    BOOL wasLDown = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
-    RenderZoneTracker_Body(s_zPx, s_zPy, s_zPw, s_zPh,
-                           mx, my, clicked, wasLDown,
-                           FALSE, NULL);
-}
+/* (Editor_RenderZonesPage_Legacy deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 #endif
 
 /* SKILL EDITOR RENDERING */
@@ -645,14 +628,8 @@ static int SlotTier(int cls, int tab, int s) {
 }
 
 /* Count available (unlocked, unassigned) skills for a given tier */
-static int CountAvailable(int tier) {
-    int count = 0;
-    for (int i = 0; i < g_poolCount; i++) {
-        if (g_pool[i].unlocked && !g_pool[i].assigned && g_skillDB[g_pool[i].dbIndex].tier == tier)
-            count++;
-    }
-    return count;
-}
+/* (CountAvailable deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 /* Assign a pool skill to a tab/slot — editor only, no point cost. */
 static void AssignSkill(int poolIdx, int tab, int slot) {

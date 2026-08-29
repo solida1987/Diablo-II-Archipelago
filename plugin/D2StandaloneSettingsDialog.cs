@@ -483,8 +483,12 @@ internal sealed class D2StandaloneSettingsDialog : Window
         host.Children.Add(Check("Monster shuffle", _s.MonsterShuffle, v => _s.MonsterShuffle = v));
         host.Children.Add(Check("Super-unique shuffle (Bishibosh, Rakanishu, Pindleskin…)",
             _s.SuperUniqueShuffle, v => _s.SuperUniqueShuffle = v));
-        host.Children.Add(Check("Act-boss shuffle (Andariel → Duriel → Mephisto → Diablo → Baal)",
-            _s.ActBossShuffle, v => _s.ActBossShuffle = v));
+        // Act-boss shuffle is TEMPORARILY OUT. A shuffled boss has been seen
+        // stopping its attack for good once the player breaks line of sight
+        // (BetaHub #13), which leaves a run that cannot be finished. The
+        // setting, the mod's swap code and the data-file writer are all still
+        // here — this is the only thing standing between a player and it, and
+        // putting the line back is how it returns.
         host.Children.Add(Check("Shop shuffle",    _s.ShopShuffle,    v => _s.ShopShuffle = v));
         host.Children.Add(Check("Entrance shuffle", _s.EntranceShuffle, v => _s.EntranceShuffle = v));
     }

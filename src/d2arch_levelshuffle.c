@@ -107,6 +107,15 @@ static const DungeonSet g_sets[] = {
 /* === Shuffle map: index of set -> destination set index === Built per-pool with Sattolo (no fixed points within pool). */
 static int g_shuffleMap[NUM_SETS];
 
+/* === Inverse map: destination set -> the set whose entrance leads INTO it ===
+ * The shuffle is a bijection, so this answers "which door did the player come
+ * in through" with NO session state. Exits are driven from this (2026-08-29):
+ * the old exit path depended on g_returnSurface, which every save&quit wipes
+ * (UndoEntranceShuffle) -- so a relog inside a shuffled dungeon released the
+ * player onto the destination's own surface, acts away from where they
+ * entered ("entered Den of Evil, exited into Act 2"). */
+static int g_inverseMap[NUM_SETS];
+
 /* === Per-frame runtime state === */
 static int g_currentSetIdx     = -1;  /* which set player is in (-1 = none) */
 static int g_returnSurface     = 0;   /* warp-back target on exit (0 = no pending) */
@@ -182,6 +191,30 @@ static BOOL IsLevelInSet(int level, int setIdx) {
     return FALSE;
 }
 
+/* Returns the index of the set containing level (any member), or -1. */
+static int FindSetContaining(int level) {
+    for (int i = 0; i < NUM_SETS; i++) {
+        if (IsLevelInSet(level, i)) return i;
+    }
+    return -1;
+}
+
+/* Pool participant = not pinned. Pinned sets keep the identity mapping and
+ * normal zone-lock rules; pooled interiors are only physically reachable
+ * through whatever entrance the shuffle assigned them. */
+static BOOL SetIsPooled(int setIdx) {
+    if (setIdx < 0 || setIdx >= NUM_SETS) return FALSE;
+    return !(g_sets[setIdx].flags & DS_FLAG_NO_SHUFFLE);
+}
+
+/* Zone-lock combined-mode exemption (used by d2arch_drawall.c). The old test
+ * was `g_currentSetIdx >= 0` -- session state, wiped by every save&quit, so a
+ * relog inside a shuffled zone-locked dungeon got the player kicked to town.
+ * Membership in a pooled set is statically derivable and needs no state. */
+static BOOL AreaInPooledShuffledSet(int area) {
+    return SetIsPooled(FindSetContaining(area));
+}
+
 /* Act-town locking — prevent player from being stuck in an act-town they haven't unlocked yet. */
 
 /* D2 quest IDs for act-end bosses (param values in d2arch_quests.c) */
@@ -208,16 +241,21 @@ static BOOL IsActBossDead(void* pQuestFlags, int d2QuestId) {
     return done;
 }
 
-/* Read pQuestFlags via pGame->pQuestControl->pQuestFlags chain. */
+/* Read pQuestFlags via pGame->pQuestControl->pQuestFlags chain.
+ * Returns -1 when the chain is not readable (load window): the caller must
+ * SKIP the town-lock check that tick. The old "fail closed to act 1" could
+ * warp a legitimate act-3+ character toward Act 1 town while the quest
+ * pointers were still settling. Failing open for one tick is harmless -- the
+ * next tick re-checks. */
 static int GetHighestUnlockedAct(void) {
-    if (!g_cachedPGame || !fnGetQuestState) return 1;  /* fail closed */
+    if (!g_cachedPGame || !fnGetQuestState) return -1;  /* unknown -> skip */
     void* pQuestFlags = NULL;
     __try {
         DWORD pQuestControl = *(DWORD*)(g_cachedPGame + 0x10F4);
-        if (!pQuestControl) return 1;
+        if (!pQuestControl) return -1;
         pQuestFlags = *(void**)(pQuestControl + 0x0C);
-    } __except(EXCEPTION_EXECUTE_HANDLER) { return 1; }
-    if (!pQuestFlags) return 1;
+    } __except(EXCEPTION_EXECUTE_HANDLER) { return -1; }
+    if (!pQuestFlags) return -1;
 
     int act = 1;
     if (IsActBossDead(pQuestFlags, ACT_BOSS_QUEST_ANDARIEL)) act = 2;
@@ -245,6 +283,7 @@ static int CheckActTownLock(int currentArea) {
     int townAct = GetActForArea(currentArea);
     if (townAct <= 1) return 0;  /* Act 1 town is always allowed */
     int maxUnlocked = GetHighestUnlockedAct();
+    if (maxUnlocked < 0) return 0;  /* quest flags unreadable -> don't warp on a guess */
     if (townAct <= maxUnlocked) return 0;
     return TownForAct(maxUnlocked);
 }
@@ -353,6 +392,11 @@ static void ApplyEntranceShuffle(DWORD seed) {
             g_shuffleMap[poolBRest[i]] = poolBRest[permB[i]];
         }
     }
+
+    /* Build the inverse map (destination -> source). A permutation gives every
+     * set exactly one inbound entrance; exits are derived from this. */
+    for (int i = 0; i < NUM_SETS; i++) g_inverseMap[i] = i;
+    for (int i = 0; i < NUM_SETS; i++) g_inverseMap[g_shuffleMap[i]] = i;
 
     /* Log the shuffle for visibility */
     Log("ENTRANCE SHUFFLE [Pool A, Act 1+2, %d sets]:\n", countA);
@@ -501,7 +545,59 @@ static void EntranceShuffle_Tick(void) {
     }
 
 
-    /* CASE A: player is currently inside a shuffled dungeon set. */
+    /* STATELESS EXIT (2026-08-29, replaces the g_returnSurface exit). The
+     * shuffle map is a bijection, so the set the player just left plus the
+     * INVERSE map name the one entrance that leads in -- no session state
+     * needed. The old path depended on g_returnSurface, which every
+     * save&quit wipes, so a relog inside a shuffled dungeon released the
+     * player onto the destination's own surface ("entered Den of Evil,
+     * exited into Act 2"). Guards:
+     *  - the transition must come FROM inside the set (the old check had no
+     *    prevArea test: TP to town + a stroll onto the destination's own
+     *    surface teleported the player cross-act mid-walk);
+     *  - a fresh death respawn into a parent-TOWN (A2 Sewers/Cow/Nihlathak
+     *    exits) is not an exit -- the player wants their corpse run. */
+    {
+        int physSet = FindSetContaining(prevArea);
+        if (physSet >= 0 && newArea == g_sets[physSet].surfaceParent &&
+            g_inverseMap[physSet] != physSet &&
+            !(IsTown((DWORD)newArea) && RecentlyDied())) {
+            int src      = g_inverseMap[physSet];
+            int returnTo = g_sets[src].surfaceParent;
+            if (returnTo == newArea) {
+                /* Source entrance sits on the SAME surface we just landed on
+                 * (the Tal Rasha tombs all share Canyon of the Magi). No warp
+                 * -- just move the player to the door they actually entered
+                 * through. */
+                g_relocateLevel  = newArea;
+                g_relocateNextTo = g_sets[src].members[0];
+                Log("ENTRANCE SHUFFLE TICK: exit of '%s' onto shared surface %d "
+                    "-> repositioning at '%s' entrance (L%d)\n",
+                    g_sets[physSet].name, newArea,
+                    g_sets[src].name, g_sets[src].members[0]);
+            } else {
+                /* This OVERRIDES any zone-lock teleport queued this same tick
+                 * (P4): the return target is by construction the surface whose
+                 * entrance the player used -- self-visited, unlocked. */
+                if (g_pendingZoneTeleport != 0 && g_pendingZoneTeleport != returnTo)
+                    Log("ENTRANCE SHUFFLE TICK: overriding queued zone-lock teleport "
+                        "%d with shuffled-set return %d\n", g_pendingZoneTeleport, returnTo);
+                g_pendingZoneTeleport  = returnTo;
+                g_pendingWarpTarget    = returnTo;
+                g_pendingLandingNextTo = g_sets[src].members[0];
+                Log("ENTRANCE SHUFFLE TICK: exit of '%s' (surface %d) -> its "
+                    "entrance is '%s''s, returning to surface %d\n",
+                    g_sets[physSet].name, g_sets[physSet].surfaceParent,
+                    g_sets[src].name, returnTo);
+            }
+            g_returnSurface = 0;
+            g_currentSetIdx = -1;
+            return;
+        }
+    }
+
+    /* CASE A: player is currently inside a shuffled dungeon set (context is
+     * kept for town-portal round-trips and logging; exits no longer need it). */
     if (g_currentSetIdx >= 0) {
         if (IsLevelInSet(newArea, g_currentSetIdx)) {
             /* Internal navigation, no action */
@@ -514,33 +610,10 @@ static void EntranceShuffle_Tick(void) {
                 g_sets[g_currentSetIdx].name, newArea);
             return;
         }
-        /* Player left the set */
-        int parentOfCurrentSet = g_sets[g_currentSetIdx].surfaceParent;
-        if (newArea == parentOfCurrentSet && g_returnSurface > 0)
-        {
-            /* Exited via the natural surface — redirect back to where the
-             * player originally clicked from. This OVERRIDES any teleport
-             * zone-locking queued this same tick (P4): the destination set's
-             * surface lies in a LOCKED act, so zone-lock fires on it first and
-             * used to win — the "== 0" guard here then skipped the redirect,
-             * the player got zone-lock's town instead of the entrance, and the
-             * context was gone. Our return target is always a self-visited,
-             * unlocked area, so overriding is safe by construction. */
-            int returnTo = g_returnSurface;
-            if (g_pendingZoneTeleport != 0 && g_pendingZoneTeleport != returnTo)
-                Log("ENTRANCE SHUFFLE TICK: overriding queued zone-lock teleport "
-                    "%d with shuffled-set return %d\n", g_pendingZoneTeleport, returnTo);
-            g_pendingZoneTeleport = returnTo;
-            g_pendingWarpTarget = returnTo;
-            g_pendingLandingNextTo = g_returnEntryL1;
-            Log("ENTRANCE SHUFFLE TICK: exit detected (set='%s' parentNatural=%d, "
-                "originalReturn=%d) -> warping to %d\n",
-                g_sets[g_currentSetIdx].name, parentOfCurrentSet, returnTo, returnTo);
-        } else {
-            Log("ENTRANCE SHUFFLE TICK: left set '%s' to area %d (not natural parent "
-                "or no pending return) -> clearing state\n",
-                g_sets[g_currentSetIdx].name, newArea);
-        }
+        /* Left the set some other way (death respawn into the parent town,
+         * identity-mapped exit, aborted trip) -- just drop the context. */
+        Log("ENTRANCE SHUFFLE TICK: left set '%s' to area %d -> clearing state\n",
+            g_sets[g_currentSetIdx].name, newArea);
         g_returnSurface = 0;
         g_currentSetIdx = -1;
         return;
@@ -550,8 +623,19 @@ static void EntranceShuffle_Tick(void) {
     int sourceSetIdx = FindSetByEntryLevel(newArea);
     if (sourceSetIdx < 0) return;  /* not a cave entry — ignore */
 
-    /* 2.x (bug B, belt-and-suspenders) — arriving at a cave entry FROM TOWN is a town-portal return (you can't walk from town into a dungeon), not a fresh entrance, so don't re-fire the redirect; just resume tracking this set. */
-    if (IsTown((DWORD)prevArea)) {
+    /* 2.x (bug B, belt-and-suspenders) — arriving at a cave entry FROM TOWN is
+     * a town-portal return, not a fresh entrance... UNLESS that town IS the
+     * set's own natural parent (2026-08-29): A2 Sewers (trapdoor in Lut
+     * Gholein), the Cow portal (Rogue Encampment) and the Nihlathak chain
+     * (Anya portal in Harrogath) are entered FROM a town by design. The old
+     * unconditional guard swallowed their fresh entries, so those three never
+     * shuffled -- and their mapped partners lost their only inbound entrance:
+     * Echo Chamber's interior (q432 + a Hunt superunique) was unreachable in
+     * EVERY entrance-shuffle seed. Real TP returns are safe: while a portal
+     * exists the set context is still alive (CASE A keeps it on TP-to-town),
+     * so this branch only runs after a context loss -- and no town portal
+     * survives a relog. */
+    if (IsTown((DWORD)prevArea) && prevArea != g_sets[sourceSetIdx].surfaceParent) {
         g_currentSetIdx = sourceSetIdx;
         g_returnSurface = g_sets[sourceSetIdx].surfaceParent;
         Log("ENTRANCE SHUFFLE TICK: entry to '%s' from town %d (portal return) -> no redirect\n",

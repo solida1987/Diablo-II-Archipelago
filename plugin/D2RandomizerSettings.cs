@@ -328,9 +328,12 @@ public sealed class D2RandomizerSettings
 
         yield return new("MonsterShuffle",       B(MonsterShuffle));
         yield return new("SuperUniqueShuffle",   B(SuperUniqueShuffle));
-        yield return new("ActBossShuffle",       B(ActBossShuffle));
+        // TEMPORARILY DISABLED — see BetaHub #13. Emitted as false whatever the
+        // saved settings say, so an older settings file cannot switch it back
+        // on behind the player's back. Restore B(ActBossShuffle) to re-enable.
+        yield return new("ActBossShuffle",       B(false));
         // Back-compat: the DLL reads ActBossShuffle (falling back to BossShuffle).
-        yield return new("BossShuffle",          B(ActBossShuffle));
+        yield return new("BossShuffle",          B(false));
         yield return new("ShopShuffle",          B(ShopShuffle));
         yield return new("EntranceShuffle",      B(EntranceShuffle));
 

@@ -26,9 +26,8 @@ void ItemLogInit(void) {
     Log("ItemLog: initialized (capacity=%d)\n", ITEMLOG_BUFSIZE);
 }
 
-void ItemLogClear(void) {
-    ItemLogInit();
-}
+/* (ItemLogClear deleted 2026-08-29: defined but never called -- dead-code sweep, docs/BUILDPLAN_2026-08-29.md part 4) */
+
 
 int ItemLogCount(void) {
     return (int)g_itemLogCount;
