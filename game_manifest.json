@@ -1,6 +1,6 @@
 {
-  "version": "v3.9.0",
-  "version_display": "v3.9.0",
+  "version": "v3.9.1",
+  "version_display": "v3.9.1",
   "file_count": 649,
   "files": [
     {
@@ -20,7 +20,7 @@
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "bfd0b5a93ab57088024f4753b6a8d789d20f41de1d7dd70405de43fb9ec59e1c",
+      "sha256": "4dde5dad0a7f378a221af75830b7a61d51932c8f0a14fd85e753ee9edaca453f",
       "size": 845312
     },
     {
@@ -3235,7 +3235,7 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "bfd0b5a93ab57088024f4753b6a8d789d20f41de1d7dd70405de43fb9ec59e1c",
+      "sha256": "4dde5dad0a7f378a221af75830b7a61d51932c8f0a14fd85e753ee9edaca453f",
       "size": 845312
     },
     {

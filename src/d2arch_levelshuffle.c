@@ -497,55 +497,16 @@ static void EntranceShuffle_Tick(void) {
         return;
     }
 
-    /* Act-town lock: catches death-respawn into a higher-act town than the player has unlocked. */
-    {
-        int kickTo = CheckActTownLock(newArea);
-        if (kickTo > 0 && g_pendingZoneTeleport == 0) {
-            /* P4 (Maegis, Cain-quest kill): this lock used to run BEFORE the
-             * CASE A town-portal branch below and CLEAR the return context —
-             * so a player who town-portalled out of a cross-act shuffled
-             * dungeon (D2 portals to the town of the act you physically stand
-             * in) got Act2-town -> kicked to Act1-town, and the recorded way
-             * back to the original entrance was wiped. If we still hold a
-             * pending return surface, THAT is where the player belongs: it is
-             * by definition an area they walked to themselves, in an unlocked
-             * act. The lock stays for the plain death-respawn case. */
-            if (g_currentSetIdx >= 0 && g_returnSurface > 0) {
-                kickTo = g_returnSurface;
-                g_pendingLandingNextTo = g_returnEntryL1;
-                Log("ENTRANCE SHUFFLE TICK: locked town %d but a shuffled-set "
-                    "return is pending -> sending player to the ORIGINAL "
-                    "entrance surface %d instead of town\n", newArea, kickTo);
-                ShowNotify("Returning to where you entered");
-            } else if (prevArea > 0 && prevArea != newArea && !IsTown((DWORD)prevArea)
-                       && !RecentlyDied()) {
-                /* P25: a town-portal into a locked act's town used to strand
-                 * the player in another town with the portal pair out of
-                 * reach. Send them back where they stood instead. Death
-                 * respawns keep the old town kick. */
-                kickTo = prevArea;
-                g_pendingLandingNextTo = 0;
-                Log("ENTRANCE SHUFFLE TICK: locked town %d, no set context -> "
-                    "bouncing back to previous area %d\n", newArea, kickTo);
-                ShowNotify("That town's act is still locked — sending you back");
-            } else {
-                g_pendingLandingNextTo = 0;
-                Log("ENTRANCE SHUFFLE TICK: town %d (act %d) not yet unlocked (max unlocked=%d) "
-                    "-> kicking to town %d\n",
-                    newArea, GetActForArea(newArea), GetHighestUnlockedAct(), kickTo);
-                ShowNotify("You haven't unlocked this act yet — returning home");
-            }
-            g_pendingZoneTeleport = kickTo;
-            g_pendingWarpTarget = kickTo;
-            /* Clear cave-context state since the trip is aborted */
-            g_currentSetIdx = -1;
-            g_returnSurface = 0;
-            return;
-        }
-    }
-
-
-    /* STATELESS EXIT (2026-08-29, replaces the g_returnSurface exit). The
+    /* STATELESS EXIT (2026-08-29, replaces the g_returnSurface exit).
+     *
+     * RUNS BEFORE THE ACT-TOWN LOCK (2026-09-01, third report). The lock
+     * used to fire first and return: a cave shuffled into a Tal Rasha
+     * tomb put the exiting player on Canyon of the Magi, the lock saw a
+     * locked act and bounced them to prevArea -- BACK INTO the tomb --
+     * and the two answers ping-ponged forever while the exit rule that
+     * would have sent them home to their own entrance never ran. The
+     * exit's target is by construction a door the player entered
+     * through themselves, in an act they have: it outranks the lock. The
      * shuffle map is a bijection, so the set the player just left plus the
      * INVERSE map name the one entrance that leads in -- no session state
      * needed. The old path depended on g_returnSurface, which every
@@ -595,6 +556,54 @@ static void EntranceShuffle_Tick(void) {
             return;
         }
     }
+
+    /* Act-town lock: catches death-respawn into a higher-act town than the player has unlocked. */
+    {
+        int kickTo = CheckActTownLock(newArea);
+        if (kickTo > 0 && g_pendingZoneTeleport == 0) {
+            /* P4 (Maegis, Cain-quest kill): this lock used to run BEFORE the
+             * CASE A town-portal branch below and CLEAR the return context —
+             * so a player who town-portalled out of a cross-act shuffled
+             * dungeon (D2 portals to the town of the act you physically stand
+             * in) got Act2-town -> kicked to Act1-town, and the recorded way
+             * back to the original entrance was wiped. If we still hold a
+             * pending return surface, THAT is where the player belongs: it is
+             * by definition an area they walked to themselves, in an unlocked
+             * act. The lock stays for the plain death-respawn case. */
+            if (g_currentSetIdx >= 0 && g_returnSurface > 0) {
+                kickTo = g_returnSurface;
+                g_pendingLandingNextTo = g_returnEntryL1;
+                Log("ENTRANCE SHUFFLE TICK: locked town %d but a shuffled-set "
+                    "return is pending -> sending player to the ORIGINAL "
+                    "entrance surface %d instead of town\n", newArea, kickTo);
+                ShowNotify("Returning to where you entered");
+            } else if (prevArea > 0 && prevArea != newArea && !IsTown((DWORD)prevArea)
+                       && !RecentlyDied()) {
+                /* P25: a town-portal into a locked act's town used to strand
+                 * the player in another town with the portal pair out of
+                 * reach. Send them back where they stood instead. Death
+                 * respawns keep the old town kick. */
+                kickTo = prevArea;
+                g_pendingLandingNextTo = 0;
+                Log("ENTRANCE SHUFFLE TICK: locked town %d, no set context -> "
+                    "bouncing back to previous area %d\n", newArea, kickTo);
+                ShowNotify("That town's act is still locked - sending you back");
+            } else {
+                g_pendingLandingNextTo = 0;
+                Log("ENTRANCE SHUFFLE TICK: town %d (act %d) not yet unlocked (max unlocked=%d) "
+                    "-> kicking to town %d\n",
+                    newArea, GetActForArea(newArea), GetHighestUnlockedAct(), kickTo);
+                ShowNotify("You haven't unlocked this act yet - returning home");
+            }
+            g_pendingZoneTeleport = kickTo;
+            g_pendingWarpTarget = kickTo;
+            /* Clear cave-context state since the trip is aborted */
+            g_currentSetIdx = -1;
+            g_returnSurface = 0;
+            return;
+        }
+    }
+
 
     /* CASE A: player is currently inside a shuffled dungeon set (context is
      * kept for town-portal round-trips and logging; exits no longer need it). */
