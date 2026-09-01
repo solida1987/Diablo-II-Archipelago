@@ -1,6 +1,6 @@
 {
-  "version": "v3.8.9",
-  "version_display": "v3.8.9",
+  "version": "v3.9.0",
+  "version_display": "v3.9.0",
   "file_count": 649,
   "files": [
     {
@@ -20,7 +20,7 @@
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "b4b0e36782259132cb931f18dd0a4a0065009eb7eaa36f3f0d69b8288f9c42b8",
+      "sha256": "bfd0b5a93ab57088024f4753b6a8d789d20f41de1d7dd70405de43fb9ec59e1c",
       "size": 845312
     },
     {
@@ -310,8 +310,8 @@
     },
     {
       "path": "data/global/excel/SuperUniques.txt",
-      "sha256": "e1ad2c34e5894bbefae927366b4f540683d2e693aeb0e379b085c4e9f31793b5",
-      "size": 14037
+      "sha256": "ee6557ab1a9ceba360632bf706f55f3f8333c285ff09da086116d67c97f3ba62",
+      "size": 14034
     },
     {
       "path": "data/global/excel/TreasureClassEx.txt",
@@ -3235,7 +3235,7 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "b4b0e36782259132cb931f18dd0a4a0065009eb7eaa36f3f0d69b8288f9c42b8",
+      "sha256": "bfd0b5a93ab57088024f4753b6a8d789d20f41de1d7dd70405de43fb9ec59e1c",
       "size": 845312
     },
     {
