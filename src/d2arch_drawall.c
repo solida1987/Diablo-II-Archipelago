@@ -3350,7 +3350,21 @@ cheat_menu_done:
                 if (fnRect) fnRect(0, 0, g_screenW, g_screenH, 0x00, 5);
 
                 /* Queue teleport — executed in HookD2DebugGame (server context) via LEVEL_WarpUnit which has NO proximity checks */
-                g_pendingZoneTeleport = GetActTown(curArea);
+                /* The locked region's own town can itself sit in a locked
+                 * act (Canyon of the Magi is R2; its town is Lut Gholein).
+                 * Kicking there met the act-town lock, which bounced the
+                 * player straight back — and the two locks ping-ponged them
+                 * forever (measured live, 2026-09-01). A kick target must be
+                 * a town the player actually HAS. Unreadable quest flags:
+                 * skip this tick and re-check on the next. */
+                {
+                    int kickAct = GetActForArea(curArea);
+                    int maxUnl  = GetHighestUnlockedAct();
+                    if (maxUnl >= 1) {
+                        if (kickAct > maxUnl || kickAct < 1) kickAct = maxUnl;
+                        g_pendingZoneTeleport = TownForAct(kickAct);
+                    }
+                }
 
                 /* Teleport handled by HookD2DebugGame via LEVEL_WarpUnit */
             } else {

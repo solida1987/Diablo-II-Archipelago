@@ -578,7 +578,12 @@ static void EntranceShuffle_Tick(void) {
                     "entrance surface %d instead of town\n", newArea, kickTo);
                 ShowNotify("Returning to where you entered");
             } else if (prevArea > 0 && prevArea != newArea && !IsTown((DWORD)prevArea)
-                       && !RecentlyDied()) {
+                       && !RecentlyDied() && !IsAreaLocked(prevArea)) {
+                /* ^ The bounce target must be LEGAL: bouncing into a zone-
+                 * locked area handed the player to the zone lock, which
+                 * kicked them right back here — the other half of the same
+                 * measured ping-pong. A locked prevArea falls through to the
+                 * home-town kick below instead. */
                 /* P25: a town-portal into a locked act's town used to strand
                  * the player in another town with the portal pair out of
                  * reach. Send them back where they stood instead. Death
