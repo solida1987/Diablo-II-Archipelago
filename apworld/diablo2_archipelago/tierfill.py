@@ -41,7 +41,7 @@ from __future__ import annotations
 
 import re
 
-from BaseClasses import LocationProgressType
+from BaseClasses import ItemClassification, LocationProgressType
 
 from .locations import ALL_ACT_LOCATIONS
 
@@ -203,11 +203,18 @@ def place_tiered_fillers(world) -> None:
 
     # --- 2. Bucket our own free locations by depth ---------------------------
     #
-    # Excluded first within each bucket. Those locations are barred from
-    # holding progression, so filling them is pure profit: it satisfies this
-    # module and reduces what the general fill has to place.
+    # Excluded LAST within each bucket, because placement takes with pop(),
+    # i.e. from the END: excluded locations must be the ones popped first.
+    # (The original sort put them at the FRONT while pop() harvested the back,
+    # so the module spent non-excluded locations exactly when it claimed to be
+    # spending excluded ones. That silently burned the filler surplus and a
+    # check-heavy yaml died in fill with "N more excluded locations than
+    # filler" — measured 2026-09-01: 471 tiered fillers on non-excluded spots,
+    # 77 short.)
     by_depth: dict[int, list] = {}
+    excl_in: dict[int, int] = {}
     total_free = 0
+    excluded_free = 0
     for loc in multiworld.get_locations(player):
         if loc.item is not None:
             continue
@@ -216,11 +223,14 @@ def place_tiered_fillers(world) -> None:
             continue
         by_depth.setdefault(depth, []).append(loc)
         total_free += 1
+        if loc.progress_type is LocationProgressType.EXCLUDED:
+            excl_in[depth] = excl_in.get(depth, 0) + 1
+            excluded_free += 1
 
     for depth in by_depth:
         multiworld.random.shuffle(by_depth[depth])
         by_depth[depth].sort(
-            key=lambda l: l.progress_type is not LocationProgressType.EXCLUDED)
+            key=lambda l: l.progress_type is LocationProgressType.EXCLUDED)
 
     if not by_depth:
         multiworld.itempool[:] = keep
@@ -235,6 +245,19 @@ def place_tiered_fillers(world) -> None:
     placed_total = 0
     if (lo_d, hi_d) != (1, _REFERENCE_DEPTH):
         report.append(f"seed spans depth {lo_d}-{hi_d}; bands scaled to fit")
+
+    # Hard invariant: after this module runs, the pool must still hold at
+    # least one filler-or-trap item for every empty EXCLUDED location, or the
+    # general fill dies (excluded locations accept nothing else). Placing at
+    # an excluded location keeps the balance (one slot gone, one item gone);
+    # placing at a non-excluded location only spends the item — so the number
+    # of non-excluded placements is capped by the surplus.
+    filler_like = sum(
+        1 for g in groups.values() for _ in g) + sum(
+        1 for i in keep
+        if i.player == player and i.classification in (
+            ItemClassification.filler, ItemClassification.trap))
+    nonexcl_budget = max(0, filler_like - excluded_free)
 
     # --- 3. Place, widest-band-last -----------------------------------------
     #
@@ -253,11 +276,19 @@ def place_tiered_fillers(world) -> None:
                 handed_back.append(item)
                 continue
             candidates = [d for d in range(low, high + 1) if by_depth.get(d)]
+            if nonexcl_budget <= 0:
+                # Out of surplus: only depths that still hold an excluded
+                # location may be spent (their bucket pops excluded first).
+                candidates = [d for d in candidates if excl_in.get(d, 0) > 0]
             if not candidates:
                 handed_back.append(item)
                 continue
             depth = multiworld.random.choice(candidates)
             loc = by_depth[depth].pop()
+            if loc.progress_type is LocationProgressType.EXCLUDED:
+                excl_in[depth] -= 1
+            else:
+                nonexcl_budget -= 1
             loc.place_locked_item(item)
             placed_total += 1
             done += 1

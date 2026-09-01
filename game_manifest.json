@@ -1,6 +1,6 @@
 {
-  "version": "v3.9.5",
-  "version_display": "v3.9.5",
+  "version": "v3.9.6",
+  "version_display": "v3.9.6",
   "file_count": 650,
   "files": [
     {
@@ -65,8 +65,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "bc03bb9c54da8c790c84db34039208549f6c2722185dcb7d654ba3031900d002",
-      "size": 83088
+      "sha256": "ef0a6b99a244d159571c1ac607a456bdabc622fd4d5b99ce1ecf5cf15d4c5378",
+      "size": 83516
     },
     {
       "path": "apworld/diablo2_archipelago/__init__.py",
@@ -110,8 +110,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago/tierfill.py",
-      "sha256": "344767549e5f40d58c17298202934e4243877970da25a975f30ef5c8c6ea482d",
-      "size": 12379
+      "sha256": "2581f1f82ba394eb27796b97fad8df67201bdbf0a5ac9596736c14476e7bdee9",
+      "size": 14090
     },
     {
       "path": "apworld/diablo2_archipelago/__pycache__/options.cpython-314.pyc",
