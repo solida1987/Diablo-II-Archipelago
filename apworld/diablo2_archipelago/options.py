@@ -508,9 +508,10 @@ def custom_goal_target_location(csv_tok: str) -> str | None:
 class CollectionTargetGems(Toggle):
     """Whether all 35 gems (7 colors × 5 grades, Chipped..Perfect)
     count toward F1 Collection book completion + Custom Goal's
-    'include collection' option. Each individual gem pickup still
-    fires an AP check when this toggle is ON. Moved out of Goal &
-    Win Condition in 1.9.2 — now lives under Collection — Gems."""
+    'include collection' option. Each individual gem pickup fires an
+    AP check when this toggle is ON — under every goal, since 3.9.7.
+    Moved out of Goal & Win Condition in 1.9.2 — now lives under
+    Collection — Gems."""
     display_name = "Collection: Gems"
     default = True
 
@@ -626,10 +627,11 @@ def _make_collect_toggle(field_name, display, doc_extra=""):
     cls_name = ''.join(p.capitalize() for p in field_name.split('_'))
     bases = (Toggle,)
     attrs = {
-        '__doc__': f"[Goal=Collection only] Include this item in your "
-                   f"collection goal. When ON in AP mode, the slot becomes "
-                   f"an AP location/check that fires when the item is "
-                   f"first collected. {doc_extra}".strip(),
+        '__doc__': f"Include this item in the F1 Collection book. When ON "
+                   f"in AP mode, the slot becomes an AP location/check that "
+                   f"fires when the item is first collected — under every "
+                   f"goal, since 3.9.7. With Goal=Collection the game is "
+                   f"won by completing all included targets. {doc_extra}".strip(),
         'display_name': f"Collect: {display}",
         'default': True,
     }

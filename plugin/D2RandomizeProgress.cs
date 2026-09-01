@@ -38,7 +38,13 @@ internal static class D2RandomizeProgress
         try
         {
             await StepAsync(ov, "Backing up the original tables…", 12,
-                () => D2DataFiles.EnsureBackup(gameDir), 300);
+                () =>
+                {
+                    // Missing vanilla tables come out of the player's own
+                    // archives before the backup snapshots them as pristine.
+                    D2MpqTables.ExtractMissingTables(gameDir);
+                    D2DataFiles.EnsureBackup(gameDir);
+                }, 300);
             await StepAsync(ov, "Generating randomized tables…", 48,
                 () => D2DataFiles.GenerateForSeed(s, seed, seedFolder, gameDir), 550);
             await StepAsync(ov, "Applying the seed's tables to the game…", 78,
@@ -51,7 +57,7 @@ internal static class D2RandomizeProgress
             bool good = v.total > 0 && v.ok == v.total;
             ov.Done(good
                 ? $"✓ Randomization ready — {v.ok}/{v.total} tables in place"
-                : "✓ Klar — starter spillet");
+                : "✓ Ready — starting the game");
             await Task.Delay(850);
         }
         catch

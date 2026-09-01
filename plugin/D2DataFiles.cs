@@ -217,6 +217,12 @@ public static class D2DataFiles
     {
         try
         {
+            // The vanilla tables (weapons.txt, armor.txt, Levels.txt, the
+            // affix and set tables) are not shipped — they are Blizzard's.
+            // Pull any missing one out of the player's own archives FIRST,
+            // or everything below silently skips them and "item requirements
+            // off" / gear shop shuffle / force-full-generation do nothing.
+            D2MpqTables.ExtractMissingTables(gameDir);
             EnsureBackup(gameDir);                       // capture pristine before anything patches
             // Start from nothing: the map is static, so a seed generated earlier in
             // this launcher session would otherwise be published for one that has

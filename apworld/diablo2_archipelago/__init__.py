@@ -234,13 +234,20 @@ class Diablo2ArchipelagoWorld(World):
                         loc_name = name + " (Hell)"
                         active.append((quest_id, loc_name, "level", ItemClassification.progression, LOCATION_BASE + quest_id + 2000, 2))
 
-        # 1.9.0 NEW — Collection locations (only when goal=collection).
-        # 110 IDs broken down as 32 sets + 33 runes + 35 gems + 10
-        # specials. Each item is conditionally included based on its
-        # individual toggle in the YAML. The `kind` field on each
-        # COLL_LOCATIONS entry tells us which option-group the item
-        # belongs to.
-        if goal == 3:  # Goal=Collection
+        # 1.9.0 — Collection locations. 110 IDs broken down as 32 sets +
+        # 33 runes + 35 gems + 10 specials. Each item is conditionally
+        # included based on its individual toggle in the YAML. The `kind`
+        # field on each COLL_LOCATIONS entry tells us which option-group
+        # the item belongs to.
+        #
+        # 3.9.7 — included under EVERY goal, not only Goal=Collection.
+        # The collect_* toggles shape the F1 Collection book and its
+        # checks; Goal=Collection additionally wins by completing the
+        # targeted set. The DLL fires these under any goal since 3.9.7
+        # (it used to parse the masks and then ignore them unless
+        # goal==3, so "collection: gems only" changed nothing on a
+        # Full Hell run).
+        if True:
             for loc_id, loc_name, kind, idx in COLL_LOCATIONS:
                 included = False
                 if kind == "set":

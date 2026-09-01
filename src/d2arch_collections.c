@@ -511,8 +511,19 @@ void Coll_LoadForCharacter(const char* charName) {
         fclose(f);
     }
 
-    /* If Goal=3 is selected and the goal config was never set, default to "all targets on" — strictest default, matches feedback_settings_isolation "freeze at character creation" pattern. */
-    if (g_apGoal == 3 && Coll_GoalConfigIsZero()) {
+    /* Configure the collection targets for a fresh character.
+     *
+     * 3.9.7 — the YAML's collect_* toggles apply under EVERY goal now, not
+     * only Goal=Collection. They shape which slots the F1 book targets and
+     * which pickups fire AP checks; Goal=Collection additionally wins by
+     * completing the targeted set. Before this, a player on Full Hell who
+     * chose "gems only" got a book that ignored the choice entirely — the
+     * masks were parsed and then thrown away unless g_apGoal == 3.
+     *
+     * No override present (older world, or standalone): Goal=3 keeps its
+     * strictest all-targets-on default; other goals keep the zero config
+     * they always had, so nothing changes for old seeds. */
+    if (Coll_GoalConfigIsZero() && (g_apGoal == 3 || g_collGoalOverridePresent)) {
         Coll_DefaultGoalAllOn();
         /* apworld slot_data carries 6 bitmask integers (sets×2, runes×3, specials×1) plus the gems boolean and gold target. */
         if (g_collGoalOverridePresent) {
@@ -535,7 +546,8 @@ void Coll_LoadForCharacter(const char* charName) {
             for (int i = 0; i < COLL_NUM_RUNES; i++)
                 if (!g_collGoal.runesTargeted[i]) { allRunes = 0; break; }
             g_collGoal.allRunesTargeted = allRunes;
-            Log("Coll_Load: Goal=3 granular masks applied — sets=0x%08X runes=0x%llX specials=0x%X gems=%d gold=%llu\n",
+            Log("Coll_Load: granular masks applied (goal=%d) — sets=0x%08X runes=0x%llX specials=0x%X gems=%d gold=%llu\n",
+                g_apGoal,
                 g_collGoalOverrideSetsMask,
                 (unsigned long long)g_collGoalOverrideRunesMask,
                 (unsigned)g_collGoalOverrideSpecialsMask,
@@ -753,10 +765,14 @@ void Coll_MarkSlotCollected(int slotIdx) {
     /* 1.9.0 Phase 5.3 — start the gold-flash celebration timer. */
     s_collJustCollectedTick[slotIdx] = GetTickCount();
 
-    /* Collection AP-check / standalone reward. */
-    if (g_apGoal == 3) {
-        Coll_MaybeFireCheckForSlot(slotIdx);
-    }
+    /* Collection AP-check / standalone reward.
+     * 3.9.7 — fires under EVERY goal, not only Goal=Collection: the
+     * targeted flags already gate it, and they now reflect the YAML's
+     * collect_* toggles for any goal. Where no config exists (standalone,
+     * or an old world under a non-collection goal) every flag is zero and
+     * MaybeFire returns before doing anything — old behaviour preserved
+     * by the data rather than by a second copy of the condition. */
+    Coll_MaybeFireCheckForSlot(slotIdx);
 
     /* Bonus check: set piece pickup. */
     if (slotIdx >= COLL_SLOT_SETS_BASE && slotIdx < COLL_SLOT_SETS_BASE + COLL_NUM_SET_PIECES) {
@@ -1279,6 +1295,25 @@ void Coll_ProcessItem(void* pItem, BOOL requireLegit) {
         } __except(EXCEPTION_EXECUTE_HANDLER) {}
     }
 
+    /* ItemLevelReqs / ItemStatsReqs toggles (Maegis #2 second half).
+     * 2.x — split: LEVEL toggle strips the level-req modifier (stat 92);
+     * STATS toggle strips str/dex (91/93).
+     * 3.9.7 — moved ABOVE the catalog gate. It used to sit after the
+     * "not a tracked collectible" return, so it only ever ran for
+     * sets/runes/gems/specials — and with every collection toggled off
+     * in the YAML it ran for nothing at all, while the player wondered
+     * why "item requirements off" still asked for strength. Every
+     * observed item is stripped now. */
+    if (fnSetStat && (!g_itemLevelReqs || !g_itemStatsReqs)) {
+        __try {
+            if (!g_itemLevelReqs) fnSetStat(pItem, 92, 1, 0);  /* item_levelreq -> 1 */
+            if (!g_itemStatsReqs) {
+                fnSetStat(pItem, 91, 0, 0);  /* item_strengthreq -> 0 */
+                fnSetStat(pItem, 93, 0, 0);  /* item_dexterityreq -> 0 */
+            }
+        } __except(EXCEPTION_EXECUTE_HANDLER) {}
+    }
+
     /* Resolve which catalog slot (if any) this item maps to. */
     int slotIdx = -1;
     if (quality == COLL_QUALITY_SET && fileIdx >= 0 &&
@@ -1296,17 +1331,8 @@ void Coll_ProcessItem(void* pItem, BOOL requireLegit) {
         __except(EXCEPTION_EXECUTE_HANDLER) { currentFlags = 0; }
     }
 
-    /* ItemLevelReqs toggle (Maegis #2 second half). */
-    /* 2.x — split: LEVEL toggle strips the level-req modifier (stat 92); STATS toggle strips str/dex (91/93). */
-    if (fnSetStat) {
-        __try {
-            if (!g_itemLevelReqs) fnSetStat(pItem, 92, 1, 0);  /* item_levelreq -> 1 */
-            if (!g_itemStatsReqs) {
-                fnSetStat(pItem, 91, 0, 0);  /* item_strengthreq -> 0 */
-                fnSetStat(pItem, 93, 0, 0);  /* item_dexterityreq -> 0 */
-            }
-        } __except(EXCEPTION_EXECUTE_HANDLER) {}
-    }
+    /* (The ItemLevelReqs/ItemStatsReqs strip runs above the catalog gate
+     * now — see the 3.9.7 note — so it covers every item, not just these.) */
 
     if (requireLegit) {
         /* Two-flag enforcement. */
