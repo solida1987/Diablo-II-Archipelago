@@ -197,16 +197,25 @@ static void TreasureCow_BoostStats(void* pUnit, int actIdx) {
          * but level-28 fists, which is the reported one-shot. Scale the
          * baked stats by the same ratio the level moved.
          * 19=attackrating 21/22=min/maxdamage 23/24=secondary 31=defense */
-        if (areaLvl > 0 && nativeLvl > areaLvl && fnGetStat && fnSetStat) {
-            static const int dmgStats[6] = { 19, 21, 22, 23, 24, 31 };
-            for (int s = 0; s < 6; s++) {
+        /* Both directions on purpose: early it comes DOWN to the player,
+         * and an over-levelled player in an old act meets a cow scaled UP —
+         * "dependent on the player's level" cuts both ways. */
+        if (areaLvl > 0 && nativeLvl > 0 && nativeLvl != areaLvl
+            && fnGetStat && fnSetStat) {
+            /* HP is on this list now (6=current, 7=max). It never was, so a
+             * superunique cow kept its native-level life times the unique
+             * multiplier while everything else came down — the reported
+             * "way too much life when you meet it early". The percentage
+             * bonus below then applies to the LEVEL-MATCHED life. */
+            static const int dmgStats[8] = { 19, 21, 22, 23, 24, 31, 6, 7 };
+            for (int s = 0; s < 8; s++) {
                 int v = fnGetStat(pUnit, dmgStats[s], 0);
                 if (v <= 0) continue;
                 int scaled = (int)(((__int64)v * areaLvl) / nativeLvl);
                 if (scaled < 1) scaled = 1;
                 fnSetStat(pUnit, dmgStats[s], scaled, 0);
             }
-            Log("TreasureCow: baked stats scaled %d -> %d (dmg/AR/def)\n",
+            Log("TreasureCow: baked stats scaled %d -> %d (dmg/AR/def/HP)\n",
                 nativeLvl, areaLvl);
         }
 
@@ -223,11 +232,30 @@ static void TreasureCow_BoostStats(void* pUnit, int actIdx) {
             fnAddStat(pUnit, 6, (int)add, 0);
         }
 
-        /* 3. Resistances do NOT feed regen, so they carry the rest of the toughness. Lowered along with the HP change so the two together land near boss-tier rather than past it. */
-        fnAddStat(pUnit, 39, ta->resistPct, 0);
-        fnAddStat(pUnit, 43, ta->resistPct, 0);
-        fnAddStat(pUnit, 41, ta->resistPct, 0);
-        fnAddStat(pUnit, 45, ta->resistPct, 0);
+        /* 3. Resistances: SET, never ADD, and scaled to the PLAYER's level.
+         *
+         * Adding stacked on whatever the spawn already gave the unit — with
+         * the row's old Magic Resistant mod that stack crossed 100 and the
+         * cow met a level-15 character as "Immune to Lightning". Setting an
+         * absolute value makes this line the only author of the number, and
+         * the hard cap stays far below the 100 where immunity begins.
+         *
+         * The curve: the act's configured resist is the level-99 ceiling,
+         * scaled down linearly by the player's level. A level-15 Act 1
+         * character meets ~2%, a level-85 Act 5 one meets ~26%. */
+        {
+            int rTarget = (ta->resistPct * (areaLvl > 0 ? areaLvl : 1)) / 99;
+            if (rTarget > 60) rTarget = 60;
+            if (rTarget < 0)  rTarget = 0;
+            if (fnSetStat) {
+                fnSetStat(pUnit, 39, rTarget, 0);   /* fire      */
+                fnSetStat(pUnit, 41, rTarget, 0);   /* lightning */
+                fnSetStat(pUnit, 43, rTarget, 0);   /* cold      */
+                fnSetStat(pUnit, 45, rTarget, 0);   /* poison    */
+            }
+            Log("TreasureCow: resists SET to %d%% (act ceiling %d%%, level %d)\n",
+                rTarget, ta->resistPct, areaLvl);
+        }
 
         Log("TreasureCow: level=%d HP %d -> %d (+%d%%) resist +%d%% (act %d)\n",
             areaLvl, curMax / 256,
