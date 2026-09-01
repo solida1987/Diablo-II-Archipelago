@@ -3336,7 +3336,18 @@ cheat_menu_done:
                         "entrance — kick suppressed (combined-mode reachability)\n", curArea);
                 }
                 /* Do NOT record the locked area as "safe": a later enforcement kick would bounce the player back INTO locked territory. */
-            } else if (IsAreaLocked(curArea)) {
+            } else if (IsAreaLocked(curArea) && g_pendingZoneTeleport == 0) {
+                /* ^ The pending check is the whole fix (2026-09-01, measured
+                 * in Marco's log lines 444-448): the entrance-shuffle exit
+                 * had ALREADY queued the return to the door the player
+                 * entered through, and this branch — seeing them still stand
+                 * on locked ground for the one frame before the warp runs —
+                 * overwrote that queue with a town kick. Last writer won,
+                 * and "back to your door" became "back to town". A redirect
+                 * in flight is about to carry the player off this ground;
+                 * leave it alone. If they somehow remain here after it
+                 * resolves, this branch fires again next frame with an
+                 * empty queue. */
                 DWORD now = GetTickCount();
 
                 /* Show notification (throttled) */
