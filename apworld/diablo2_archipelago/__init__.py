@@ -1176,7 +1176,7 @@ class Diablo2ArchipelagoWorld(World):
             # XP + shuffles. 2.1 — the launcher applies monster/super-unique/shop
             # shuffle + item reqs via the seed-bound data files (it reads these from
             # slot_data); the mod still does the act-boss cosmetic swap from
-            # boss_shuffle. The legacy single boss_shuffle, if set, turns on both new
+            # boss_shuffle: the legacy option is REMOVED from the option set;
             # shuffles. (i_play_assassin removed — no-op in DLL.)
             "xp_multiplier":   self.options.xp_multiplier.value,
             # 3.5.5 — the DLL has always parsed `starting_skills` from slot_data
@@ -1186,7 +1186,7 @@ class Diablo2ArchipelagoWorld(World):
             # Each gold/XP reward rolls a random amount in [min, max] (DLL).
             "monster_shuffle":  self.options.monster_shuffle.value,
             "superunique_shuffle": (
-                self.options.superunique_shuffle.value or self.options.boss_shuffle.value
+                self.options.superunique_shuffle.value
             ),
             # TEMPORARILY DISABLED — forced to 0 regardless of the YAML.
             #

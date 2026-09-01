@@ -197,8 +197,11 @@ internal sealed class D2YamlDialog : Window
         Text = t, Foreground = Ink, VerticalAlignment = VerticalAlignment.Center,
     };
 
-    private static string Shorten(string s) =>
-        s.Length <= 150 ? s : s[..149].TrimEnd() + "…";
+    // The description IS the documentation — a player deciding on an option
+    // deserves all of it. It used to stop at 150 characters with an ellipsis,
+    // which cut every long option off mid-sentence (Marco, 2026-09-01:
+    // "der burde være masser af plads").
+    private static string Shorten(string s) => s;
 
     // Emit the file. Written by hand rather than through a YAML library: the
     // shape is flat and fixed, and Archipelago is strict about it — two spaces

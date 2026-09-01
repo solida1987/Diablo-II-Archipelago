@@ -792,22 +792,6 @@ class SuperUniqueShuffle(Toggle):
     default = False
 
 
-class ActBossShuffle(Toggle):
-    """TEMPORARILY DISABLED — has no effect, whatever you set it to.
-
-    Shuffles the act bosses (Andariel / Duriel / Mephisto / Diablo / Baal) so
-    each takes on another's appearance. A shuffled boss has been seen stopping
-    its attack for good once the player breaks line of sight (BetaHub #13), and
-    a boss that will not fight is a seed that cannot be finished. The option is
-    left here so existing YAMLs keep parsing; it is forced off in slot_data and
-    is not offered in the generated template.
-
-    The mod's implementation is untouched. Re-enabling is a matter of putting
-    it back in the option group and dropping the force-off below."""
-    display_name = "Act-boss Shuffle (temporarily disabled)"
-    default = False
-
-
 class ShopShuffle(Toggle):
     """Shuffle which vendors stock which gear (weapons/armor relocated between
     NPCs). Consumables (potions/scrolls/town portals) are untouched, so shops
@@ -830,17 +814,6 @@ class ItemStatsReqs(Toggle):
     any item regardless of STR/DEX (applied via the seed's data files)."""
     display_name = "Item Stat Requirements"
     default = True
-
-
-class BossShuffle(Toggle):
-    """Deprecated, and now only half of what it used to be.
-
-    It used to turn on both Super-unique Shuffle and Act-boss Shuffle. The
-    act-boss half is temporarily disabled (see ActBossShuffle), so a YAML that
-    sets this now gets the super-unique shuffle alone. Kept so older files
-    still parse."""
-    display_name = "Boss Shuffle (legacy)"
-    default = False
 
 
 class GateKeysInOtherWorlds(Toggle):
@@ -1132,8 +1105,6 @@ _FIELDS = [
     # Shuffles
     ("monster_shuffle",        MonsterShuffle),
     ("superunique_shuffle",    SuperUniqueShuffle),
-    ("act_boss_shuffle",       ActBossShuffle),
-    ("boss_shuffle",           BossShuffle),    # legacy → both of the above
     ("shop_shuffle",           ShopShuffle),
     ("entrance_shuffle",       EntranceShuffle),
     # 2.x one-chest: per-seed stash isolation
@@ -1241,7 +1212,7 @@ OPTION_GROUPS = [
         SuperUniqueShuffle,
         ShopShuffle,
         EntranceShuffle,
-        # ActBossShuffle and the legacy BossShuffle are deliberately absent:
+        # act_boss_shuffle and the legacy boss_shuffle are REMOVED outright (2026-09-01):
         # both are still accepted in a YAML so old files parse, but the
         # act-boss swap is disabled until BetaHub #13 is understood, and an
         # option a generated template offers is one a player expects to work.

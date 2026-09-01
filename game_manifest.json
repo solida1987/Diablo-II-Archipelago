@@ -1,7 +1,7 @@
 {
-  "version": "v3.9.4",
-  "version_display": "v3.9.4",
-  "file_count": 649,
+  "version": "v3.9.5",
+  "version_display": "v3.9.5",
+  "file_count": 650,
   "files": [
     {
       "path": "D2.Detours.dll",
@@ -65,13 +65,13 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "9149d6bb8dea03f406028922ad02a650bda0e70945b2fe56b544f2500a654fdd",
-      "size": 81216
+      "sha256": "bc03bb9c54da8c790c84db34039208549f6c2722185dcb7d654ba3031900d002",
+      "size": 83088
     },
     {
       "path": "apworld/diablo2_archipelago/__init__.py",
-      "sha256": "268adb723f999f1049d95fead718238ce2b4465fb836b12bd63407a9707db639",
-      "size": 70575
+      "sha256": "181f9fa06b354fd447b678664ccdde6158e8d0a45439e1cf627b0a90123aca9d",
+      "size": 69236
     },
     {
       "path": "apworld/diablo2_archipelago/_dump_locations.py",
@@ -100,8 +100,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago/options.py",
-      "sha256": "7e3111b184e57637d4753a36ca739a36950e3fc8d0067bbb800d308ae3333816",
-      "size": 61222
+      "sha256": "21c2e3dd31838e39a411acf7331b88a8c52c6ff12c1d5b9d66fb671128a0640e",
+      "size": 58614
     },
     {
       "path": "apworld/diablo2_archipelago/regions.py",
@@ -112,6 +112,11 @@
       "path": "apworld/diablo2_archipelago/tierfill.py",
       "sha256": "344767549e5f40d58c17298202934e4243877970da25a975f30ef5c8c6ea482d",
       "size": 12379
+    },
+    {
+      "path": "apworld/diablo2_archipelago/__pycache__/options.cpython-314.pyc",
+      "sha256": "7e1ce68783a1c0d2c5573579ec10a1d60d394a34f79a5bdb5cc5061a4829f4ee",
+      "size": 48922
     },
     {
       "path": "Archipelago/ArchIcons15.DC6",
