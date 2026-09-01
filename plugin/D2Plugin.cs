@@ -1402,6 +1402,17 @@ public class D2Plugin : IGamePlugin
 
                 if (USER_EDITABLE_FILES.Contains(fileName)) continue; // present = valid
 
+                // Seed-patched tables: present = valid, size is ours.
+                //
+                // The randomizer rewrites these per seed (requirement columns,
+                // vendor stocking, level generation), so their size legitimately
+                // differs from the package's. They are normally pristine at this
+                // point — ApplySeed restores on exit — but a crash leaves them
+                // patched, and reporting "wrong size" then sends the player into
+                // a repair for a file that is exactly as it should be. Missing
+                // still counts: that IS broken, and repair puts it back.
+                if (D2DataFiles.IsManaged(fileName)) continue;
+
                 long expectedSize = 0;
                 if (entry.TryGetProperty("size", out var sizeEl)) expectedSize = sizeEl.GetInt64();
                 if (expectedSize > 0)

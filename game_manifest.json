@@ -1,7 +1,7 @@
 {
-  "version": "v3.9.7",
-  "version_display": "v3.9.7",
-  "file_count": 650,
+  "version": "v3.9.8",
+  "version_display": "v3.9.8",
+  "file_count": 656,
   "files": [
     {
       "path": "D2.Detours.dll",
@@ -20,7 +20,7 @@
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "d2169610f33578eb5f75e3e3066f65feb44a94ae9cdd47caddeb1ffdd925627e",
+      "sha256": "84023f9265eefc03133ca0c41009cfb3fa2cbc66f62fabf64f3d836dada972dd",
       "size": 845312
     },
     {
@@ -80,8 +80,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago/archipelago.json",
-      "sha256": "4cf4802b43e3b0a4469de4d69abbdf5882f5491ea02370060d2757e32d0cf1b2",
-      "size": 280
+      "sha256": "1c4926d79e696e88a36b2692124d08ecbe2a23de808212438a5533d756e85501",
+      "size": 271
     },
     {
       "path": "apworld/diablo2_archipelago/items.py",
@@ -304,6 +304,21 @@
       "size": 101335
     },
     {
+      "path": "data/global/excel/Levels.txt",
+      "sha256": "ed8a9c2f18d16b19ef49f80819ca4c25c77bcdfd681c93b742b9073388f92093",
+      "size": 64844
+    },
+    {
+      "path": "data/global/excel/MagicPrefix.txt",
+      "sha256": "db5ec15867c933b636ab622885ca392caca8d3346d327bc01dbee287bb42e2c4",
+      "size": 57588
+    },
+    {
+      "path": "data/global/excel/MagicSuffix.txt",
+      "sha256": "fe708fad529499efee05843647c53d949e059dab018bb96165ff9a780bfc3bda",
+      "size": 65863
+    },
+    {
       "path": "data/global/excel/Missiles.txt",
       "sha256": "058157708a2e11901d09398d2e36cacd4486f9fd2cbba628f6e2c59201336b69",
       "size": 192971
@@ -312,6 +327,11 @@
       "path": "data/global/excel/Runes.txt",
       "sha256": "0a65cddacbf2615d0f28fb60b58041f459af59696290be8ab6404adb35b81c7a",
       "size": 21009
+    },
+    {
+      "path": "data/global/excel/SetItems.txt",
+      "sha256": "20ff016375f41d11b8a228bce9445e6faacbc5f19d2c9812a984bde313467122",
+      "size": 26934
     },
     {
       "path": "data/global/excel/SuperUniques.txt",
@@ -327,6 +347,11 @@
       "path": "data/global/excel/UniqueItems.txt",
       "sha256": "73d86c81dc804a58c9e298b6862b1873d8aaf3fcf5a55de68ccc12431369cd57",
       "size": 73539
+    },
+    {
+      "path": "data/global/excel/armor.txt",
+      "sha256": "6ce5a09e8c6bc07dddea916412f18e57af860f7c870e3ef9e3003ea8beeaaf99",
+      "size": 76370
     },
     {
       "path": "data/global/excel/cubemain.txt",
@@ -352,6 +377,11 @@
       "path": "data/global/excel/skills.txt",
       "sha256": "5ef7c68e2515e9ab907b6c25cd35aa57f0e11faab634540010eaff8053834fce",
       "size": 172777
+    },
+    {
+      "path": "data/global/excel/weapons.txt",
+      "sha256": "706f39eafa8393e428b049ef7f629eb59096435f62f849b6ab2b144b704ccd4b",
+      "size": 118029
     },
     {
       "path": "data/global/items/invbrnz.dc6",
@@ -3240,7 +3270,7 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "d2169610f33578eb5f75e3e3066f65feb44a94ae9cdd47caddeb1ffdd925627e",
+      "sha256": "84023f9265eefc03133ca0c41009cfb3fa2cbc66f62fabf64f3d836dada972dd",
       "size": 845312
     },
     {
