@@ -25,53 +25,92 @@ internal static class D2RandomizeProgress
     public static async Task RunApplyAsync(
         D2RandomizerSettings s, long seed, string seedFolder, string gameDir)
     {
-        if (Application.Current?.Dispatcher == null)
+        // The work, with no UI anywhere near it. This is the part that decides
+        // whether the player's YAML reaches the game, so nothing about it may
+        // depend on a window being showable. Idempotent, so it is safe to call
+        // again after a partially completed run.
+        void ApplyPlainly()
         {
-            D2DataFiles.GenerateForSeed(s, seed, seedFolder, gameDir);
-            D2DataFiles.ApplySeed(seedFolder, gameDir);
-            return;
-        }
-
-        var ov = new D2ProgressOverlay("Randomizing the world…");
-        ov.Detail($"Seed {seed}");
-        ov.Show();
-        try
-        {
-            await StepAsync(ov, "Backing up the original tables…", 12,
-                () =>
-                {
-                    // Missing vanilla tables come out of the player's own
-                    // archives before the backup snapshots them as pristine.
-                    D2MpqTables.ExtractMissingTables(gameDir);
-                    D2DataFiles.EnsureBackup(gameDir);
-                }, 300);
-            await StepAsync(ov, "Generating randomized tables…", 48,
-                () => D2DataFiles.GenerateForSeed(s, seed, seedFolder, gameDir), 550);
-            await StepAsync(ov, "Applying the seed's tables to the game…", 78,
-                () => D2DataFiles.ApplySeed(seedFolder, gameDir), 350);
-
-            (int ok, int total) v = (0, 0);
-            await StepAsync(ov, "Verifying everything is in place…", 94,
-                () => v = D2DataFiles.VerifyApplied(seedFolder, gameDir), 350);
-
-            bool good = v.total > 0 && v.ok == v.total;
-            ov.Done(good
-                ? $"✓ Randomization ready — {v.ok}/{v.total} tables in place"
-                : "✓ Ready — starting the game");
-            await Task.Delay(850);
-        }
-        catch
-        {
-            // The overlay is cosmetic: if anything in it fails, still make sure the
-            // tables are generated + applied so the launch is correct.
             try
             {
+                // Missing vanilla tables come out of the player's own archives
+                // before the backup snapshots them as pristine.
+                D2MpqTables.ExtractMissingTables(gameDir);
+                D2DataFiles.EnsureBackup(gameDir);
                 D2DataFiles.GenerateForSeed(s, seed, seedFolder, gameDir);
                 D2DataFiles.ApplySeed(seedFolder, gameDir);
             }
-            catch { /* non-fatal */ }
+            catch { /* non-fatal - the launch continues either way */ }
         }
-        finally { try { ov.Close(); } catch { /* ignore */ } }
+
+        var disp = Application.Current?.Dispatcher;
+        if (disp == null || disp.HasShutdownStarted || disp.HasShutdownFinished)
+        {
+            ApplyPlainly();
+            return;
+        }
+
+        // ⚠⚠ The overlay is a WPF Window, and a Window can only be built on the
+        // UI thread. This method is awaited from BOTH launch paths: the game
+        // page (already on the UI thread) and the Join panel's "Play this slot",
+        // whose ApJoinSession awaits LaunchAsync with ConfigureAwait(false) and
+        // therefore arrives here on a thread-pool thread.
+        //
+        // The overlay used to be constructed OUTSIDE the try below. On the Join
+        // path that constructor threw, the throw escaped this method before the
+        // fallback could run, and the caller's catch swallowed it - so every
+        // Join-panel launch played a seed with UNMODIFIED tables: no item or
+        // skill requirement changes, no shop/monster/super-unique shuffle.
+        // Measured 2026-09-02 on a live run: ap_settings.dat and d2arch.ini
+        // written, but no _apbackup and no seed excel folder at all.
+        //
+        // So: marshal to the UI thread, and treat every failure as cosmetic by
+        // falling back to the plain work.
+        try
+        {
+            await disp.InvokeAsync(async () =>
+            {
+                D2ProgressOverlay? ov = null;
+                try
+                {
+                    ov = new D2ProgressOverlay("Randomizing the world…");
+                    ov.Detail($"Seed {seed}");
+                    ov.Show();
+
+                    await StepAsync(ov, "Backing up the original tables…", 12,
+                        () =>
+                        {
+                            D2MpqTables.ExtractMissingTables(gameDir);
+                            D2DataFiles.EnsureBackup(gameDir);
+                        }, 300);
+                    await StepAsync(ov, "Generating randomized tables…", 48,
+                        () => D2DataFiles.GenerateForSeed(s, seed, seedFolder, gameDir), 550);
+                    await StepAsync(ov, "Applying the seed's tables to the game…", 78,
+                        () => D2DataFiles.ApplySeed(seedFolder, gameDir), 350);
+
+                    (int ok, int total) v = (0, 0);
+                    await StepAsync(ov, "Verifying everything is in place…", 94,
+                        () => v = D2DataFiles.VerifyApplied(seedFolder, gameDir), 350);
+
+                    bool good = v.total > 0 && v.ok == v.total;
+                    ov.Done(good
+                        ? $"✓ Randomization ready — {v.ok}/{v.total} tables in place"
+                        : "✓ Ready — starting the game");
+                    await Task.Delay(850);
+                }
+                finally { try { ov?.Close(); } catch { /* ignore */ } }
+            }).Task.Unwrap();
+        }
+        catch
+        {
+            ApplyPlainly();
+        }
+
+        // Whatever happened above, the tables the game is about to load must be
+        // this seed's. Checked here rather than assumed.
+        var final = D2DataFiles.VerifyApplied(seedFolder, gameDir);
+        if (final.total == 0 || final.ok != final.total)
+            ApplyPlainly();
     }
 
     // Reset flow (when the game exits): restore pristine → confirm clean.
