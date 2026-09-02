@@ -271,6 +271,55 @@ public class D2Plugin : IGamePlugin
     // initializer on the second registration in App.xaml.cs.
     public bool Experimental { get; protected init; } = false;
 
+    ///
+    /// The world file this channel ships, and the name Archipelago knows it by.
+    ///
+    /// ⚠⚠ The two channels used to publish the SAME identity: file
+    /// `diablo2_archipelago.apworld`, module `diablo2_archipelago`, game
+    /// "Diablo II Archipelago". ApworldSync copies into custom_worlds by file
+    /// name with overwrite:true, and Archipelago keys worlds by the game
+    /// string, so the engine could only ever hold one of them -- whichever
+    /// channel was installed last, for BOTH cards. An experimental YAML
+    /// carrying act_boss_shuffle then failed to generate against stable's
+    /// world. Separate identities are the only thing that actually fixes it.
+    ///
+    public string ApWorldFileName => Experimental
+        ? "diablo2_archipelago_experimental.apworld"
+        : "diablo2_archipelago.apworld";
+
+    /// The `game:` line a YAML for THIS channel must carry.
+    public string ApWorldGameName => Experimental
+        ? "Diablo II Archipelago Experimental"
+        : "Diablo II Archipelago";
+
+    ///
+    /// Remove any OTHER .apworld left in this channel's world folder.
+    ///
+    /// ⚠⚠ Renaming the file is not enough on its own. ApworldSync.FindApworlds
+    /// scans the folder — `Directory.EnumerateFiles(root, "*.apworld",
+    /// AllDirectories)` — and copies everything it finds into custom_worlds.
+    /// An experimental install that upgraded from the old naming would still
+    /// have `diablo2_archipelago.apworld` sitting beside the new file, and
+    /// London would faithfully copy that stale stable-named world over the
+    /// real stable one. The rename would have moved the collision, not ended
+    /// it. Same lesson as ApworldUpdater's stale-asset cleanup.
+    ///
+    private void PurgeForeignApworlds(string apworldDir)
+    {
+        try
+        {
+            foreach (string f in Directory.EnumerateFiles(apworldDir, "*.apworld"))
+            {
+                if (string.Equals(Path.GetFileName(f), ApWorldFileName,
+                                  StringComparison.OrdinalIgnoreCase))
+                    continue;
+                try { File.Delete(f); }
+                catch (Exception) { /* leaving one behind is not worth failing the install */ }
+            }
+        }
+        catch (Exception) { /* no folder, no problem */ }
+    }
+
     private string GitHubRepo => Experimental
         ? "Diablo-II-Archipelago-experimental"
         : "Diablo-II-Archipelago";
@@ -917,7 +966,7 @@ public class D2Plugin : IGamePlugin
         // Build direct CDN download URLs — no REST API call needed.
         string packageUrl  = DownloadUrl(tag, "game_package.zip");
         string manifestUrl = DownloadUrl(tag, "game_manifest.json");
-        string apworldUrl  = DownloadUrl(tag, "diablo2_archipelago.apworld");
+        string apworldUrl  = DownloadUrl(tag, ApWorldFileName);
 
         if (!IsInstalled)
         {
@@ -1118,7 +1167,8 @@ public class D2Plugin : IGamePlugin
                 string apworldDir = Path.Combine(GameDirectory, "apworld");
                 Directory.CreateDirectory(apworldDir);
                 await DownloadSimpleAsync(apworldUrl,
-                    Path.Combine(apworldDir, "diablo2_archipelago.apworld"), ct);
+                    Path.Combine(apworldDir, ApWorldFileName), ct);
+                PurgeForeignApworlds(apworldDir);
             }
 
             progress.Report((98, "Cleaning data cache..."));
@@ -1306,7 +1356,8 @@ public class D2Plugin : IGamePlugin
                 string apworldDir = Path.Combine(GameDirectory, "apworld");
                 Directory.CreateDirectory(apworldDir);
                 await DownloadSimpleAsync(apworldUrl,
-                    Path.Combine(apworldDir, "diablo2_archipelago.apworld"), ct);
+                    Path.Combine(apworldDir, ApWorldFileName), ct);
+                PurgeForeignApworlds(apworldDir);
             }
             catch { /* non-fatal — apworld update failure doesn't block the game */ }
         }
@@ -2415,6 +2466,23 @@ public class D2Plugin : IGamePlugin
             IProgress<(int Pct, string Msg)> progress)
         => RepairMissingFilesAsync(progress);
 
+    ///
+    /// Build the map tracker's pictures out of this player's own archives.
+    ///
+    /// The published pack carries no Diablo II artwork — it carries a list
+    /// saying which sprite becomes which tile, and the pictures are made here.
+    /// Runs on a worker: 475 sprites out of two 250 MB archives is disk work,
+    /// not UI work.
+    ///
+    public Task<int> BuildTrackerArtworkAsync(string packDir,
+                                              CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(GameDirectory) || !Directory.Exists(GameDirectory))
+            return Task.FromResult(0);
+        return Task.Run(() => D2TrackerPack.BuildArtwork(
+            GameDirectory, packDir, m => LogLine?.Invoke(m)), ct);
+    }
+
     // --- IGamePlugin: DeathLink, receive side ---
     public Task OnDeathLinkReceivedAsync(string source, string cause)
         => IsRunning ? SendDeathLinkToGameAsync(source, cause) : Task.CompletedTask;
@@ -3513,6 +3581,18 @@ public class D2Plugin : IGamePlugin
     // part people get wrong: any other version fails to install.
     public string[] GameBadges =>
         IsOriginalD2Configured ? Array.Empty<string>() : new[] { "Requires D2: LoD 1.10f" };
+
+    ///
+    /// The excel tables the randomiser rewrites for each seed.
+    ///
+    /// Verify files compares every file against what was installed. Its own
+    /// rule for "the game changed this on purpose" is extension-based, which
+    /// covers .ini and .cfg and knows nothing about data tables — so a patched
+    /// Levels.txt was reported as "the wrong size", and the repair offered to
+    /// fetch the pristine copy over the table the player's seed is running on.
+    /// Naming them here is how that stops.
+    ///
+    public IReadOnlyList<string> VolatileDataFiles => D2DataFiles.ManagedNames;
 
     public async Task<NewsItem[]> GetNewsAsync(CancellationToken ct = default)
     {

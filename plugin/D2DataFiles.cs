@@ -31,6 +31,11 @@ public static class D2DataFiles
           "MagicPrefix.txt", "MagicSuffix.txt", "SetItems.txt", "UniqueItems.txt",
           "UniqueItems2.txt" };
 
+    /// The tables, for anything that needs to know which files this mod
+    /// rewrites — Verify files asks, so a patched table is not called damage
+    /// and the repair does not offer to overwrite the player's seed.
+    public static IReadOnlyList<string> ManagedNames => Managed;
+
     // True when the file name is one of the randomizer-managed excel tables
     // (the ones the pristine-backup/restore cycle owns).
     // flow to decide whether a repair actually touched managed data.

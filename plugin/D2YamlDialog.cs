@@ -44,6 +44,18 @@ internal sealed class D2YamlDialog : Window
     private System.Collections.Generic.IEnumerable<D2YamlOption> VisibleOptions
         => D2YamlOptions.All.Where(o => _experimental || !o.ExpOnly);
 
+    // The world name the generator answers to, per channel.
+    //
+    // ⚠⚠ Not D2YamlOptions.Game alone. The two channels now publish separate
+    // world identities so they can sit in one engine without overwriting each
+    // other (see D2Plugin.ApWorldFileName). A YAML that names the wrong one is
+    // rejected at generation time with a message that helps nobody, so the
+    // file must name the channel this dialog was opened for. The generated
+    // options file only knows stable's name, so the suffix lives here.
+    private string GameName => _experimental
+        ? D2YamlOptions.Game + " Experimental"
+        : D2YamlOptions.Game;
+
     private D2YamlDialog(bool experimental)
     {
         _experimental = experimental;
@@ -219,8 +231,8 @@ internal sealed class D2YamlDialog : Window
         var sb = new StringBuilder();
         sb.Append("name: ").Append(player).Append('\n');
         sb.Append("description: Created with the Multiworld Launcher\n");
-        sb.Append("game: ").Append(D2YamlOptions.Game).Append('\n');
-        sb.Append(D2YamlOptions.Game).Append(":\n");
+        sb.Append("game: ").Append(GameName).Append('\n');
+        sb.Append(GameName).Append(":\n");
         // Two settings every AP file carries; the apworld does not declare them.
         sb.Append("  progression_balancing: normal\n");
         sb.Append("  accessibility: full\n");

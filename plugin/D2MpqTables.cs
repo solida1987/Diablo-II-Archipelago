@@ -112,7 +112,9 @@ public static class D2MpqTables
 
     // ─── MPQ v1 reader ──────────────────────────────────────────────────
 
-    private sealed class MpqReader
+    // internal, not private: D2TrackerPack reads sprites out of the same
+    // archives with the same reader. One MPQ implementation, two callers.
+    internal sealed class MpqReader
     {
         private readonly byte[] _d;
         private readonly int _base;
