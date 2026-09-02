@@ -1286,9 +1286,15 @@ class Diablo2ArchipelagoWorld(World):
             "seed":        self.multiworld.seed,
             "player_name": self.multiworld.get_player_name(self.player),
         }
+        # ALWAYS send it. The DLL reads SkillPoolSize out of the local
+        # d2arch.ini first and lets slot_data override; omitting the key made
+        # an AP seed inherit whatever the player last used in STANDALONE --
+        # the exact "local settings leak into the multiworld" this file's
+        # ap_settings.dat path exists to prevent. resolved is 0 only when
+        # skill hunting is off, where "no AP restriction" is the honest
+        # answer, and the DLL clamps to 1..210 so 0 would be rejected anyway.
         resolved = getattr(self, "_resolved_skill_pool", 0)
-        if resolved > 0:
-            slot_data["skill_pool_size"] = resolved
+        slot_data["skill_pool_size"] = resolved if resolved > 0 else 210
         return slot_data
 
 

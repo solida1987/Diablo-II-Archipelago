@@ -1763,7 +1763,18 @@ public class D2Plugin : IGamePlugin
         try
         {
             if (GetSlotData?.Invoke() is not JsonElement sd || sd.ValueKind != JsonValueKind.Object)
+            {
+                // Never silent. Every per-seed setting the player chose --
+                // item/skill requirements, the shuffles, chest isolation --
+                // rides on this slot_data, so returning quietly here starts a
+                // run whose YAML did nothing and gives the player no way to
+                // know. It cost two rounds of "it still does not work".
+                LogLine?.Invoke("[Diablo II] The seed's settings could not be read "
+                              + "from the server yet, so the game is starting with "
+                              + "UNMODIFIED tables. Close the game, wait for the "
+                              + "server connection, and launch again.");
                 return;
+            }
 
             var settings = D2RandomizerSettings.FromSlotData(sd);
             long seed = worldKey;
@@ -1786,12 +1797,28 @@ public class D2Plugin : IGamePlugin
                 SetIniSectionValue(lines, "settings", "StashIsolated", settings.StashIsolated ? "1" : "0");
                 File.WriteAllLines(ini, lines);
             }
-            catch { /* non-fatal */ }
+            catch (Exception ex)
+            {
+                LogLine?.Invoke("[Diablo II] Could not write d2arch.ini: " + ex.Message
+                              + " - chest isolation and the per-seed key may be wrong.");
+            }
 
             await D2RandomizeProgress.RunApplyAsync(settings, seed, saveFolder, GameDirectory);
             _apAppliedDataTables = true;
+
+            // Prove it landed rather than assuming it: the tables the game is
+            // about to load must match the ones this seed generated.
+            var v = D2DataFiles.VerifyApplied(saveFolder, GameDirectory);
+            if (v.total == 0 || v.ok != v.total)
+                LogLine?.Invoke($"[Diablo II] WARNING: only {v.ok}/{v.total} of the "
+                              + "seed's data tables are in place - some settings "
+                              + "(item requirements, shuffles) may not apply.");
         }
-        catch { /* non-fatal — fall back to the DLL's runtime shuffle */ }
+        catch (Exception ex)
+        {
+            LogLine?.Invoke("[Diablo II] The seed's settings could not be applied: "
+                          + ex.Message + " - the run may ignore your YAML.");
+        }
     }
 
     // Stable, reproducible per-world seed for AP data-file randomization: derived
