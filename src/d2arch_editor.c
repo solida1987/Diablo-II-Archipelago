@@ -1082,19 +1082,23 @@ static void RenderEditor(void) {
         static int s_edRTopX = 420, s_edRTopY = 300;
         static int s_edRBotX = 420, s_edRBotY = 515;
 
-        if (s_edLoaded != g_celSessionGen) {
-            s_edLoaded = g_celSessionGen;
-            /* RELEASE the old handles before loading new ones. */
-            if (s_edLeftTopCel  == s_edTopCel) s_edLeftTopCel  = NULL;
-            if (s_edLeftBotCel  == s_edBotCel) s_edLeftBotCel  = NULL;
-            if (s_edRightTopCel == s_edTopCel) s_edRightTopCel = NULL;
-            if (s_edRightBotCel == s_edBotCel) s_edRightBotCel = NULL;
-            EdCelFree(&s_edLeftTopCel);
-            EdCelFree(&s_edLeftBotCel);
-            EdCelFree(&s_edRightTopCel);
-            EdCelFree(&s_edRightBotCel);
-            EdCelFree(&s_edTopCel);
-            EdCelFree(&s_edBotCel);
+        /* Load ONCE and never free — these six frames come from OUR OWN DC6
+         * files via LoadDC6FromDisk, which allocates with Fog (10042) and
+         * normalises through D2CMP. They are not D2Win archive cels: D2 never
+         * owns them, so they never dangle across a session, and there is
+         * nothing to reload.
+         *
+         * They used to be freed on every session change with EdCelFree, i.e.
+         * D2Win's WinFreeCellFile (10041) — the wrong deallocator for a Fog
+         * block. That corrupted the Fog pool the OTHER disk DC6s live in
+         * (g_icons28, g_archIcons, s_stIcons35, allocated right next to
+         * these), and D2 then handed that memory out for in-game sprites: the
+         * F1 skill icons drew characters and monsters after a save&quit.
+         * Measured 2026-09-03: six relogs, six generation bumps, six wrong
+         * frees, corrupt icons every time — with the pointer-OR-name detection
+         * firing correctly on all six. */
+        if (!s_edTopCel && s_edLoaded < 0) {
+            s_edLoaded = 0;
             {
                 char dc6Path[MAX_PATH];
                 if (BuildDC6Path(dc6Path, MAX_PATH, "editor_top.DC6"))
