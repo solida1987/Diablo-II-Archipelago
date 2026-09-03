@@ -174,6 +174,20 @@ typedef void (__fastcall *WinFreeCellFile_t)(void* cellFile);
 static WinFreeCellFile_t fnCelFree = NULL;
 /* defined in d2arch_editor.c (later in the unity build): __try-guarded fnCelFree + NULLs the slot */
 static void EdCelFree(void** pSlot);
+
+/* DIAGNOSTIC (2026-09-03). Say whether a cached cel pointer still points at
+ * a DC6 (header dword == 6) — measured at the moment we are about to draw
+ * it after a session change. This is how we find out, instead of arguing
+ * about it in comments, which cels D2 frees at save&quit and which it does
+ * not. Read under __try: a dead pointer is exactly what we are looking for. */
+static void CelChk(const char* tag, void* p) {
+    DWORD m0 = 0xDEADDEAD, m1 = 0xDEADDEAD;
+    if (!p) { Log("CELCHK %-14s p=NULL\n", tag); return; }
+    __try { m0 = *(DWORD*)p; m1 = *((DWORD*)p + 1); }
+    __except(EXCEPTION_EXECUTE_HANDLER) { Log("CELCHK %-14s p=%p UNREADABLE\n", tag, p); return; }
+    Log("CELCHK %-14s p=%p magic=%08X next=%08X %s\n", tag, p, m0, m1,
+        (m0 == 6) ? "ok" : "*** NOT A DC6 ***");
+}
 /* Session generation — bumped by OnCharacterLoad each time a character is (re)loaded (incl. */
 int g_celSessionGen = 0;
 

@@ -770,6 +770,10 @@ static void RenderConfirmDialog(int mx, int my, BOOL clicked) {
 /* Forward declarations for DC6 functions defined later */
 static BOOL BuildDC6Path(char* out, int outSize, const char* subPath);
 static void* LoadDC6FromDisk(const char* szPath);
+/* The MATCHING free for LoadDC6FromDisk: Fog's (10043), never D2Win's. Defined in d2arch_ap.c. */
+static void DiskCelFree(void** pSlot);
+/* Session generation for icon sheets that live in globals (declared in d2arch_api.c). */
+static int g_icons28Gen = -1;
 static void DrawCel(void* pCelFile, int frame, int x, int y);
 static void DrawSkillTooltip(int skillId, int mx, int my);
 

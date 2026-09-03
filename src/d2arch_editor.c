@@ -1057,8 +1057,10 @@ static void RenderEditor(void) {
     /* === BOOK PANELS (always visible on all pages) === */
 
     /* Load 24x24 icons for right-side slots (once) */
-    if (!g_icons28Loaded) {
+    if (g_icons28Gen != g_celSessionGen) {   /* reload per session — see the frames above */
+        g_icons28Gen = g_celSessionGen;
         g_icons28Loaded = TRUE;
+        DiskCelFree(&g_icons28);
         char dc6p[MAX_PATH];
         GetArchDir(dc6p, MAX_PATH);
         strcat(dc6p, "ArchIcons24.DC6");
@@ -1097,8 +1099,39 @@ static void RenderEditor(void) {
          * Measured 2026-09-03: six relogs, six generation bumps, six wrong
          * frees, corrupt icons every time — with the pointer-OR-name detection
          * firing correctly on all six. */
-        if (!s_edTopCel && s_edLoaded < 0) {
-            s_edLoaded = 0;
+        /* DIAGNOSTIC: once per session change, before anything is drawn,
+         * is every cached cel still a DC6? Disk-loaded (Fog) AND icons. */
+        {
+            static int s_edChkGen = -1;
+            if (s_edChkGen != g_celSessionGen) {
+                s_edChkGen = g_celSessionGen;
+                Log("CELCHK --- editor, session gen %d ---\n", g_celSessionGen);
+                CelChk("ed_top",      s_edTopCel);
+                CelChk("ed_bot",      s_edBotCel);
+                CelChk("ed_lefttop",  s_edLeftTopCel);
+                CelChk("ed_leftbot",  s_edLeftBotCel);
+                CelChk("ed_righttop", s_edRightTopCel);
+                CelChk("ed_rightbot", s_edRightBotCel);
+                CelChk("icons28",     g_icons28);
+            }
+        }
+        /* RELOAD on every session change. MEASURED 2026-09-03 (CELCHK): the
+         * Fog blocks stay perfectly valid across save&quit — magic 6 at the
+         * same address — and yet a load-once frame draws garbage after a
+         * relog while a reloaded one draws fine. D2Gfx (10072) caches the
+         * decoded frames per cel POINTER, and the game rebuilds that cache's
+         * memory on exit; the stale key then blits recycled sprite memory.
+         * A fresh pointer is a fresh cache entry. Free the old block with
+         * Fog's free (DiskCelFree), never D2Win's. */
+        if (s_edLoaded != g_celSessionGen) {
+            s_edLoaded = g_celSessionGen;
+            if (s_edLeftTopCel  == s_edTopCel) s_edLeftTopCel  = NULL;
+            if (s_edLeftBotCel  == s_edBotCel) s_edLeftBotCel  = NULL;
+            if (s_edRightTopCel == s_edTopCel) s_edRightTopCel = NULL;
+            if (s_edRightBotCel == s_edBotCel) s_edRightBotCel = NULL;
+            DiskCelFree(&s_edLeftTopCel);  DiskCelFree(&s_edLeftBotCel);
+            DiskCelFree(&s_edRightTopCel); DiskCelFree(&s_edRightBotCel);
+            DiskCelFree(&s_edTopCel);      DiskCelFree(&s_edBotCel);
             {
                 char dc6Path[MAX_PATH];
                 if (BuildDC6Path(dc6Path, MAX_PATH, "editor_top.DC6"))
@@ -1487,8 +1520,11 @@ static void RenderEditor(void) {
             static void* s_icons35 = NULL;
             static BOOL s_icons35Loaded = FALSE;
             static void* s_icons35_ptr = NULL;
-            if (!s_icons35Loaded) {
+            static int  s_icons35Gen = -1;
+            if (s_icons35Gen != g_celSessionGen) {   /* reload per session */
+                s_icons35Gen = g_celSessionGen;
                 s_icons35Loaded = TRUE;
+                DiskCelFree(&s_icons35);
                 char dc6p[MAX_PATH];
                 GetArchDir(dc6p, MAX_PATH);
                 strcat(dc6p, "ArchIcons35.DC6");

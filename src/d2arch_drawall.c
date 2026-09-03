@@ -738,8 +738,11 @@ static void DrawAll(void) {
 
         if (panelOpen) {
             /* Load our custom panel DC6 from disk */
-            if (!s_loadAttempted) {
+            static int s_panelGen = -1;
+            if (s_panelGen != g_celSessionGen) {   /* reload per session */
+                s_panelGen = g_celSessionGen;
                 s_loadAttempted = TRUE;
+                DiskCelFree(&s_panelCel);
                 char dc6Path[MAX_PATH];
                 if (BuildDC6Path(dc6Path, MAX_PATH, "skltree_custom.DC6")) {
                     s_panelCel = LoadDC6FromDisk(dc6Path);
@@ -759,6 +762,12 @@ static void DrawAll(void) {
 
                 if (s_halvesLoaded != g_celSessionGen) {
                     s_halvesLoaded = g_celSessionGen;
+                    /* DIAGNOSTIC: are the D2Win-loaded halves still DC6s
+                     * after the session change, i.e. is this free legitimate
+                     * or a double free of something D2 already released? */
+                    Log("CELCHK --- skill panel halves, session gen %d ---\n", g_celSessionGen);
+                    CelChk("skltree_top", s_topCel);
+                    CelChk("skltree_bot", s_botCel);
                     EdCelFree(&s_topCel); EdCelFree(&s_botCel);
                     /* Use fnCelLoad (D2Win 10039) - same as button loading. */
                     if (fnCelLoad) {
@@ -792,12 +801,23 @@ static void DrawAll(void) {
             }
 
             /* Load icon DC6 + map (once, shared by all 30 buttons). */
-            if (!g_archIconsLoaded) {
+            if (g_archIconsGen != g_celSessionGen) {   /* reload per session */
+                g_archIconsGen = g_celSessionGen;
                 g_archIconsLoaded = TRUE;
+                DiskCelFree(&g_archIcons);
                 char dc6p[MAX_PATH];
                 GetArchDir(dc6p, MAX_PATH);
                 strcat(dc6p, "ArchIcons40.DC6");
                 g_archIcons = LoadDC6FromDisk(dc6p);
+            }
+            /* DIAGNOSTIC: the icon sheet is load-once on our own Fog block —
+             * is it still a DC6 after a session change? */
+            {
+                static int s_icoChkGen = -1;
+                if (s_icoChkGen != g_celSessionGen) {
+                    s_icoChkGen = g_celSessionGen;
+                    CelChk("archIcons40", g_archIcons);
+                }
             }
             if (!g_icoMapLoaded || g_skillPanelReset) {
                 g_icoMapLoaded = TRUE;
@@ -948,6 +968,14 @@ static void DrawAll(void) {
                 /* free+reload the archive squares on session change (save&quit invalidates D2Win handles). */
                 if (s_stGfxLoaded != g_celSessionGen) {
                     s_stGfxLoaded = g_celSessionGen;
+                    /* DIAGNOSTIC: D2Win squares (about to be freed) and the
+                     * Fog icon sheet (never freed) — which of them survived? */
+                    Log("CELCHK --- tier squares, session gen %d ---\n", g_celSessionGen);
+                    CelChk("green41",   s_stGreen41);
+                    CelChk("blue41",    s_stBlue41);
+                    CelChk("orange41",  s_stOrange41);
+                    CelChk("red41",     s_stRed41);
+                    CelChk("stIcons35", s_stIcons35);
                     EdCelFree(&s_stGreen41); EdCelFree(&s_stBlue41);
                     EdCelFree(&s_stOrange41); EdCelFree(&s_stRed41);
                     if (fnCelLoad) {
@@ -957,8 +985,11 @@ static void DrawAll(void) {
                         s_stRed41    = fnCelLoad("data\\global\\ui\\SPELLS\\red_square", 0);
                     }
                 }
-                if (!s_stIconsLoaded) {
+                static int s_stIconsGen = -1;
+                if (s_stIconsGen != g_celSessionGen) {   /* reload per session */
+                    s_stIconsGen = g_celSessionGen;
                     s_stIconsLoaded = TRUE;
+                    DiskCelFree(&s_stIcons35);
                     char dp[MAX_PATH]; GetArchDir(dp, MAX_PATH); strcat(dp, "ArchIcons35.DC6");
                     s_stIcons35 = LoadDC6FromDisk(dp);
                 }

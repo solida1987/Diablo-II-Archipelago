@@ -2710,7 +2710,11 @@ static void* LoadDC6FromDisk(const char* szPath) {
     /* Note: We do NOT free pRawBuf -- CelFileNormalize may have stored it as the output (pCellFile == pRawBuf after in-place normalization), or it allocated new memory. */
 
     if (pCellFile) {
-        Log("LoadDC6: SUCCESS -> CellFile=%p\n", pCellFile);
+        /* DIAGNOSTIC: raw vs normalised. Equal = in-place (one Fog block);
+         * different = D2CMP allocated the D2CellFileStrc itself, in which
+         * case D2CMP may well own — and free — that block at teardown. */
+        Log("LoadDC6: SUCCESS -> CellFile=%p raw=%p %s (%s)\n", pCellFile, pRawBuf,
+            (pCellFile == pRawBuf) ? "IN-PLACE" : "SEPARATE", szPath);
     } else {
         Log("LoadDC6: CelFileNormalize returned NULL for %s\n", szPath);
         if (g_fnFogFree) g_fnFogFree(pRawBuf, "d2arch.c", __LINE__, 0);
@@ -2718,6 +2722,19 @@ static void* LoadDC6FromDisk(const char* szPath) {
     }
 
     return pCellFile;
+}
+
+/* Free a DC6 we loaded from disk, with the allocator that gave it to us.
+ * ⚠ Not EdCelFree/fnCelFree (D2Win 10041): that is the free for ARCHIVE
+ * cels. This block came from Fog 10042 (or HeapAlloc when Fog was absent),
+ * so it goes back the same way. NULLs the slot. */
+static void DiskCelFree(void** pSlot) {
+    if (!pSlot || !*pSlot) return;
+    __try {
+        if (g_fnFogFree) g_fnFogFree(*pSlot, "d2arch.c", __LINE__, 0);
+        else HeapFree(GetProcessHeap(), 0, *pSlot);
+    } __except(EXCEPTION_EXECUTE_HANDLER) {}
+    *pSlot = NULL;
 }
 
 /* Build the full path to a DC6 file in the runtime data directory. */

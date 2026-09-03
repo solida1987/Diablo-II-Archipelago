@@ -22,6 +22,7 @@ static BOOL g_stHideColors = TRUE;    /* Toggle: hide tier-colored backgrounds i
 /* Global icon system: loaded once, used by all 30 buttons */
 static void* g_archIcons = NULL;
 static BOOL  g_archIconsLoaded = FALSE;
+static int   g_archIconsGen = -1;   /* session generation of the current sheet */
 static int   g_icoMap[400]; /* skillId -> frame index */
 static BOOL  g_icoMapLoaded = FALSE;
 static int* g_pVanillaSkillTreeOpen = NULL; /* D2Client's native skill tree state (0x6FBB3664) */

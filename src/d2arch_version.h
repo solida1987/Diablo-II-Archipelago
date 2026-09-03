@@ -3,11 +3,11 @@
 
 /* Single source of truth for Diablo II Archipelago mod version. */
 
-/* NOTE: rolled 2.9.9 -> 3.0.0 (MAJOR), NOT 2.9.10 — the in-game version-patch slot holds only 11 chars (see below): "Stable2.9.10" / "Stable2.10.0" are both 12 chars and would corrupt the adjacent format-string slot. */
+/* NOTE: rolled 2.9.9 -> 3.0.0 (MAJOR), NOT 2.9.10 ??? the in-game version-patch slot holds only 11 chars (see below): "Stable2.9.10" / "Stable2.10.0" are both 12 chars and would corrupt the adjacent format-string slot. */
 #define D2ARCH_VERSION_MAJOR    3
 #define D2ARCH_VERSION_MINOR    9
-#define D2ARCH_VERSION_PATCH    10
-/* No channel word any more — the version is just "v" and the numbers.
+#define D2ARCH_VERSION_PATCH    11
+/* No channel word any more ??? the version is just "v" and the numbers.
  *
  * "Beta", then "Stable", then "Unstable" each promised something about the
  * build that the number already says better, and the last rename was itself a
