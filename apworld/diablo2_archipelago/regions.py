@@ -97,9 +97,16 @@ def _build_quest_area_map() -> None:
         104: 74,  # Arcane Sanctuary
         105: 74,  # The Summoner
         106: 73,  # Seven Tombs / Duriel's Lair
-        # Hunts
-        170: 49, 171: 42, 172: 61, 173: 43, 174: 52, 175: 64,
-        176: 44, 177: 44, 178: 74, 179: 46,
+        # Hunts — where the game's own presets put them. Three of these
+        # were wrong until 3.9.17 and the quest book repeated the error:
+        # Creeping Feature was listed in Palace Cellar 1 (BetaHub #28) but
+        # lives in Stony Tomb 2; Bloodwitch was in Dry Hills but is killed
+        # in Halls of the Dead 3; Fire Eye was in Lost City but is killed in
+        # Palace Cellar 3 (both measured from kill logs, area ids 60 and 54).
+        # Ancient Kaa stands in one of the six false tombs at random, so his
+        # entry stays on the Canyon of the Magi that holds them.
+        170: 49, 171: 60, 172: 61, 173: 43, 174: 59, 175: 64,
+        176: 54, 177: 44, 178: 74, 179: 46,
         # Kill
         110: 41, 111: 42, 112: 43, 113: 44, 114: 45,
         115: 47, 116: 48,          # Sewers L1/L2 (restored 3.5.3)
@@ -124,9 +131,12 @@ def _build_quest_area_map() -> None:
         204: 80,  # Golden Bird (Kurast Bazaar area)
         205: 83,  # Blackened Temple
         206: 102, # The Guardian (Mephisto, Durance L3)
-        # Hunts
-        271: 84, 272: 88, 273: 79, 274: 94, 275: 92,
-        276: 83, 277: 83, 278: 83, 279: 100, 280: 101, 281: 101,
+        # Hunts. 3.9.17: Sszark is in the Spider CAVERN (85, measured from a
+        # kill log), not the Spider Cave; Endugu is in Flayer Dungeon 3, the
+        # Council — Ismail, Geleb, Toorc — stand in Travincal together, and
+        # Bremm, Wyand and Maffer guard Mephisto in Durance of Hate 3.
+        271: 85, 272: 91, 273: 79, 274: 94, 275: 92,
+        276: 83, 277: 83, 278: 102, 279: 83, 280: 102, 281: 102,
         # Kill
         210: 76, 211: 77, 212: 78, 213: 79, 214: 80, 215: 81, 216: 83,
         217: 84, 218: 88, 219: 89,
@@ -166,9 +176,13 @@ def _build_quest_area_map() -> None:
         404: 124, # Betrayal of Harrogath (Nihlathak)
         405: 120, # Rite of Passage (Ancients)
         406: 132, # Eve of Destruction (Baal, Throne of Destruction)
-        # Hunts
-        470: 110, 471: 111, 472: 112, 473: 118, 474: 119,
-        475: 121, 476: 115, 477: 129,
+        # Hunts. 3.9.17: six of eight were one area off. Shenk and Dac Farren
+        # both hold the Bloody Foothills; Eyeback the Unleashed is on the
+        # Frigid Highlands; Thresh Socket on the Arreat Plateau; Bonesaw
+        # Breaker in the Glacial Trail; Snapchip Shatter in the Icy Cellar;
+        # Frozenstein in the Frozen River; Pindleskin at Nihlathak's Temple.
+        470: 110, 471: 110, 472: 115, 473: 111, 474: 112,
+        475: 121, 476: 119, 477: 114,
         # Kill
         410: 110, 411: 111, 412: 112, 413: 113,
         414: 118, 415: 119, 416: 117,

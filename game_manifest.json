@@ -1,7 +1,7 @@
 {
-  "version": "3.9.16",
-  "version_display": "3.9.16",
-  "file_count": 661,
+  "version": "3.9.17",
+  "version_display": "3.9.17",
+  "file_count": 655,
   "files": [
     {
       "path": "D2.Detours.dll",
@@ -15,12 +15,12 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "d202d74eccda9eff4a8b10ddd29d454362bc814f12694dd107dcc9ace791af97",
+      "sha256": "84d6275071317bc82d794271f360449bb4c428c37debcb79269a940ae8c4e34e",
       "size": 125440
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "520f3db01f06f3316569e29b629ca530fa150807f4560c1114af3f4fc74af6fc",
+      "sha256": "c812bfb17aa4526d31326787689d987ec41a172595cc87e208da9bc363f3ec17",
       "size": 856576
     },
     {
@@ -65,8 +65,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "034b1efe6a858817d1544e9ae445925379d39fdf0e30409c8b0611d574f35cea",
-      "size": 82664
+      "sha256": "96ecc005e020a5881eb208d937fa56314c8e7c9179f06a826776c372f5759994",
+      "size": 83228
     },
     {
       "path": "apworld/diablo2_archipelago/__init__.py",
@@ -80,7 +80,7 @@
     },
     {
       "path": "apworld/diablo2_archipelago/archipelago.json",
-      "sha256": "2284864250a8e88fe2511a5df1c0f7badbae4962953f855496065043b79d5e8e",
+      "sha256": "2d580c1aa6f6d4691cd8d1e7a7216db9c11c8ff2206e85cadaf327a98485038b",
       "size": 281
     },
     {
@@ -105,43 +105,13 @@
     },
     {
       "path": "apworld/diablo2_archipelago/regions.py",
-      "sha256": "8daa39e0faf978e9ad65ee4e494a6f02eddb99ff7e77bd8c513e7282696e921f",
-      "size": 46321
+      "sha256": "f0a245bab3276b4a070c8be7769f950ba2e1e08d9efab4ee78cf3aa173fbde4f",
+      "size": 47550
     },
     {
       "path": "apworld/diablo2_archipelago/tierfill.py",
       "sha256": "2581f1f82ba394eb27796b97fad8df67201bdbf0a5ac9596736c14476e7bdee9",
       "size": 14090
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/__init__.cpython-313.pyc",
-      "sha256": "9f402611d3a8ecdc4023972e43f5d15f8526e6f8bfc43a01f54021e25add8088",
-      "size": 52530
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/__init__.cpython-314.pyc",
-      "sha256": "e16f42cd722f2d38b16e9a5c2ada96e6e724ba34d41134b56196ac20858e6435",
-      "size": 55205
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/items.cpython-314.pyc",
-      "sha256": "fae2097d419296c4860c02867a0f3b45430b6525030947f6161347b70d4d5958",
-      "size": 28859
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/locations.cpython-314.pyc",
-      "sha256": "2aa3980e06e01319cb1b96af8e4b5034e4dd371e002f9ce9b23a65ccae0a5ea3",
-      "size": 33760
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/options.cpython-313.pyc",
-      "sha256": "86f34db181c79bafede50247f67874753826f9eb61c55355f084d254ea5415e1",
-      "size": 48252
-    },
-    {
-      "path": "apworld/diablo2_archipelago/__pycache__/options.cpython-314.pyc",
-      "sha256": "fd96c4d81c623ddc5efb72859d32402444acc40e95a118bc1b9275f0519d6ae3",
-      "size": 49332
     },
     {
       "path": "Archipelago/ArchIcons15.DC6",
@@ -225,7 +195,7 @@
     },
     {
       "path": "Archipelago/version.dat",
-      "sha256": "6cb581e8611c237de11432bfdac12855a9a3973b6e7441377a9101dbe24e2da7",
+      "sha256": "4935e9c8172d7a1304851ff42fa09ab0b4bf9e8a305194889a7b7441e5592cd1",
       "size": 9
     },
     {
@@ -3295,7 +3265,7 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "520f3db01f06f3316569e29b629ca530fa150807f4560c1114af3f4fc74af6fc",
+      "sha256": "c812bfb17aa4526d31326787689d987ec41a172595cc87e208da9bc363f3ec17",
       "size": 856576
     },
     {
