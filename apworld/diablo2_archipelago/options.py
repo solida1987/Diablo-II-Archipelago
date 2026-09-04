@@ -511,9 +511,10 @@ class CollectionTargetGems(Toggle):
     'include collection' option. Each individual gem pickup fires an
     AP check when this toggle is ON — under every goal, since 3.9.7.
     Moved out of Goal & Win Condition in 1.9.2 — now lives under
-    Collection — Gems."""
+    Collection — Gems. OFF by default since 3.9.14, like every other
+    collection toggle: turn on what you want to collect."""
     display_name = "Collection: Gems"
-    default = True
+    default = False
 
 
 class CollectionGoldTarget(Range):
@@ -631,9 +632,15 @@ def _make_collect_toggle(field_name, display, doc_extra=""):
                    f"in AP mode, the slot becomes an AP location/check that "
                    f"fires when the item is first collected — under every "
                    f"goal, since 3.9.7. With Goal=Collection the game is "
-                   f"won by completing all included targets. {doc_extra}".strip(),
+                   f"won by completing all included targets. OFF by default "
+                   f"since 3.9.14: turn on the items you want to collect "
+                   f"rather than turning off the ones you do not. {doc_extra}".strip(),
         'display_name': f"Collect: {display}",
-        'default': True,
+        # 3.9.14 — off by default (Maegis, Testing Round 1: "having to
+        # disable every single one by hand is a pain"). 76 toggles that all
+        # started ON meant every player who wanted a small collection had to
+        # untick 70-odd boxes; the common case is now the empty one.
+        'default': False,
     }
     cls = type(cls_name, bases, attrs)
     setattr(_sys.modules[__name__], cls_name, cls)
