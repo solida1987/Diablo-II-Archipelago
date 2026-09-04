@@ -330,6 +330,44 @@ static void* __fastcall CreateItemExHook(void* pGame, void* pItemDrop, int bUseS
     return ((CreateItemExFn_t)s_createItemExDetour.trampoline)(pGame, pItemDrop, bUseSeed);
 }
 
+/* GOLD CAPS — D2Common #10439 (carried, level x 10,000) and #10339 (stash).
+ *
+ * Both are __stdcall(pUnit) and open with `mov eax,[esp+4]; push 0` — six
+ * position-independent bytes, so the detour keeps the original arithmetic
+ * intact in the trampoline and only scales the answer. The same two exports
+ * serve D2Game (pickup, rewards) and D2Client (the stash dialog), so one
+ * patch moves every limit the player meets. See Gold_ScaleCap in api.c for
+ * the multiplier and the 25-bit save ceiling. */
+typedef int (__stdcall *GoldCapFn_t)(void* pUnit);
+static Detour s_goldCarryDetour;
+static Detour s_goldBankDetour;
+
+static int __stdcall GoldCarryCapHook(void* pUnit) {
+    int v = ((GoldCapFn_t)s_goldCarryDetour.trampoline)(pUnit);
+    return Gold_ScaleCap(v);
+}
+static int __stdcall GoldBankCapHook(void* pUnit) {
+    int v = ((GoldCapFn_t)s_goldBankDetour.trampoline)(pUnit);
+    return Gold_ScaleCap(v);
+}
+
+static BOOL Hooks_InstallGoldCap(HMODULE hCommon, int ordinal, Detour* d, void* wrapper, const char* what) {
+    static const BYTE kPro[] = { 0x8B, 0x44, 0x24, 0x04, 0x6A, 0x00, 0x6A, 0x0C };  /* mov eax,[esp+4]; push 0; push 0Ch */
+    BYTE* p = hCommon ? (BYTE*)GetProcAddress(hCommon, (LPCSTR)(INT_PTR)ordinal) : NULL;
+    BOOL ok = FALSE;
+    if (!p) { Log("HOOKS: gold cap %s — D2Common #%d not found\n", what, ordinal); return FALSE; }
+    __try { ok = (memcmp(p, kPro, sizeof(kPro)) == 0); }
+    __except(EXCEPTION_EXECUTE_HANDLER) { ok = FALSE; }
+    if (!ok) {
+        Log("HOOKS: gold cap %s — D2Common #%d prologue mismatch, left at vanilla\n", what, ordinal);
+        return FALSE;
+    }
+    ok = Detour_Install(d, (void*)p, wrapper, 6);
+    Log("HOOKS: gold cap %s (D2Common #%d @ %08X) = %d, multiplier x%d, ceiling %d\n",
+        what, ordinal, (DWORD)p, ok, g_goldCapMultiplier, GOLD_SAVE_LIMIT);
+    return ok;
+}
+
 static int __fastcall OperateHandlerHook(void* pGame, void* pPlayer,
                                          int nObjectType, int nObjectGUID,
                                          int* pResult) {
@@ -630,6 +668,10 @@ void Hooks_InstallLogbookHooks(HMODULE hD2Game) {
         extern void Shops_Install(HMODULE hGame);
         Shops_Install(hD2Game);
     }
+
+    /* Gold caps (carried + stash), both in D2Common. */
+    Hooks_InstallGoldCap(hCommon, 10439, &s_goldCarryDetour, (void*)GoldCarryCapHook, "carried");
+    Hooks_InstallGoldCap(hCommon, 10339, &s_goldBankDetour,  (void*)GoldBankCapHook,  "stash");
 
     s_installed = TRUE;
 }

@@ -1171,6 +1171,11 @@ static void LoadAPSettings(void) {
             extern void Bonus_SetRandomChance(BOOL on);
             Bonus_SetRandomChance(GetPrivateProfileIntA("settings", "BonusChecksRandom", 0, iniPath) != 0);
         }
+        /* Standalone: gold cap multiplier (1 = vanilla, default 30). */
+        {
+            int gm = GetPrivateProfileIntA("settings", "GoldCapMultiplier", 30, iniPath);
+            if (gm >= 1 && gm <= 100) g_goldCapMultiplier = gm;
+        }
         /* 2.x — configurable gold/XP reward ranges (standalone INI). */
         g_goldRewardMin = GetPrivateProfileIntA("settings", "GoldRewardMin", 100,    iniPath);
         g_goldRewardMax = GetPrivateProfileIntA("settings", "GoldRewardMax", 10000,  iniPath);
@@ -1420,6 +1425,9 @@ static void LoadAPSettings(void) {
             if (g_xpMultiplier < 0) g_xpMultiplier = 0;
             if (g_xpMultiplier > 100) g_xpMultiplier = 100;
         }
+        /* Gold caps (carried + stash) scaled; absent key = the DLL default. */
+        if (sscanf(line, "gold_cap_multiplier=%d", &ival) == 1 && ival >= 1 && ival <= 100)
+            g_goldCapMultiplier = ival;
         /* 2.x — configurable gold/XP reward ranges (AP slot_data). */
         if (sscanf(line, "gold_reward_min=%d", &ival) == 1) { g_goldRewardMin = ival; RewardClampRanges(); }
         if (sscanf(line, "gold_reward_max=%d", &ival) == 1) { g_goldRewardMax = ival; RewardClampRanges(); }

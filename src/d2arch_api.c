@@ -29,6 +29,30 @@ typedef void  (__fastcall *AddGold_t)(void* pUnit, int statId, int value);
 #define STAT_GOLD      14
 #define STAT_GOLDBANK  15
 
+/* Gold caps, scaled.
+ *
+ * D2Common computes both limits from the character level and hands them to
+ * the server and the client through two tiny exports: #10439 carried gold =
+ * level x 10,000, #10339 stash gold = (level/2 + 1) x 50,000 above level 30
+ * and (level/5 + 1) x 50,000 below, i.e. 2.5M at level 99. Both are detoured
+ * in d2arch_hooks.c and multiplied by this. Marco, 4 September: "flere
+ * millioner på mig hurtigere" — 30x lets a level-10 character carry 3M.
+ *
+ * The ceiling is the save format, not taste: gold and goldbank are stored
+ * in 25 bits (ItemStatCost CSvBits), so anything above 33,554,431 would be
+ * truncated on the next save. 33,000,000 leaves room under that. */
+int g_goldCapMultiplier = 30;               /* 1 = vanilla; slot_data gold_cap_multiplier / ini GoldCapMultiplier */
+#define GOLD_SAVE_LIMIT 33000000
+
+static int Gold_ScaleCap(int vanilla) {
+    if (vanilla <= 0) return vanilla;
+    int m = g_goldCapMultiplier < 1 ? 1 : g_goldCapMultiplier;
+    long long v = (long long)vanilla * m;
+    if (v > GOLD_SAVE_LIMIT) v = GOLD_SAVE_LIMIT;
+    if (v < vanilla) v = vanilla;
+    return (int)v;
+}
+
 /* D2Win control struct macros (used by title screen code) */
 #define CTRL_TYPE(p)   (*(int*)((BYTE*)(p) + 0x00))
 #define CTRL_X(p)      (*(int*)((BYTE*)(p) + 0x0C))

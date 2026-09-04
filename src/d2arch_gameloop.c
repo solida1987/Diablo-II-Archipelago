@@ -22,7 +22,7 @@ static void GrantGoldCapped(void* pPlayer, int amount) {
     if (level < 1)  level = 1;
     if (level > 99) level = 99;
     if (cur   < 0)  cur   = 0;
-    cap = level * 10000;
+    cap = Gold_ScaleCap(level * 10000);   /* the same scaled limit the engine now enforces */
     headroom = cap - cur;
     if (headroom < 0) headroom = 0;
     toCarry  = (amount < headroom) ? amount : headroom;

@@ -783,6 +783,20 @@ class XPMultiplier(Range):
     default = 0
 
 
+class GoldCapMultiplier(Range):
+    """
+    How much gold the character and the stash can hold, as a multiple of
+    the game's own level-based limits. 1 = vanilla (carried: level x 10,000;
+    stash: 2,500,000 at level 99). 30 = a level-10 character carries 3M.
+    Both limits stop at 33,000,000 whatever the multiplier, because the save
+    file stores gold in 25 bits.
+    """
+    display_name = "Gold Cap Multiplier"
+    range_start = 1
+    range_end = 100
+    default = 30
+
+
 # ============================================================
 # Shuffles
 # ============================================================
@@ -1127,6 +1141,7 @@ _FIELDS = [
     ("starting_skills",        StartingSkills),
     # XP
     ("xp_multiplier",          XPMultiplier),
+    ("gold_cap_multiplier",    GoldCapMultiplier),
     # Reward amounts
     # Shuffles
     ("monster_shuffle",        MonsterShuffle),
@@ -1233,6 +1248,7 @@ OPTION_GROUPS = [
     ]),
     OptionGroup("Difficulty & XP", [
         XPMultiplier,
+        GoldCapMultiplier,
     ]),
     OptionGroup("Shuffles", [
         MonsterShuffle,

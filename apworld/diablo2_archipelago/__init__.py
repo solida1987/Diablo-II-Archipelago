@@ -1186,6 +1186,8 @@ class Diablo2ArchipelagoWorld(World):
             # boss_shuffle: the legacy option is REMOVED from the option set;
             # shuffles. (i_play_assassin removed — no-op in DLL.)
             "xp_multiplier":   self.options.xp_multiplier.value,
+            # 3.9.15 — carried + stash gold limits scaled (DLL default 30 when absent).
+            "gold_cap_multiplier": self.options.gold_cap_multiplier.value,
             # 3.5.5 — the DLL has always parsed `starting_skills` from slot_data
             # (d2arch_ap.c); the apworld simply never sent one, so AP silently
             # used the in-game default while standalone used the player's.
