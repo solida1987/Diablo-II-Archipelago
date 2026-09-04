@@ -1,0 +1,30 @@
+{
+  "apiVersion": 2,
+  "gameId": "diablo2_archipelago_experimental",
+  "displayName": "Diablo II: Lord of Destruction (Experimental)",
+  "subtitle": "Randomizer Mod",
+  "version": "1.3.2",
+  "author": "Solida Games",
+  "authorContact": "https://github.com/solida1987/Diablo-II-Archipelago-experimental",
+  "assembly": "DiabloII.dll",
+  "entryType": "LauncherV2.Plugins.DiabloII.DiabloIIArchipelagoExperimental",
+  "declares": {
+    "installsFiles": true,
+    "downloadsFrom": [
+      "github.com/solida1987/Diablo-II-Archipelago-experimental",
+      "github.com/bayaraa/d2gl (D2GL renderer, only if you say yes)",
+      "github.com/mir-diablo-ii-tools/SlashGaming-Diablo-II-Free-Resolution (only if you say yes)",
+      "github.com/kcat/dsoal (DSOAL audio, only if you say yes)",
+      "api.github.com (release list for the same repository)"
+    ],
+    "runsExternalProcess": true,
+    "connectsToAp": false,
+    "requiresOriginalGame": true
+  },
+  "rulesAcknowledged": true,
+  "minLauncher": "3.4.0",
+  "update": {
+    "versionUrl": "https://raw.githubusercontent.com/solida1987/Diablo-II-Archipelago-experimental/main/plugin_version.txt",
+    "packageUrl": "https://github.com/solida1987/Diablo-II-Archipelago-experimental/releases/latest/download/diablo2_archipelago_experimental.londonplugin"
+  }
+}

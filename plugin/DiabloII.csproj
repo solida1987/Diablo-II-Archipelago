@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Diablo II Archipelago, built as a .londonplugin for the Multiworld    -->
+  <!-- Launcher. It lives OUTSIDE the launcher folder because the SDK globs   -->
+  <!-- every .cs under a project directory: inside, it would compile into the -->
+  <!-- launcher too and every type would exist twice. ASCII only.             -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>DiabloII</AssemblyName>
+    <RootNamespace>LauncherV2.Plugins.DiabloII</RootNamespace>
+
+    <!-- Writes DiabloII.deps.json, which the launcher's resolver reads.      -->
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Company>Solida Games</Company>
+    <Product>Diablo II Archipelago plugin for Multiworld Launcher</Product>
+    <Copyright>Copyright (c) 2026 Solida Games</Copyright>
+    <Description>Archipelago plugin for Diablo II: Lord of Destruction</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private=false: a second copy of these assemblies would make          -->
+    <!-- IGamePlugin a different type than the host's, and the cast fails.    -->
+    <ProjectReference Include="..\Multiworld-Launcher\LauncherV2.csproj" Private="false" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- One manifest per channel, each naming its own entry class.           -->
+    <Content Include="plugin.stable.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="plugin.experimental.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
