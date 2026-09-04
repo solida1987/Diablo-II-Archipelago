@@ -304,8 +304,18 @@ static void InitSkillPool(DWORD seed) {
 
     /* Categorize all skills by tier */
     for (int i = 0; i < (int)SKILL_DB_COUNT; i++) {
-        /* Class filter: skip skills from disabled classes (standalone only) */
-        if (!g_apMode && g_classFilter && !IsClassEnabled(g_skillDB[i].classCode))
+        /* Class filter: skip skills from disabled classes.
+         *
+         * Used to be standalone-only, because under AP the filter only ever
+         * came from d2arch.ini and could disagree with the seed. It now
+         * comes from slot_data (d2arch_ap.c parses skill_class_filter and
+         * include_*), the same keys the apworld built its skill items from,
+         * so honouring it here makes the menu show exactly the skills the
+         * seed can deliver. The old exemption is what BetaHub #27 saw: the
+         * first character loaded before AP had authenticated (g_apMode still
+         * FALSE) and was filtered, the second loaded after and got every
+         * class. Characters already created keep their saved pool. */
+        if (g_classFilter && !IsClassEnabled(g_skillDB[i].classCode))
             continue;
         /* Exclude class-locked skills (native-only animations + assassin traps) unless this IS the player's own class — they can't be used cross-class and the apworld never places them, so a non-owner must not list them. */
         if (playerClassCode

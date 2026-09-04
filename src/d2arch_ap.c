@@ -1435,6 +1435,20 @@ static void LoadAPSettings(void) {
         if (sscanf(line, "xp_reward_max=%d",   &ival) == 1) { g_xpRewardMax   = ival; RewardClampRanges(); }
         /* additional slot_data fields */
         if (sscanf(line, "shop_shuffle=%d", &ival) == 1) g_shopShuffleEnabled = (ival != 0);
+        /* Class filter — from the SEED, not the ini. The apworld builds its
+         * skill items from the included classes and has sent these keys all
+         * along; the DLL only ever read ClassFilter/Cls* from d2arch.ini, so
+         * a character created under AP got a pool of every class and a menu
+         * full of skills the seed would never deliver (BetaHub #27, second
+         * character). 1 = custom filter; 0 = every class. */
+        if (sscanf(line, "skill_class_filter=%d", &ival) == 1) g_classFilter = (ival == 1);
+        if (sscanf(line, "include_amazon=%d",      &ival) == 1) g_clsEnabled[0] = (ival != 0);
+        if (sscanf(line, "include_sorceress=%d",   &ival) == 1) g_clsEnabled[1] = (ival != 0);
+        if (sscanf(line, "include_necromancer=%d", &ival) == 1) g_clsEnabled[2] = (ival != 0);
+        if (sscanf(line, "include_paladin=%d",     &ival) == 1) g_clsEnabled[3] = (ival != 0);
+        if (sscanf(line, "include_barbarian=%d",   &ival) == 1) g_clsEnabled[4] = (ival != 0);
+        if (sscanf(line, "include_druid=%d",       &ival) == 1) g_clsEnabled[5] = (ival != 0);
+        if (sscanf(line, "include_assassin=%d",    &ival) == 1) g_clsEnabled[6] = (ival != 0);
         /* 1.8.0 cleanup: treasure_cows slot_data parse removed */
         /* 2.9.7 cleanup: i_play_assassin removed (dead since 1.7.0 trap-filter removal) */
 

@@ -3506,7 +3506,24 @@ static void SkillWatch_Tick(void* pPlayerUnit) {
              * pool but not unlocked, kick the hand back to normal Attack.
              * Skills outside the pool (scrolls, tomes, base attack) are
              * untouched. */
-            if (id > 0) {
+            /* A skill an ITEM grants is not ours to take away. Enigma's
+             * Teleport, a staff's Fire Bolt, charges on a wand: the skill
+             * sits in our pool, is not unlocked, and the game lets the
+             * player use it because the item says so. The guard kicked it
+             * to Attack with "That skill is not yours yet" (BetaHub #30).
+             * The skill struct names its granting unit — the same probe
+             * the provenance log below uses — so a granted skill is left
+             * alone and only a bare, unowned pool skill is reset. */
+            BOOL grantedByItem = FALSE;
+            if (id > 0 && pSk) {
+                for (DWORD off = 4; off <= 0x2C && !grantedByItem; off += 4) {
+                    __try {
+                        DWORD v = *(DWORD*)((DWORD)pSk + off);
+                        if (v && (v & 3) == 0 && *(DWORD*)v == 4) grantedByItem = TRUE;
+                    } __except(EXCEPTION_EXECUTE_HANDLER) {}
+                }
+            }
+            if (id > 0 && !grantedByItem) {
                 for (int pi = 0; pi < g_poolCount; pi++) {
                     if (g_skillDB[g_pool[pi].dbIndex].id != id) continue;
                     if (!g_pool[pi].unlocked) {
