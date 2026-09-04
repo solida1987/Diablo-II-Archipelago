@@ -2378,6 +2378,15 @@ static void OnCharacterLoad(void) {
         }
     }
 
+    /* The player-side settings follow the slot on every load, not only at
+     * creation — an existing character otherwise came back at 0x XP every
+     * launch (BetaHub #22). Runs before the freeze so the state file written
+     * below carries the corrected values. */
+    {
+        extern void AP_ReapplyPlayerSideSettings(const char* why);
+        AP_ReapplyPlayerSideSettings("character load");
+    }
+
     g_settingsFrozen = TRUE;
     Log("OnCharacterLoad complete for '%s' — settings frozen (SH=%d ZL=%d "
         "monShuf=%d bossShuf=%d xp=%dx apMode=%d)\n",

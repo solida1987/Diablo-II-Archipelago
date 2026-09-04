@@ -247,7 +247,7 @@ static void Shops_FillFullPool(void* pGame, void* pPlayer, void* pNpc) {
         if (q == SQ_UNIQUE || q == SQ_SET) {
             forcedRow = Shops_PickRow(r->code, q);
             if (forcedRow < 0) q = info.canRare ? SQ_RARE : SQ_MAGIC;   /* no named item on this base */
-            else Hooks_ArmForcedItemRow(forcedRow, pGame, q == SQ_UNIQUE);
+            else Hooks_ArmForcedItemRow(forcedRow, pGame, q == SQ_UNIQUE, 0);
         }
         void* item = NULL;
         __try { item = Shops_Create(pNpc, r->code, pGame, q, ilvl, clvl); }

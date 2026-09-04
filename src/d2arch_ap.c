@@ -920,6 +920,71 @@ static void ReportFrozenSettingDrift(void) {
             reported);
 }
 
+/* The player-side settings, read again from slot_data for a character that
+ * already exists.
+ *
+ * BetaHub #22, 4 September: "XP multiplier lost upon saving and relaunching".
+ * Three things conspired. OnCharacterLoad zeroes g_xpMultiplier with the rest
+ * of the frozen set; LoadAPSettings runs for NEW characters only; and the
+ * state file's copy is skipped under AP by design (the YAML is the contract,
+ * the file only a cache — see the note in LoadStateFile). So an existing
+ * character came back at 0x every launch, and the log said so in plain
+ * sight: "settings frozen (... xp=0x ...)" against a slot that asked for 5x.
+ * The connect-time refresh already corrected the skill cap and the level
+ * requirements for the same reason; the multiplier belongs to that set — it
+ * is the player's own rate, not the shape of the world — and this is that
+ * refresh, callable from character load as well. */
+void AP_ReapplyPlayerSideSettings(const char* why) {
+    extern int  g_skillMaxLevel;
+    extern BOOL g_skillLevelReqs;
+    extern BOOL g_settingsFrozen;
+    extern void SaveStateFile(void);
+
+    if (!g_apConnected) return;
+
+    char path[MAX_PATH];
+    GetArchDir(path, MAX_PATH);
+    strcat(path, "ap_settings.dat");
+    FILE* sf = fopen(path, "r");
+    if (!sf) return;
+
+    int slotXp = -1, slotCap = -1, slotReqs = -1;
+    char line[256];
+    while (fgets(line, sizeof(line), sf)) {
+        int v;
+        if (sscanf(line, "xp_multiplier=%d", &v) == 1 && v >= 0 && v <= 100) slotXp = v;
+        if (sscanf(line, "skill_max_level=%d", &v) == 1 && v >= 1 && v <= 99) slotCap = v;
+        if (sscanf(line, "skill_level_reqs=%d", &v) == 1) slotReqs = (v != 0) ? 1 : 0;
+    }
+    fclose(sf);
+
+    BOOL changed = FALSE;
+    if (slotXp >= 0 && slotXp != g_xpMultiplier) {
+        Log("AP LIVE SETTING (%s): xp multiplier %dx -> %dx (from slot_data)\n",
+            why, g_xpMultiplier, slotXp);
+        g_xpMultiplier = slotXp;
+        changed = TRUE;
+    }
+    if (slotCap > 0 && slotCap != g_skillMaxLevel) {
+        Log("AP LIVE SETTING (%s): skill cap %d -> %d (from slot_data)\n",
+            why, g_skillMaxLevel, slotCap);
+        g_skillMaxLevel = slotCap;
+        changed = TRUE;
+    }
+    if (slotReqs >= 0 && (BOOL)slotReqs != g_skillLevelReqs) {
+        Log("AP LIVE SETTING (%s): skill level reqs %d -> %d (from slot_data)\n",
+            why, (int)g_skillLevelReqs, slotReqs);
+        g_skillLevelReqs = (slotReqs != 0);
+        changed = TRUE;
+    }
+    if (changed && g_charName[0]) {
+        BOOL wf = g_settingsFrozen;
+        g_settingsFrozen = FALSE;
+        SaveStateFile();
+        g_settingsFrozen = wf;
+    }
+}
+
 static void LoadAPSettings(void) {
     /* settings are baked into the per-character state file at creation time. */
     if (g_settingsFrozen) {
@@ -1101,6 +1166,11 @@ static void LoadAPSettings(void) {
         g_xpMultiplier = GetPrivateProfileIntA("settings", "XPMultiplier", 0, iniPath);
         if (g_xpMultiplier < 0) g_xpMultiplier = 0;
         if (g_xpMultiplier > 100) g_xpMultiplier = 100;
+        /* Standalone: object checks random (1) or guaranteed (0, default). */
+        {
+            extern void Bonus_SetRandomChance(BOOL on);
+            Bonus_SetRandomChance(GetPrivateProfileIntA("settings", "BonusChecksRandom", 0, iniPath) != 0);
+        }
         /* 2.x — configurable gold/XP reward ranges (standalone INI). */
         g_goldRewardMin = GetPrivateProfileIntA("settings", "GoldRewardMin", 100,    iniPath);
         g_goldRewardMax = GetPrivateProfileIntA("settings", "GoldRewardMax", 10000,  iniPath);
@@ -1232,6 +1302,11 @@ static void LoadAPSettings(void) {
             if (sscanf(line, "check_chests=%d",          &ival) == 1) { s_chCh   = ival; s_anyBonusSeen=1; }
             if (sscanf(line, "check_set_pickups=%d",     &ival) == 1) { s_chSet  = ival; s_anyBonusSeen=1; }
             if (sscanf(line, "check_gold_milestones=%d", &ival) == 1) { s_chGold = ival; s_anyBonusSeen=1; }
+            /* Random (escalating chance) or guaranteed. Absent key = guaranteed. */
+            if (sscanf(line, "bonus_checks_random=%d", &ival) == 1) {
+                extern void Bonus_SetRandomChance(BOOL on);
+                Bonus_SetRandomChance(ival != 0);
+            }
             /* Apply on every line — idempotent, so the final state after the loop is the union of all parsed values. */
             if (s_anyBonusSeen) {
                 extern void Bonus_ApplyToggles(BOOL,BOOL,BOOL,BOOL,BOOL,BOOL);

@@ -132,6 +132,21 @@ BOOL Bonus_OnAPItemReceived(int apId) {
 static void Bonus_FireApLocation(int apId, const char* tag);
 static void Bonus_DeliverStandalone(int apId, const char* tag);
 
+/* Random or guaranteed. OFF by default: every shrine, urn, barrel and chest
+ * fires its check until the category's quota is full. ON restores the
+ * escalating roll below (10% → 100%, reset per hit). A seed generated before
+ * the option existed carries no key, so it lands on guaranteed — Marco's
+ * call, 4 September, so the round in progress simply stops being random.
+ * The location count is the quota either way; this only decides how many
+ * objects it takes to reach it. */
+static BOOL g_bonusRandomChance = FALSE;
+
+void Bonus_SetRandomChance(BOOL on) {
+    if (on != g_bonusRandomChance)
+        Log("Bonus: object checks are %s\n", on ? "RANDOM (escalating chance)" : "GUARANTEED (every object)");
+    g_bonusRandomChance = on;
+}
+
 /* Escalating-chance helper. */
 static BOOL Bonus_RollEscalating(uint8_t attempt) {
     int pct = attempt * 10;
@@ -152,9 +167,9 @@ static BOOL Bonus_TryFireObject(int categoryIdx, int diff, int quota,
         return FALSE;
     if (*slotPtr >= quota) return FALSE;  /* category for this diff full */
 
-    /* Pre-increment then roll. */
+    /* Pre-increment then roll — or skip the roll when the seed says guaranteed. */
     if (*attemptPtr < 255) (*attemptPtr)++;
-    BOOL hit = Bonus_RollEscalating(*attemptPtr);
+    BOOL hit = g_bonusRandomChance ? Bonus_RollEscalating(*attemptPtr) : TRUE;
     if (!hit) return FALSE;
 
     int apId = apIdBase + diff * quota + (*slotPtr);

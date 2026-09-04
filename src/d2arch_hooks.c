@@ -266,7 +266,12 @@ typedef void* (__fastcall *CreateItemExFn_t)(void* pGame, void* pItemDrop, int b
 static Detour s_createItemExDetour;
 static volatile LONG s_forcedItemRow  = 0;   /* 1-based row; 0 = disarmed */
 static volatile LONG s_forcedItemHits = 0;
+/* Item-level floor stamped alongside the row. 0 = leave the request's level
+ * alone. Needed for the two uniques whose UniqueItems.txt lvl is 110 (Hellfire
+ * Torch, Annihilus): below that level the engine will not roll them at all. */
+static volatile LONG s_forcedItemMinLvl = 0;
 
+#define D2_ITEMDROP_OFF_NITEMLVL   0x0C
 #define D2_ITEMDROP_OFF_BFORCE     0x2C
 #define D2_ITEMDROP_OFF_NQUALITY   0x30
 #define D2_ITEMDROP_OFF_NITEMINDEX 0x40
@@ -285,14 +290,16 @@ static void Hooks_ClearUniqueDroppedFlag(void* pGame, int rowIdx) {
 }
 
 /* Arm for the NEXT item creation(s) until disarmed. */
-void Hooks_ArmForcedItemRow(int rowIdx, void* pGame, BOOL isUnique) {
+void Hooks_ArmForcedItemRow(int rowIdx, void* pGame, BOOL isUnique, int minItemLevel) {
     InterlockedExchange(&s_forcedItemHits, 0);
+    InterlockedExchange(&s_forcedItemMinLvl, (minItemLevel > 0 && minItemLevel <= 127) ? (LONG)minItemLevel : 0);
     InterlockedExchange(&s_forcedItemRow, (rowIdx >= 0) ? (LONG)(rowIdx + 1) : 0);
     if (rowIdx >= 0 && isUnique) Hooks_ClearUniqueDroppedFlag(pGame, rowIdx);
 }
 
 void Hooks_DisarmForcedItemRow(void) {
     InterlockedExchange(&s_forcedItemRow, 0);
+    InterlockedExchange(&s_forcedItemMinLvl, 0);
 }
 
 /* How many creations actually received the stamp since arming — used by the delivery log so a test run tells us whether the hook fired. */
@@ -308,6 +315,14 @@ static void* __fastcall CreateItemExHook(void* pGame, void* pItemDrop, int bUseS
             int quality = *(int*)((BYTE*)pItemDrop + D2_ITEMDROP_OFF_NQUALITY);
             if (!bForce && (quality == D2_ITEMQUAL_SET || quality == D2_ITEMQUAL_UNIQUE)) {
                 *(int*)((BYTE*)pItemDrop + D2_ITEMDROP_OFF_NITEMINDEX) = (int)row;
+                /* Raise the level to the row's floor when the caller set one:
+                 * the qlvl filter runs on THIS field, and a 110 row against a
+                 * 99 request fails every time, whatever index is stamped. */
+                LONG minLvl = InterlockedCompareExchange(&s_forcedItemMinLvl, 0, 0);
+                if (minLvl > 0) {
+                    int* pLvl = (int*)((BYTE*)pItemDrop + D2_ITEMDROP_OFF_NITEMLVL);
+                    if (*pLvl < (int)minLvl) *pLvl = (int)minLvl;
+                }
                 InterlockedIncrement(&s_forcedItemHits);
             }
         } __except(EXCEPTION_EXECUTE_HANDLER) {}

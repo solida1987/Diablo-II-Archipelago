@@ -1267,6 +1267,10 @@ class Diablo2ArchipelagoWorld(World):
             "check_chests":          self.options.check_chests.value,
             "check_set_pickups":     self.options.check_set_pickups.value,
             "check_gold_milestones": self.options.check_gold_milestones.value,
+            # 3.9.13 — random (escalating chance) or guaranteed object checks.
+            # The DLL treats a missing key as guaranteed, so seeds generated
+            # before this option existed simply stop rolling.
+            "bonus_checks_random":   self.options.bonus_checks_random.value,
             # 1.9.2: Six new check categories on top of bonus checks.
             # See locations.py EXTRA_BASE_* and the DLL's
             # d2arch_extrachecks.c module. Categories 4-6 (NPC/RW/Cube)

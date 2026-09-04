@@ -970,6 +970,14 @@ static const char* Quests_SetPieceName(int idx) {
 }
 
 /* Unique catalog — parsed from data/global/excel/UniqueItems.txt at first use. */
+/* The row's `lvl` from UniqueItems.txt — the item level the engine demands
+ * before it will roll this unique at all. 0 when the index is out of range. */
+int Quests_UniqueQlvl(int idx) {
+    if (!g_uniqueCatalogLoaded) Quests_LoadUniqueCatalog();
+    if (idx < 0 || idx >= g_uniqueCatalogCount) return 0;
+    return g_uniqueCatalog[idx].reqLvl;
+}
+
 static const char* Quests_UniqueName(int idx) {
     if (!g_uniqueCatalogLoaded) Quests_LoadUniqueCatalog();
     if (idx < 0 || idx >= g_uniqueCatalogCount) return "Random Unique";

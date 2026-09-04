@@ -8,7 +8,7 @@
 void Hooks_InstallLogbookHooks(HMODULE hD2Game);
 
 /* force a NAMED set/unique instead of letting the engine roll one of the many rows sharing the same base code. */
-void Hooks_ArmForcedItemRow(int rowIdx, void* pGame, BOOL isUnique);
+void Hooks_ArmForcedItemRow(int rowIdx, void* pGame, BOOL isUnique, int minItemLevel);
 void Hooks_DisarmForcedItemRow(void);
 int  Hooks_ForcedItemStampCount(void);
 

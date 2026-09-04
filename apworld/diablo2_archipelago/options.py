@@ -988,6 +988,19 @@ class CheckGoldMilestones(Toggle):
     default = False
 
 
+class BonusChecksRandom(Toggle):
+    """
+    How shrines, urns, barrels and chests earn their checks. OFF (default):
+    every one you activate or break fires a check until that category's
+    quota for the difficulty is full. ON: each one rolls an escalating
+    chance instead (10%, 20%, ... 100%, reset on a hit), so it takes more
+    objects to fill the same quota. The number of locations is the same
+    either way; this only decides how many objects it takes to reach them.
+    """
+    display_name = "Bonus Checks Random Chance"
+    default = False
+
+
 # ============================================================
 # 1.9.2 — Six new check categories on top of the bonus checks above.
 # Each is an independent opt-in toggle. AP location ranges (per
@@ -1133,6 +1146,7 @@ _FIELDS = [
     ("check_chests",           CheckChests),
     ("check_set_pickups",      CheckSetPickups),
     ("check_gold_milestones",  CheckGoldMilestones),
+    ("bonus_checks_random",    BonusChecksRandom),
     # Extra check categories (1.9.2 — opt-in)
     ("check_cow_level",         CheckCowLevel),
     ("check_merc_milestones",   CheckMercMilestones),
@@ -1242,6 +1256,7 @@ OPTION_GROUPS = [
         CheckChests,
         CheckSetPickups,
         CheckGoldMilestones,
+        BonusChecksRandom,
         CheckCowLevel,
         CheckMercMilestones,
         CheckHellforgeRunes,

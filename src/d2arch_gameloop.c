@@ -1734,10 +1734,38 @@ static void ProcessPendingGameTick(void) {
                                         forceRow = Coll_GetUniqueFileIndex(peekIdx);
                                 } __except(EXCEPTION_EXECUTE_HANDLER) { forceRow = -1; }
                             }
+                            /* THE UNIQUE'S OWN LEVEL, not the player's.
+                             *
+                             * The engine only lets a unique roll when the item level
+                             * is at or above the row's `lvl` in UniqueItems.txt, and
+                             * two rows sit ABOVE 99: Hellfire Torch and Annihilus are
+                             * both 110 (they drop from level-110 monsters in vanilla).
+                             * Every try below capped at 99, so for those two the roll
+                             * could never pass and the engine handed back the base
+                             * item as a magic charm — BetaHub #26: "sent the Hellfire
+                             * Torch, got a Magic Large Charm", with the check counted.
+                             * Measured on the same install: every unique with lvl ≤ 99
+                             * arrived fine at 85 (realQ=7).
+                             *
+                             * So the first try is the higher of the usual level and
+                             * the row's own, and the forcing hook is told the same
+                             * floor in case the wrapper rewrites the level on the way
+                             * in. 127 is the 7-bit ceiling the save format holds. */
+                            int uniqueQlvl = 0;
+                            if (peekKind == REWARD_DROP_UNIQUE) {
+                                extern int Quests_UniqueQlvl(int idx);
+                                __try { uniqueQlvl = Quests_UniqueQlvl(peekIdx); }
+                                __except(EXCEPTION_EXECUTE_HANDLER) { uniqueQlvl = 0; }
+                            }
+                            int firstLevel = itemLevel;
+                            if (uniqueQlvl > firstLevel) firstLevel = uniqueQlvl;
+                            if (firstLevel > 127) firstLevel = 127;
+
                             {
-                                extern void Hooks_ArmForcedItemRow(int rowIdx, void* pGame, BOOL isUnique);
+                                extern void Hooks_ArmForcedItemRow(int rowIdx, void* pGame, BOOL isUnique, int minItemLevel);
                                 __try { Hooks_ArmForcedItemRow(forceRow, (void*)g_cachedPGame,
-                                                               peekKind == REWARD_DROP_UNIQUE); }
+                                                               peekKind == REWARD_DROP_UNIQUE,
+                                                               uniqueQlvl > 99 ? firstLevel : 0); }
                                 __except(EXCEPTION_EXECUTE_HANDLER) {}
                             }
 
@@ -1746,7 +1774,7 @@ static void ProcessPendingGameTick(void) {
                             if (qual == 5 || qual == 7) {
                                 /* ladder fix. The old ladder retried the requested quality at item levels 50 and 30, i.e. LOWER than the original: pointless, because a set/unique roll that fails at ilvl N fails harder below it (the qlvl filter only gets stricter). Retry at 99 instead — the highest legal item level, which is what actually widens the eligible set/unique table — and only then degrade. */
                                 struct { BYTE q; int lvl; } tries[6] = {
-                                    { qual, itemLevel }, { qual, 99 },
+                                    { qual, firstLevel }, { qual, 99 },
                                     { 6, itemLevel }, { 4, itemLevel }, { 2, itemLevel },
                                     { 2, 99 }
                                 };
@@ -3365,9 +3393,36 @@ static void StuckWatch_Tick(void* pPlayerUnit) {
         *(WORD*)&pkt[1] = (WORD)x;
         *(WORD*)&pkt[3] = (WORD)y;
         SendGamePacket(5, pkt);
+
+        /* Name the skill. "That skill" sent a tester to the bug tracker
+         * twice for one cause (BetaHub #21 + #23: Fists of Fire with a
+         * pilum — the three elemental Martial Arts charge-ups are claw-only
+         * in vanilla, and the engine freezes rather than refuses). The
+         * right hand is where a charge-up lives; the left is the fallback. */
+        const char* skillName = NULL;
+        int skillId = -1;
+        if (fnGetRightSkill) {
+            for (int hand = 0; hand < 2 && skillId <= 0; hand++) {
+                void* pSk = hand ? (fnGetLeftSkill ? fnGetLeftSkill(pPlayerUnit) : NULL)
+                                 : fnGetRightSkill(pPlayerUnit);
+                if (!pSk) continue;
+                DWORD pTxt = *(DWORD*)((DWORD)pSk + 0x00);
+                if (pTxt) skillId = (int)*(WORD*)(pTxt + 0x00);
+            }
+            for (int i = 0; skillId > 0 && i < (int)SKILL_DB_COUNT; i++)
+                if (g_skillDB[i].id == skillId) { skillName = g_skillDB[i].name; break; }
+        }
         Log("STUCKWATCH: player frozen in skill mode %lu at (%d,%d) for %lums "
-            "— sent move packet to break out\n", mode, x, y, now - s_since);
-        ShowNotify("Unstuck: that skill needs a different weapon");
+            "(hand skill id=%d '%s') — sent move packet to break out\n",
+            mode, x, y, now - s_since, skillId, skillName ? skillName : "?");
+        if (skillName) {
+            char msg[128];
+            _snprintf(msg, sizeof(msg), "Unstuck: %s cannot be used with this weapon", skillName);
+            msg[sizeof(msg) - 1] = 0;
+            ShowNotify(msg);
+        } else {
+            ShowNotify("Unstuck: that skill needs a different weapon");
+        }
         s_since = now;
     } __except(EXCEPTION_EXECUTE_HANDLER) {}
 }
