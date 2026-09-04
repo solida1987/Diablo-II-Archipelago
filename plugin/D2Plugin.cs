@@ -72,7 +72,44 @@ public class D2Plugin : IGamePlugin
 
     // --- Version state ---
 
-    public string? InstalledVersion  { get; private set; }
+    // Read from disk the first time anybody asks, not only once the update
+    // check has run. A plugin object that has just been loaded -- the running
+    // one is replaced whenever the plugin updates itself -- otherwise answers
+    // "not installed" until its network check finishes, and in that window
+    // the launcher's Play button ran a FRESH install over a complete game
+    // (measured 4 September 2026: a full download, and an install record left
+    // a version behind). Cheap: one 7-byte file, remembered once found; a
+    // missing file is asked about again only every couple of seconds.
+    private string? _installedVersion;
+    private long?   _installedProbeTick;
+
+    public string? InstalledVersion
+    {
+        get
+        {
+            if (_installedVersion != null) return _installedVersion;
+            long now = Environment.TickCount64;
+            if (_installedProbeTick is { } last && now - last < 2000) return null;
+            _installedProbeTick = now;
+            _installedVersion = ReadVersionDat();
+            return _installedVersion;
+        }
+        private set => _installedVersion = value;
+    }
+
+    private string? ReadVersionDat()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(_gameDirectory)) return null;
+            string versionDat = Path.Combine(_gameDirectory, "Archipelago", "version.dat");
+            if (!File.Exists(versionDat)) return null;
+            string v = File.ReadAllText(versionDat).Trim();
+            return v.Length == 0 ? null : v;
+        }
+        catch { return null; }
+    }
+
     public string? AvailableVersion  { get; private set; }
     public bool    IsInstalled       => InstalledVersion != null;
     public bool    IsRunning         { get; private set; }
@@ -93,6 +130,8 @@ public class D2Plugin : IGamePlugin
         set
         {
             _gameDirectory = value;
+            _installedVersion   = null;
+            _installedProbeTick = null;
             LoadApIndex();
         }
     }
@@ -1171,6 +1210,15 @@ public class D2Plugin : IGamePlugin
                 PurgeForeignApworlds(apworldDir);
             }
 
+            // The record the launcher checks the files against. It is a
+            // separate release asset, NOT inside the zip -- fetched for the
+            // SAME tag the files came from, or the next verify measures this
+            // build against another one and calls every correct file wrong.
+            progress.Report((97, "Writing the install record..."));
+            if (actualTag == null || !await WriteInstallRecordAsync(actualTag, ct))
+                progress.Report((97, "The install record could not be fetched now; "
+                                   + "the next launch fetches it."));
+
             progress.Report((98, "Cleaning data cache..."));
             DeleteBinCache();
             Directory.CreateDirectory(Path.Combine(GameDirectory, "save"));
@@ -1230,13 +1278,9 @@ public class D2Plugin : IGamePlugin
         progress.Report((5, "Downloading manifest..."));
         string manifestJson = await _http.GetStringAsync(manifestUrl, ct);
 
-        // Cache manifest locally for offline verify
-        try
-        {
-            Directory.CreateDirectory(GameDirectory);
-            File.WriteAllText(Path.Combine(GameDirectory, "game_manifest.json"), manifestJson);
-        }
-        catch { }
+        // The record on disk: what Verify files and the launch scan measure
+        // against. Written before the files, from the same download.
+        WriteInstallRecord(manifestJson);
 
         // Extract the version tag from the manifest (more reliable than release tag)
         string? manifestVersion = actualTagHint;
@@ -1382,6 +1426,103 @@ public class D2Plugin : IGamePlugin
         progress.Report((100, msg));
     }
 
+    // --- The install record ---
+    //
+    // game_manifest.json: the per-file sizes and hashes of the release the
+    // files came from. The launcher's Verify files measures against it, and
+    // so does the launch-time scan above. It is a separate release asset --
+    // it is NOT inside game_package.zip -- so every path that puts files on
+    // disk has to fetch it for the SAME tag, or the record describes a
+    // different build than the one on disk.
+    //
+    // Measured 4 September 2026: the fresh-install path never wrote it. A
+    // plugin update replaced the running plugin object, the new object had
+    // not read version.dat yet, Play took the fresh-install path over a
+    // complete v3.9.11 game, and the result was a v3.9.12 game under a
+    // v3.9.11 record -- with Verify files telling the player to reinstall,
+    // which is the very path that had skipped the record.
+
+    private string InstallRecordPath => Path.Combine(GameDirectory, "game_manifest.json");
+
+    private async Task<bool> WriteInstallRecordAsync(string tag, CancellationToken ct)
+    {
+        string json;
+        try { json = await _http.GetStringAsync(DownloadUrl(tag, "game_manifest.json"), ct); }
+        catch (OperationCanceledException) { throw; }
+        catch { return false; }
+        return WriteInstallRecord(json);
+    }
+
+    // The record must say what it is for. An HTML error page, or a manifest
+    // without a version or a file list, would be worse than the stale record
+    // it replaces -- so it is never written.
+    private bool WriteInstallRecord(string json)
+    {
+        try
+        {
+            string? version = null;
+            JsonFindString(json, "version", ref version);
+            if (string.IsNullOrWhiteSpace(version)) return false;
+            using (var doc = JsonDocument.Parse(json))
+                if (!doc.RootElement.TryGetProperty("files", out _)) return false;
+            Directory.CreateDirectory(GameDirectory);
+            File.WriteAllText(InstallRecordPath, json);
+            return true;
+        }
+        catch { return false; }
+    }
+
+    // What version the record on disk was written for; null when there is no
+    // record or it cannot be read.
+    private string? InstallRecordVersion()
+    {
+        try
+        {
+            if (!File.Exists(InstallRecordPath)) return null;
+            string? v = null;
+            JsonFindString(File.ReadAllText(InstallRecordPath), "version", ref v);
+            return string.IsNullOrWhiteSpace(v) ? null : v;
+        }
+        catch { return null; }
+    }
+
+    // "v3.9.12" and "3.9.12" are one version written two ways.
+    private static bool SameVersionText(string a, string b)
+        => a.Trim().TrimStart('v', 'V').Equals(b.Trim().TrimStart('v', 'V'),
+                                               StringComparison.OrdinalIgnoreCase);
+
+    // IGamePlugin: write the record for the version installed NOW.
+    //
+    // version.dat holds the release tag the files came from ("v3.9.12",
+    // "EX-1.2.5"), and the record is published under that same tag, so the
+    // installed version IS the address. The latest release is tried only when
+    // it names this very version -- an older install stamped without the
+    // leading "v" -- never as a stand-in for a different one.
+    public async Task<bool> RefreshInstallRecordAsync(
+        IProgress<(int Pct, string Msg)>? progress, CancellationToken ct = default)
+    {
+        string? installed = InstalledVersion;
+        if (string.IsNullOrWhiteSpace(installed)) return false;
+
+        progress?.Report((10, $"Fetching the install record for {installed}..."));
+        if (await WriteInstallRecordAsync(installed!, ct))
+        {
+            progress?.Report((100, "Install record updated."));
+            return true;
+        }
+
+        string? latest = await FetchLatestTagAsync(ct);
+        if (latest != null
+            && !string.Equals(latest, installed, StringComparison.Ordinal)
+            && SameVersionText(latest, installed!)
+            && await WriteInstallRecordAsync(latest, ct))
+        {
+            progress?.Report((100, "Install record updated."));
+            return true;
+        }
+        return false;
+    }
+
     public async Task<bool> VerifyInstallAsync(CancellationToken ct = default)
     {
         // Thin wrapper over the detailed scan so the bool gate and the per-file
@@ -1403,12 +1544,41 @@ public class D2Plugin : IGamePlugin
     // Fast size-only check (SHA256 over ~355 files was 5-15 s in V1 — rejected).
     public async Task<List<InstallProblem>?> ScanInstallProblemsAsync(CancellationToken ct = default)
     {
-        string manifestPath = Path.Combine(GameDirectory, "game_manifest.json");
+        string manifestPath = InstallRecordPath;
         string? manifestJson = null;
+
+        // A record for another version than the one on disk: measured
+        // against it, every file the update replaced is "the wrong size", and
+        // the repair that follows downloads the whole package to put back
+        // files that are already right -- then rewrites the record, so it
+        // converges, at the price of a 10 MB download per version. Fetch the
+        // record for the installed version first; if that fails, the stale
+        // one is still the better of two bad answers, for that same reason.
+        string? recorded  = InstallRecordVersion();
+        string? installed = InstalledVersion;
+        if (recorded != null && installed != null && !SameVersionText(recorded, installed))
+        {
+            try { await RefreshInstallRecordAsync(null, ct); }
+            catch (OperationCanceledException) { throw; }
+            catch { }
+        }
 
         if (File.Exists(manifestPath))
         {
             try { manifestJson = await File.ReadAllTextAsync(manifestPath, ct); }
+            catch { }
+        }
+
+        // No record at all: the one for the installed version, before the
+        // latest -- they differ the moment a newer release is out.
+        if (manifestJson == null && installed != null)
+        {
+            try
+            {
+                if (await RefreshInstallRecordAsync(null, ct))
+                    manifestJson = await File.ReadAllTextAsync(manifestPath, ct);
+            }
+            catch (OperationCanceledException) { throw; }
             catch { }
         }
 
@@ -1535,25 +1705,12 @@ public class D2Plugin : IGamePlugin
         // and repairing five files that were already correct, because nothing
         // ever told the manifest what had happened. Rewriting it here is what
         // makes a repair actually finish.
-        if (restored.Count > 0)
-        {
-            try
-            {
-                string manifestJson = await _http.GetStringAsync(
-                    DownloadUrl(tag, "game_manifest.json"), ct);
-                File.WriteAllText(Path.Combine(GameDirectory, "game_manifest.json"),
-                                  manifestJson);
-                progress.Report((100, $"Restored {restored.Count} file(s); "
-                                    + "install record updated."));
-            }
-            catch (Exception)
-            {
-                // The files ARE repaired; only the record of them is stale. Worth
-                // saying nothing about here rather than turning a successful
-                // repair into a reported failure — the next verify simply runs
-                // again.
-            }
-        }
+        //
+        // The files ARE repaired either way; a record that could not be
+        // fetched is only stale, and the next verify or launch fetches it.
+        if (restored.Count > 0 && await WriteInstallRecordAsync(tag, ct))
+            progress.Report((100, $"Restored {restored.Count} file(s); "
+                                + "install record updated."));
 
         return (restored, wanted.ToList()); // leftover = not present in the package
     }

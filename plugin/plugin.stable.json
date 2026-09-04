@@ -3,7 +3,7 @@
   "gameId": "diablo2_archipelago",
   "displayName": "Diablo II: Lord of Destruction",
   "subtitle": "Randomizer Mod",
-  "version": "1.2.14",
+  "version": "1.2.15",
   "author": "Solida Games",
   "authorContact": "https://github.com/solida1987/Diablo-II-Archipelago",
   "assembly": "DiabloII.dll",
@@ -22,7 +22,7 @@
     "requiresOriginalGame": true
   },
   "rulesAcknowledged": true,
-  "minLauncher": "3.4.0",
+  "minLauncher": "3.24.10",
   "update": {
     "versionUrl": "https://raw.githubusercontent.com/solida1987/Diablo-II-Archipelago/main/plugin_version.txt",
     "packageUrl": "https://github.com/solida1987/Diablo-II-Archipelago/releases/latest/download/diablo2_archipelago.londonplugin"
