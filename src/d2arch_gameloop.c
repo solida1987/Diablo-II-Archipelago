@@ -11,6 +11,60 @@ static BOOL IsQuestTypeActive(int questType);
 /* Defined further down; the forced-check drain in the tick needs it earlier. */
 static void OnQuestComplete(Quest* quest);
 
+/* Is the player holding an item on the cursor?
+ *
+ * Every item London delivers goes in through QUESTS_CreateItem, which puts
+ * the new item where the engine has room — and when the player is mid-drag,
+ * "where there is room" is the cursor, over the item already there. The
+ * held item is gone. Marco, 4 September: picked up a weapon to move it, a
+ * check landed, the weapon vanished; BetaHub #25 is the same event seen by
+ * Maegis (a Flawless Gem arriving, a weapon lost).
+ *
+ * So the two delivery consumers below wait while anything sits on the
+ * cursor. The queue keeps the item; the next tick after the player puts
+ * theirs down delivers it. The server unit's inventory is asked, because
+ * that is the side the delivery writes into. */
+static BOOL Player_HoldsCursorItem(void* pPlayerUnit) {
+    typedef void* (__stdcall *GetCursorItem_t)(void* pInventory);
+    static GetCursorItem_t s_fnGetCursor = NULL;
+    static BOOL s_resolved = FALSE;
+    if (!pPlayerUnit) return FALSE;
+    if (!s_resolved) {
+        HMODULE hCommon = GetModuleHandleA("D2Common.dll");
+        if (hCommon) s_fnGetCursor = (GetCursorItem_t)GetProcAddress(hCommon, (LPCSTR)10262);
+        s_resolved = TRUE;
+    }
+    void* pInv = NULL;
+    __try { pInv = *(void**)((BYTE*)pPlayerUnit + 0x60); }
+    __except(EXCEPTION_EXECUTE_HANDLER) { pInv = NULL; }
+    if (!pInv) return FALSE;
+    void* held = NULL;
+    if (s_fnGetCursor) {
+        __try { held = s_fnGetCursor(pInv); }
+        __except(EXCEPTION_EXECUTE_HANDLER) { held = NULL; }
+    } else {
+        __try { held = *(void**)((BYTE*)pInv + 0x20); }
+        __except(EXCEPTION_EXECUTE_HANDLER) { held = NULL; }
+    }
+    return held != NULL;
+}
+
+/* Say so once per hold, in the log and on screen, so a delivery that seems
+ * late is visibly waiting rather than lost. */
+static BOOL DeliveryWaitsForCursor(void* pPlayerUnit, const char* what) {
+    static DWORD s_holdSince = 0;
+    static BOOL  s_told = FALSE;
+    if (!Player_HoldsCursorItem(pPlayerUnit)) { s_holdSince = 0; s_told = FALSE; return FALSE; }
+    DWORD now = GetTickCount();
+    if (!s_holdSince) s_holdSince = now;
+    if (!s_told && now - s_holdSince > 400) {   /* not for a quick click-through */
+        s_told = TRUE;
+        Log("DELIVERY: %s waits — an item is on the cursor\n", what);
+        ShowNotify("Items wait until you put that down");
+    }
+    return TRUE;
+}
+
 /* grant reward gold while honouring D2's carried-gold cap (level*10000). */
 static void GrantGoldCapped(void* pPlayer, int amount) {
     int level = 1, cur = 0, cap, headroom, toCarry, overflow;
@@ -1505,7 +1559,8 @@ static void ProcessPendingGameTick(void) {
                             g_pendingLootDrop, g_cachedPGame, hD2Game, GetCurrentArea());
                     }
                 }
-                if (g_pendingLootDrop > 0 && g_cachedPGame && hD2Game) {
+                if (g_pendingLootDrop > 0 && g_cachedPGame && hD2Game
+                    && !DeliveryWaitsForCursor(pCurseTarget, "boss loot")) {
                     DWORD nowMs = GetTickCount();
                     /* Town-skip removed. User explicitly wants loot delivered everywhere; only TRAPS (monster spawns) need a town guard. Boss-loot TC drops on the ground around the player; in town that's just cosmetic clutter the player accepted by enabling the bonus. */
                     if (nowMs - s_lastLootDropMs < 250) {   /* was 3000ms; near-instant loot (cap of 5 keeps the floor sane) */
@@ -1680,7 +1735,8 @@ static void ProcessPendingGameTick(void) {
                         }
                     }
                 }
-                if (Quests_PeekPendingDrop(&peekKind, &peekIdx) && g_cachedPGame && hD2Game) {
+                if (Quests_PeekPendingDrop(&peekKind, &peekIdx) && g_cachedPGame && hD2Game
+                    && !DeliveryWaitsForCursor(pCurseTarget, "an item reward")) {
                     DWORD nowMs = GetTickCount();
                     /* Town-skip removed. Items go directly to inventory via bDroppable=0, so they appear safely regardless of where the player is standing. Only trap-based monster spawns need a town guard. */
                     if (nowMs - s_lastSpecDropMs < 250) {   /* was 1500ms; near-instant item delivery */

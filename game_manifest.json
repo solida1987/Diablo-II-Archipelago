@@ -1,6 +1,6 @@
 {
-  "version": "3.9.15",
-  "version_display": "3.9.15",
+  "version": "3.9.16",
+  "version_display": "3.9.16",
   "file_count": 661,
   "files": [
     {
@@ -15,13 +15,13 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "9ec04c7e0247c214d2328b03b4a5f018b3413ad45fcfd33b4706697765bdac97",
+      "sha256": "d202d74eccda9eff4a8b10ddd29d454362bc814f12694dd107dcc9ace791af97",
       "size": 125440
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "1e64b72a29d021a00d03d8ac0f960d420504d67a2313eb7348be6ac4581c949b",
-      "size": 856064
+      "sha256": "520f3db01f06f3316569e29b629ca530fa150807f4560c1114af3f4fc74af6fc",
+      "size": 856576
     },
     {
       "path": "D2COMMON_LOADED.txt",
@@ -65,8 +65,8 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "633828267fa3a6ec719b78dd2045827b32e1e4d5d80e8cd570c93c11798d865c",
-      "size": 82665
+      "sha256": "034b1efe6a858817d1544e9ae445925379d39fdf0e30409c8b0611d574f35cea",
+      "size": 82664
     },
     {
       "path": "apworld/diablo2_archipelago/__init__.py",
@@ -80,7 +80,7 @@
     },
     {
       "path": "apworld/diablo2_archipelago/archipelago.json",
-      "sha256": "08412c2513215165f9b47d72d926451745d852ac5f545d1829dbb6a3258de3f4",
+      "sha256": "2284864250a8e88fe2511a5df1c0f7badbae4962953f855496065043b79d5e8e",
       "size": 281
     },
     {
@@ -225,7 +225,7 @@
     },
     {
       "path": "Archipelago/version.dat",
-      "sha256": "c609a32c877a71a7c22987050cb6d1500bfa11398916b825e10df5e329edafd1",
+      "sha256": "6cb581e8611c237de11432bfdac12855a9a3973b6e7441377a9101dbe24e2da7",
       "size": 9
     },
     {
@@ -3295,8 +3295,8 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "1e64b72a29d021a00d03d8ac0f960d420504d67a2313eb7348be6ac4581c949b",
-      "size": 856064
+      "sha256": "520f3db01f06f3316569e29b629ca530fa150807f4560c1114af3f4fc74af6fc",
+      "size": 856576
     },
     {
       "path": "patch/D2Game.dll",
