@@ -721,7 +721,9 @@ static Quest g_act3Quests[] = {
     {219, "Clear Flayer Dungeon L2",   "Kill 20 monsters in Flayer Dungeon 2",    QTYPE_KILL, 89, 20,0, FALSE, REWARD_GOLD, 0 },
     /* Kurast Sewers removed — D2MOO pathfinding broken in narrow corridors */
     {220, "Clear Kurast Sewers L1",    "Kill 15 monsters in Kurast Sewers",       QTYPE_KILL, 92, 15,0, FALSE, REWARD_GOLD, 0 },
-    {221, "Clear Kurast Sewers L2",    "Kill 15 monsters in Kurast Sewers 2",     QTYPE_KILL, 93, 15,0, FALSE, REWARD_GOLD, 0 },
+    /* 3.9.19: 15 -> 5. Sewers L2 is a small level with few monsters; a tester
+     * sat on 9/15 with the floor empty (Marco, 5 September). */
+    {221, "Clear Kurast Sewers L2",    "Kill 5 monsters in Kurast Sewers 2",      QTYPE_KILL, 93,  5,0, FALSE, REWARD_GOLD, 0 },
     {222, "Clear Durance L1",          "Kill 25 monsters in Durance of Hate",     QTYPE_KILL, 100,25,0, FALSE, REWARD_GOLD, 0 },
     {223, "Clear Durance L2",          "Kill 30 monsters in Durance of Hate 2",   QTYPE_KILL, 101,30,0, FALSE, REWARD_GOLD, 0 },
     {224, "Clear Kurast Causeway",     "Kill 20 monsters in Kurast Causeway",     QTYPE_KILL, 82, 20,0, FALSE, REWARD_GOLD, 0 },

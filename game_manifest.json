@@ -1,6 +1,6 @@
 {
-  "version": "3.9.18",
-  "version_display": "3.9.18",
+  "version": "3.9.19",
+  "version_display": "3.9.19",
   "file_count": 655,
   "files": [
     {
@@ -15,12 +15,12 @@
     },
     {
       "path": "D2Arch_Launcher.exe",
-      "sha256": "eeb3c4416270a044ef2a17fa81747745df9902f7fb231213c59839947a026c10",
+      "sha256": "c9202f0b115ffa59117c839717784e9dd593e888027c55d345ea0630fb44a24d",
       "size": 125440
     },
     {
       "path": "D2Archipelago.dll",
-      "sha256": "a426d18d338ba9ec053d6b4e9c4d3e2670841e720852f6454655809f4dfc44c4",
+      "sha256": "3ea786431f31f180a827eb39b42e83f28d7e4cdf52e51905fe36a6991ab1cb3e",
       "size": 858112
     },
     {
@@ -65,7 +65,7 @@
     },
     {
       "path": "apworld/diablo2_archipelago.apworld",
-      "sha256": "7627f22694fa47d18e716e3f6a5ceb6b8d957e68bb77b6aaeb0f47dfaa0c8351",
+      "sha256": "3631693286bc5955ce174e03cf5d6565dd0ae15fec6894bf3d4a8b47261ce3b4",
       "size": 83228
     },
     {
@@ -80,7 +80,7 @@
     },
     {
       "path": "apworld/diablo2_archipelago/archipelago.json",
-      "sha256": "4c709526861ec4cf3cac7dc12926073a00b8ebf23d0d76a72c5926bc194c40c4",
+      "sha256": "7e2d703f84867e239211d091425cabb2e4957c8bdc29c41a5fdf3296c39f3234",
       "size": 281
     },
     {
@@ -195,7 +195,7 @@
     },
     {
       "path": "Archipelago/version.dat",
-      "sha256": "d4944b25702f13231b68780bb80bc2e5800cea1d36a2fe695214640cdf291743",
+      "sha256": "fc72e49976f6128eb120014574cfe287628387fd0d0314aae5273e57cc2ed005",
       "size": 9
     },
     {
@@ -3265,7 +3265,7 @@
     },
     {
       "path": "patch/D2Archipelago.dll",
-      "sha256": "a426d18d338ba9ec053d6b4e9c4d3e2670841e720852f6454655809f4dfc44c4",
+      "sha256": "3ea786431f31f180a827eb39b42e83f28d7e4cdf52e51905fe36a6991ab1cb3e",
       "size": 858112
     },
     {
