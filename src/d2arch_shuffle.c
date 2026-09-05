@@ -125,6 +125,24 @@ static const int g_shuffleBannedIdx[] = {
     278, 279, 280, 281, 282,                    /* fetishshaman1-5 */
     662, 663, 664,                              /* hell-tier fetishshaman */
 
+    /* Everything a reviver raises stays its own row, for the same reason
+     * the fallen do (above). The fallen were the only family covered; a
+     * flayer row carrying a foreign record was revived by its shaman and
+     * the game died in SUNIT_GetServerUnit on a target of unit type 15
+     * (5 September, Great Marsh, minidump d2arch_crash_20260905_175220).
+     * monstats.txt names the pairs: FetishShaman -> fetish/fetishblow,
+     * ZakarumPriest (cantors) -> zealot, GreaterMummy (unravelers) ->
+     * mummy, and reanimated hordes rise on their own. The revivers that
+     * were still open are closed too. */
+    141, 142, 143, 144, 145,                    /* fetish1-5 (flayers) */
+    656, 657, 658,                              /* fetish6-8 */
+    396, 397, 398, 399, 400,                    /* fetishblow1-5 */
+    659, 660, 661,                              /* fetishblow6-8 */
+    235, 236, 237, 671, 672,                    /* zealot1-5 */
+    96, 97, 98, 99, 100, 703,                   /* mummy1-6 */
+    101, 102, 103, 104, 105, 667, 668, 669, 670,/* unraveler1-9 (greater mummies) */
+    436, 437, 438, 439, 440, 698,               /* reanimatedhorde1-6 */
+
     /* Spawner pillars: nests / sarcophagi / minion spawners */
     206, 207, 208, 209,                         /* crownest 1-4 */
     334, 335, 336, 337,                         /* suckernest 1-4 */
