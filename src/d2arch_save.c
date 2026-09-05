@@ -1162,14 +1162,38 @@ static void ResetD2SFile(const char* charName) {
             }
 
             int reinvestTotal = 0;   /* running sum, clamped to newPool below */
+
+            /* WHERE THE GAME PUT EACH BUTTON'S LEVEL.
+             *
+             * The 30 bytes of the "if" section follow the class skill list,
+             * and WriteClassSkillList (d2arch_skilltree.c) fills that list
+             * COMPACTLY: custom skills in button order with the empty
+             * buttons skipped, then the class's own skills. So a button's
+             * level sits at byte <number of filled buttons before it>, not
+             * at byte <button index>. This loop read skills30[btnIdx] and,
+             * for every button after the first gap, took some other
+             * button's level: a phantom 31 landed on one skill, the true
+             * owners read 0 and fell back to the cache, the pool clamp then
+             * zeroed the last row. Points were never lost — the total stayed
+             * 421 across cycles — but they moved between skills on every
+             * relog, and the player spent an evening putting them back.
+             *
+             * Proved on the live log, 5 September: .d2s bytes 9, 10, 11, 12
+             * = 20, 20, 31, 12 were exactly the levels of buttons 13, 20,
+             * 21, 22 — their compact positions. */
+            int compactPos = 0;
             for (int t = 0; t < 3; t++) {
                 for (int s = 0; s < 10; s++) {
                     int btnIdx = t * 10 + s;
                     if (slotAssign[t][s] < 0) continue;          /* empty slot */
+                    int pos = compactPos++;                       /* this button's byte in "if" */
                     if (g_reinvestCount >= 30) break;             /* full */
                     if (btnIdx >= 30) continue;                   /* defensive */
 
-                    int level_d2s = (int)skills30[btnIdx];
+                    int level_d2s = (pos < 30) ? (int)skills30[pos] : 0;
+                    if (pos != btnIdx)
+                        Log("ResetD2SFile: btnIdx %d skill %d reads .d2s byte %d (compact position)\n",
+                            btnIdx, slotAssign[t][s], pos);
 
                     /* Sanity-clamp: vanilla D2 levels are 0..99. */
                     if (level_d2s < 0)  level_d2s = 0;
