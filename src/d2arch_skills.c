@@ -236,6 +236,23 @@ static BOOL g_reinvestDone = FALSE; /* set TRUE after reinvest completes — tri
 static int  g_reinvestLevels[30] = {0}; /* levels loaded from files after reinvest */
 static BOOL g_reinvestLevelsReady = FALSE; /* TRUE when g_reinvestLevels has fresh data */
 
+/* Reinvest audit — what the tick just applied, kept so it can be checked
+   against the live unit later. Three passes: shortly after the apply, on the
+   player's first movement, and on the first mouse click in the game. A skill
+   found below its expected level is topped up through the same AddSkill path
+   and paid for from pool/ledger like any other reinvested point. */
+static int   g_auditSkills[30];
+static int   g_auditPoints[30];
+static int   g_auditBtnIdx[30];
+static int   g_auditCount = 0;
+static BOOL  g_auditArmed = FALSE;        /* a list is waiting to be verified */
+static DWORD g_auditDueTick = 0;          /* pass 1: time-based */
+static int   g_auditPassesLeft = 0;       /* how many of the three passes remain */
+static int   g_auditStartX = -1, g_auditStartY = -1;  /* player position at apply time */
+static BOOL  g_auditMoveSeen = FALSE;
+static volatile BOOL g_auditClickSeen = FALSE;  /* set from WndProc, consumed on the tick */
+static int   g_auditReaderTrust = 0;      /* 0 undecided, 1 the skill-list reader agrees with what we applied, -1 disagrees: log only */
+
 /* Forward declaration - GetPlayerClass is defined later but needed here */
 static int GetPlayerClass(void);
 

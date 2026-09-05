@@ -372,6 +372,8 @@ static LRESULT CALLBACK HookWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         }
     }
     if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONDBLCLK) {
+        /* first click after a reinvest triggers one audit pass on the tick. */
+        if (g_auditArmed) g_auditClickSeen = TRUE;
         int cmx = (short)LOWORD(lp), cmy = (short)HIWORD(lp);
         /* Convert window coords to game coords for AP panel */
         int gmx = cmx, gmy = cmy;

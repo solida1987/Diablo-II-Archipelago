@@ -1161,7 +1161,23 @@ static void ResetD2SFile(const char* charName) {
                 g_resetAllDeadline = 0;
             }
 
-            int reinvestTotal = 0;   /* running sum, clamped to newPool below */
+            int reinvestTotal = 0;   /* running sum, clamped to reinvestBudget below */
+
+            /* WHAT THE PLAYER ACTUALLY OWNS.
+             *
+             * The .d2s pool field is 8 bits, so at exit anything above 255
+             * goes to g_skillPtsLedger (state file) and the .d2s keeps 255.
+             * This function runs again at character load, and there the
+             * .d2s shows skills=0 + pool=255 while the ledger holds the
+             * rest. Clamping to newPool alone budgeted 255 for a player
+             * who owned 697: the first six buttons were queued, the other
+             * twelve were dropped, and their points surfaced later as free
+             * pool from the ledger. Nothing was destroyed, but every relog
+             * emptied most of the tree. The ledger is part of the budget. */
+            int reinvestBudget = newPool + g_skillPtsLedger;
+            if (g_skillPtsLedger > 0)
+                Log("ResetD2SFile: reinvest budget %d = .d2s %d + ledger %d\n",
+                    reinvestBudget, newPool, g_skillPtsLedger);
 
             /* WHERE THE GAME PUT EACH BUTTON'S LEVEL.
              *
@@ -1229,8 +1245,12 @@ static void ResetD2SFile(const char* charName) {
                     }
 
                     /* 2.1 (Maegis #11/#12/#13 — "skill points lost / -1 on reload") Clamp to the refunded pool. */
-                    int remaining = newPool - reinvestTotal;
-                    if (level > remaining) level = remaining;
+                    int remaining = reinvestBudget - reinvestTotal;
+                    if (level > remaining) {
+                        Log("ResetD2SFile: btnIdx %d skill %d clamped %d -> %d (budget exhausted)\n",
+                            btnIdx, slotAssign[t][s], level, remaining);
+                        level = remaining;
+                    }
                     if (level < 0) level = 0;
 
                     if (level > 0) {

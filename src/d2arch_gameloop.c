@@ -590,6 +590,148 @@ static void Cheat_GiveLevels(void* pSC, int levels) {
     Cheat_GiveExperience(pSC, need - cur);
 }
 
+/* Pay for one reinvested skill point. The live pool first; when that is at
+   zero the point comes out of the overflow ledger. Before this, a point the
+   pool could not cover was simply not paid for, and the ledger later handed
+   the same point back as free pool: every relog above 255 total minted
+   points. */
+static void Reinvest_PayOnePoint(void* pSrv) {
+    if (!pSrv || !fnAddStat) return;
+    int curNS = 1;
+    if (fnGetStat) { __try { curNS = fnGetStat(pSrv, 5, 0); } __except(EXCEPTION_EXECUTE_HANDLER) { curNS = 1; } }
+    if (curNS > 0) {
+        /* floor at 0. Decrementing NEWSKILLS below zero wraps the 8-bit field to a huge value (Merlyn's "negative skillpoints"). */
+        __try { fnAddStat(pSrv, 5, -1, 0); }
+        __except(EXCEPTION_EXECUTE_HANDLER) { Log("REINVEST: AddStat(NEWSKILLS,-1) exception\n"); }
+    } else if (g_skillPtsLedger > 0) {
+        g_skillPtsLedger--;
+        { extern void MarkStateDirty(void); MarkStateDirty(); }
+    } else {
+        Log("REINVEST: point applied with pool 0 and ledger 0 — nothing to pay from\n");
+    }
+}
+
+/* Base level of one skill on a unit, read from the unit's own skill list
+   (pUnit+0xA8 -> pInfo, +0x04 first D2SkillStrc, +0x04 next, +0x00 SkillsTxt
+   row whose first WORD is the id, +0x28 hard points). *found says whether the
+   skill exists on the unit at all. */
+static int Audit_ReadLiveSkillLevel(void* pUnit, int skillId, BOOL* found) {
+    *found = FALSE;
+    if (!pUnit) return 0;
+    __try {
+        DWORD pInfo = *(DWORD*)((DWORD)pUnit + 0xA8);
+        if (!pInfo) return 0;
+        DWORD pSkill = *(DWORD*)(pInfo + 0x04);
+        int guard = 0;
+        while (pSkill && guard++ < 512) {
+            DWORD pTxt = *(DWORD*)(pSkill + 0x00);
+            if (pTxt) {
+                int id = (int)*(WORD*)(pTxt + 0x00);
+                if (id == skillId) {
+                    *found = TRUE;
+                    int lvl = (int)*(DWORD*)(pSkill + 0x28);
+                    return (lvl < 0 || lvl > 999) ? -1 : lvl;
+                }
+            }
+            pSkill = *(DWORD*)(pSkill + 0x04);
+        }
+    } __except(EXCEPTION_EXECUTE_HANDLER) {}
+    return 0;
+}
+
+static BOOL Audit_PlayerMoved(void* pCli) {
+    int x = -1, y = -1;
+    __try {
+        DWORD pPath = *(DWORD*)((DWORD)pCli + 0x2C);
+        if (pPath) {
+            x = (int)*(unsigned short*)(pPath + 0x02);
+            y = (int)*(unsigned short*)(pPath + 0x06);
+        }
+    } __except(EXCEPTION_EXECUTE_HANDLER) { return FALSE; }
+    if (x < 0) return FALSE;
+    if (g_auditStartX < 0) { g_auditStartX = x; g_auditStartY = y; return FALSE; }
+    return (x != g_auditStartX || y != g_auditStartY);
+}
+
+/* One verification pass over the list the reinvest tick applied. The reader
+   is trusted once at least one skill reads back exactly the level we set; if
+   none does, the offsets are wrong for this unit and the pass only logs.
+   Skills found below their expected level are topped up through the same
+   AddSkill path as the reinvest itself. A skill above its expected level is
+   the player's own spending and is left alone. */
+static void ReinvestAudit_RunPass(const char* why, void* pSrv, void* pCli) {
+    typedef void* (__stdcall *AddSkill_t)(void* pUnit, int nSkillId);
+    static AddSkill_t fnAddSkillA = NULL;
+    if (!fnAddSkillA && hD2Common)
+        fnAddSkillA = (AddSkill_t)GetProcAddress(hD2Common, (LPCSTR)10952);
+
+    int agree = 0, low = 0, missing = 0, high = 0;
+    int liveLvl[30]; BOOL liveFound[30];
+    for (int i = 0; i < g_auditCount; i++) {
+        liveLvl[i] = Audit_ReadLiveSkillLevel(pSrv, g_auditSkills[i], &liveFound[i]);
+        if (!liveFound[i])                      missing++;
+        else if (liveLvl[i] == g_auditPoints[i]) agree++;
+        else if (liveLvl[i] < g_auditPoints[i])  low++;
+        else                                     high++;
+    }
+    if (g_auditReaderTrust == 0) {
+        g_auditReaderTrust = (agree > 0) ? 1 : -1;
+        if (g_auditReaderTrust < 0)
+            Log("REINVEST AUDIT: reader untrusted — no skill read back at its applied level (found=%d of %d); passes will only log\n",
+                g_auditCount - missing, g_auditCount);
+    }
+    int pool = -1;
+    if (fnGetStat) { __try { pool = fnGetStat(pSrv, 5, 0); } __except(EXCEPTION_EXECUTE_HANDLER) { pool = -1; } }
+    Log("REINVEST AUDIT (%s): %d skills — ok=%d low=%d missing=%d above=%d | pool=%d ledger=%d\n",
+        why, g_auditCount, agree, low, missing, high, pool, g_skillPtsLedger);
+
+    if (g_auditReaderTrust < 0 || (low == 0 && missing == 0)) return;
+    if (!fnAddSkillA) { Log("REINVEST AUDIT: AddSkill unavailable — cannot repair\n"); return; }
+
+    int repaired = 0;
+    for (int i = 0; i < g_auditCount; i++) {
+        int have = liveFound[i] ? liveLvl[i] : 0;
+        if (have < 0) have = 0;
+        int want = g_auditPoints[i];
+        if (have >= want) continue;
+        int skId = g_auditSkills[i];
+        __try { PatchSkillForPlayer(skId); } __except(EXCEPTION_EXECUTE_HANDLER) {}
+        __try { InsertSkillInClassList(skId); } __except(EXCEPTION_EXECUTE_HANDLER) {}
+        for (int p = have; p < want; p++) {
+            __try { fnAddSkillA(pSrv, skId); } __except(EXCEPTION_EXECUTE_HANDLER) { Log("REINVEST AUDIT: AddSkill(srv,%d) exception\n", skId); }
+            __try { fnAddSkillA(pCli, skId); } __except(EXCEPTION_EXECUTE_HANDLER) { Log("REINVEST AUDIT: AddSkill(cli,%d) exception\n", skId); }
+            Reinvest_PayOnePoint(pSrv);
+            repaired++;
+        }
+        Log("REINVEST AUDIT: skill %d (btnIdx=%d) was %d%s, topped up to %d\n",
+            skId, g_auditBtnIdx[i], have, liveFound[i] ? "" : " (absent)", want);
+    }
+    if (repaired > 0) {
+        Log("REINVEST AUDIT (%s): %d points re-applied\n", why, repaired);
+        ShowNotify("Skill points restored");
+        g_reinvestDone = TRUE;   /* panel reloads its levels */
+    }
+}
+
+/* Passes fire on: a short timer after the apply, the player's first movement,
+   and the first mouse click in the game (flag raised in WndProc). Each source
+   fires once; the list is dropped when all three have run. */
+static void ReinvestAudit_Tick(void) {
+    if (!g_auditArmed || g_auditPassesLeft <= 0 || g_auditCount <= 0) return;
+    void* pCli = Player();
+    if (!pCli) return;
+    const char* why = NULL;
+    DWORD now = GetTickCount();
+    if (g_auditDueTick && now >= g_auditDueTick)          { why = "timer";          g_auditDueTick = 0; }
+    else if (!g_auditMoveSeen && Audit_PlayerMoved(pCli)) { why = "first movement"; g_auditMoveSeen = TRUE; }
+    else if (g_auditClickSeen)                            { why = "first click";    g_auditClickSeen = FALSE; }
+    if (!why) return;
+    void* pSrv = GetServerPlayer(g_cachedPGame);
+    if (!pSrv) return;
+    ReinvestAudit_RunPass(why, pSrv, pCli);
+    if (--g_auditPassesLeft <= 0) g_auditArmed = FALSE;
+}
+
 static void ProcessPendingGameTick(void) {
     g_pendingGold = 0;
 
@@ -799,15 +941,8 @@ static void ProcessPendingGameTick(void) {
                         __try { fnAddSkillR(pCliR, skId); }
                         __except(1) { Log("REINVEST: AddSkill(cli,%d) exception at rp=%d\n", skId, rp); }
                     }
-                    if (fnAddStat) {
-                        /* floor at 0. Decrementing NEWSKILLS below zero wraps the 8-bit field to a huge value (Merlyn's "negative skillpoints"). With the ledger restored above the pool should never run dry here, but guard anyway. */
-                        int curNS = 1;
-                        if (fnGetStat) { __try { curNS = fnGetStat(pSrvR, 5, 0); } __except(1) { curNS = 1; } }
-                        if (curNS > 0) {
-                            __try { fnAddStat(pSrvR, 5, -1, 0); }
-                            __except(1) { Log("REINVEST: AddStat(NEWSKILLS,-1) exception\n"); }
-                        }
-                    }
+                    /* pool first, then the overflow ledger — see Reinvest_PayOnePoint. */
+                    Reinvest_PayOnePoint(pSrvR);
                 }
                 Log("REINVEST: skill %d = %d pts (btnIdx=%d)\n",
                     skId, skPts, g_reinvestBtnIdx[ri]);
@@ -830,6 +965,23 @@ static void ProcessPendingGameTick(void) {
                     }
                 }
             }
+            /* Keep what was applied so the audit passes can check it against
+               the live unit: in a few seconds, on first movement, on first click. */
+            g_auditCount = 0;
+            for (int ai = 0; ai < g_reinvestCount && ai < 30; ai++) {
+                g_auditSkills[g_auditCount] = g_reinvestSkills[ai];
+                g_auditPoints[g_auditCount] = g_reinvestPoints[ai];
+                g_auditBtnIdx[g_auditCount] = g_reinvestBtnIdx[ai];
+                g_auditCount++;
+            }
+            g_auditArmed = (g_auditCount > 0);
+            g_auditPassesLeft = 3;
+            g_auditDueTick = GetTickCount() + 4000;
+            g_auditStartX = g_auditStartY = -1;
+            g_auditMoveSeen = FALSE;
+            g_auditClickSeen = FALSE;
+            g_auditReaderTrust = 0;
+
             g_reinvestPending = FALSE;
             g_reinvestCount = 0;
             g_reinvestTime = 0;
@@ -852,6 +1004,9 @@ static void ProcessPendingGameTick(void) {
             GrantLedgerCapped(pSrvL, 4, 1023, &g_statPtsLedger);
         }
     }
+
+    /* verify the reinvest against the live unit (timer / first move / first click). */
+    ReinvestAudit_Tick();
 
     /* Consume server-side pending rewards — give directly to server player */
     if (g_cachedPGame && fnAddStat &&
