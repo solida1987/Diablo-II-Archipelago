@@ -1851,6 +1851,23 @@ static void CleanupOrphanedSaves(void) {
         totalInspected, totalDeleted, totalKept, saveDir, archDir);
 }
 
+/* Take the difficulty of the game the player is actually in, when the game
+   struct can tell us. The state file's "difficulty=" is the previous session's
+   and is only a fallback; the lock table built from it belonged to a game the
+   player may no longer be in. The per-tick sync catches the change later, but
+   by then the first lock table and the load-time reconcile have already run
+   against the wrong difficulty. */
+static void AdoptLiveDifficulty(const char* when) {
+    int live = GetCurrentDifficulty();
+    if (live < 0 || live > 2 || live == g_currentDifficulty) return;
+    Log("OnCharacterLoad: live difficulty %d overrides stored %d (%s)\n",
+        live, g_currentDifficulty, when);
+    /* Same path the tick uses: moves g_currentDifficulty AND re-points the
+       quest tracker's completed/kill fields, which LoadChecks had just filled
+       from the stored difficulty. */
+    Quests_SyncDifficulty(live);
+}
+
 static void OnCharacterLoad(void) {
     /* Sanity banner: log resolved archDir/saveDir on every character load so we can diagnose save-path issues from user logs without guesswork. */
     {
@@ -2061,12 +2078,16 @@ static void OnCharacterLoad(void) {
     }
 
     /* Initialize zone locks BEFORE loading state (state will unlock received keys) */
+    AdoptLiveDifficulty("before first lock init");
     InitZoneLocks();
 
     /* Try to load existing state */
     if (LoadStateFile()) {
         LoadSlots();
         LoadChecks(); /* This OVERRIDES global settings with per-character saved settings */
+        /* The state file just wrote its own "difficulty=" over g_currentDifficulty.
+           That is the difficulty of the LAST session, not this game's. */
+        AdoptLiveDifficulty("after state load");
         /* Re-initialize zone locks with per-character settings (goal_scope may differ). */
         {
             BOOL savedKeys[ZONE_KEY_COUNT];

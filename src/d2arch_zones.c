@@ -262,6 +262,22 @@ static void InitZoneLocks(void) {
     InitZoneLocks_FromPreloads();
 }
 
+/* Rebuild the single lock table for whatever difficulty the player is in NOW.
+
+   g_zoneLocked[] is one table, not one per difficulty, and it was only built
+   at character load from the difficulty stored in the state file. A player who
+   last saved in Hell and then joined a Normal game got Hell's locks (nothing
+   received yet, everything shut) laid over Normal, and the final region they
+   had already cleared was locked again. Called from the tick-side difficulty
+   sync so every difficulty change re-derives the table from that difficulty's
+   own keys. Leaves the safe-area/teleport bookkeeping alone: only the lock
+   bits are stale. */
+static void Zones_RebuildLocksForCurrentDifficulty(void) {
+    memset(g_zoneLocked, 0, sizeof(g_zoneLocked));
+    if (!g_zoneLockingOn) return;
+    InitZoneLocks_FromPreloads();
+}
+
 /* Unlock zones for a gate-key receipt. */
 static void UnlockGateKey(int diff, int slot) {
     if (diff < 0 || diff > 2) return;

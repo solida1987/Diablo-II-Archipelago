@@ -4590,6 +4590,10 @@ static void Quests_SyncDifficulty(int newDiff) {
     }
     Log("Difficulty change: %d -> %d — quest tracker re-synced to %s\n",
         oldDiff, newDiff, g_diffNames[newDiff]);
+    /* The zone-lock table is per difficulty too. Until now it kept the shape it
+       was given at character load, so the locks of the difficulty the state
+       file last saw followed the player into every other difficulty. */
+    Zones_RebuildLocksForCurrentDifficulty();
 }
 
 static void RunCheckDetection(void) {
